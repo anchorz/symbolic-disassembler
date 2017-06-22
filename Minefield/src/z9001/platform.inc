@@ -1,5 +1,7 @@
 start		.equ 0x300
 BWS_LINE_WIDTH  .equ 40
+BWS_HEIGHT      .equ 24
+BWS_SIZE        .equ 40*24
 
 .macro  INIT_JOYSTICK
 .endm
@@ -10,12 +12,9 @@ BWS_LINE_WIDTH  .equ 40
 	.dw 0
 .endm
 
-.macro  LINE text,?start,?end
-start:
-	.ascii text
-end:
-	.rept (start-end+BWS_LINE_WIDTH)
-	.db 0x33 
+.macro  FILL_SPACES
+	.rept (BWS_LINE_WIDTH-32)
+	.db 0x20
 	.endm
 .endm
 
