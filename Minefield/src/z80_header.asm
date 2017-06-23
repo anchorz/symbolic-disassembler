@@ -1,5 +1,5 @@
 ;--------------------------------------------------------------------------
-;  platform.inc for Z1013
+;  z80_header.asm
 ;
 ;  Copyright (C) 2016, Andreas Ziermann
 ;
@@ -26,12 +26,20 @@
 ;   might be covered by the GNU General Public License.
 ;--------------------------------------------------------------------------
 
-BWS_LINE_WIDTH         .equ 32
-BWS_HEIGHT             .equ 32
-BWS_SIZE               .equ 32*32
+        .module z80_header
+        .area   _HEADER (ABS)
 
-UP_PRST7               .equ 0x02
-UP_INKEY               .equ 0x04
+        .globl init
+        .globl s_CODE
+        .globl s_BSS
 
-TAPE_OUT               .equ 0x80
-PIOB_DATA              .equ 0x02
+        .dw s_CODE
+        .dw s_BSS-1
+        .dw init
+
+        .ascii 'HobiSo'
+        .ascii 'C'
+        .db 0xd3,0xd3,0xd3
+        .ascii 'MINEFIELD+Bro+Jo'
+
+

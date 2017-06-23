@@ -9,110 +9,101 @@
 .include 'platform.inc'
 .module  minefield
 
-; memory layout
-INTERNAL_ARRAY  .equ 0x1400
-LOG_BUFFER      .equ 0x2000
-LOG_BUFFER_INIT .equ (LOG_BUFFER-1)
-.if ne(BWS_LINE_WIDTH-40)
-CHR_MAN         .equ 0x17
-BWS_ADR_POINTS  .equ 0xec39
-BWS_ADR_MINES   .equ 0xec29
-BWS_ADR_HINT    .equ 0xec62
-BWS_ADR_BONUS_L .equ 0xee06
-BWS_ADR_BONUS_R .equ 0xee19
-BWS_A_SIE_HABEN .equ 0xed2a
-BWS_A_PUNKTE_ER .equ 0xeda7
-BWS_A_TOTAL_POI .equ 0xed6d
-BWS_A_NOCH_EIN  .equ 0xee88
-BWS_A_JA        .equ 0xeece
-START_ROW       .equ 30
-START_COLUMN    .equ 15
-END_ROW         .equ 5
-END_COLUMN      .equ 15
-.else
-CHR_MAN         .equ 0xc4
-BWS_ADR_POINTS  .equ 0xec41
-BWS_ADR_MINES   .equ 0xec31
-START_ROW       .equ BWS_HEIGHT-2
-START_COLUMN    .equ (BWS_LINE_WIDTH/2)-1
-END_ROW         .equ 5
-END_COLUMN      .equ (BWS_LINE_WIDTH/2)-1
+LOG_BUFFER_INIT        .equ (LOG_BUFFER-1)
 
-BWS_ADR_HINT    .equ 0xec62;check!
-BWS_ADR_BONUS_L .equ 0xee06;check!
-BWS_ADR_BONUS_R .equ 0xee19;check!
-BWS_A_SIE_HABEN .equ 0xed2a;check!
-BWS_A_PUNKTE_ER .equ 0xeda7;check!
-BWS_A_TOTAL_POI .equ 0xed6d;check!
-BWS_A_NOCH_EIN  .equ 0xee88;check!
-BWS_A_JA        .equ 0xeece;check!
+.if ne(BWS_LINE_WIDTH-40)
+    CHR_MAN                .equ 0x17
+    END_ROW                .equ 5
+    END_SCREEN_CORRECTION  .equ 9 ; starting line of the text
+.else
+    CHR_MAN                .equ 0xc4
+    END_ROW                .equ 2
+    END_SCREEN_CORRECTION  .equ 5; starting line of the text
 .endif
-INT_ADR_BONUS_L .equ 0x1566
-INT_ADR_BONUS_R .equ 0x1579
-BWS             .equ 0xec00
-UP_PRST7        .equ 0x02
-UP_INKEY        .equ 0x04
-KEY_UP          .equ 'G' ; G
-KEY_LEFT        .equ 'P' ; P
-KEY_RIGHT       .equ 'Q' ; Q
-KEY_DOWN        .equ 'O' ; O
-KEY_START       .equ 'S' ; S
-KEY_QUIT        .equ 0x03 ; vorher ^E
-KEY_NEXT        .equ 0x01 ; vorher ^J
-CHR_VISITED     .equ 0xff
-CHR_FREE     .equ ' '
-CHR_BONUS    .equ 0xca
-CHR_MINE     .equ 0xc9
-RECORD_UP    .equ 0x01
-RECORD_DOWN  .equ 0x02
-RECORD_RIGHT .equ 0x03
-RECORD_LEFT  .equ 0x04
-RECORD_END   .equ 0x37
-IS_FREE      .equ 0x00
-IS_MINE      .equ 0x64
-NO_MINE      .equ 0x00
-RANDOM_INIT  .equ 0x0555
-RANDOM_MASK  .equ >(BWS_SIZE-1)
-REMOVE_OFFSET   .equ BWS+(START_ROW-2)*BWS_LINE_WIDTH-1
-SET_TO_ZERO     .equ 0x0000
-WAIT_750MS      .equ 0xea60; 2 MHz
-WAIT_250MS      .equ 0x4e20; 2 MHz
-WAIT_130MS      .equ 0x2710; 2 MHz
-REC_DELAY_190MS .equ 0x3a98; 2 MHz
-WAVE_LEN_285Hz  .equ 0x64; 2 MHz
-WAVE_PERIODS    .equ 0x50; 2 MHz
-QUIT_SOUND_P1   .equ 0x60
-QUIT_SOUND_P2   .equ 0xe0
-QUIT_SOUND_P3   .equ 0x01
-QUIT_SOUND_P4   .equ 0xee
-BLINK_COUNTER   .equ 10
-TAPE_OUT        .equ 0x80
-PIOB_DATA       .equ 0x02
-MINEFIELD_WIDTH .equ BWS_LINE_WIDTH-2
+BWS                    .equ 0xec00
+BWS_ADR_MINES          .equ BWS+ofs_minen
+BWS_ADR_POINTS         .equ BWS+ofs_points
+BWS_ADR_HINT           .equ BWS+ofs_vorsicht
+
+START_ROW              .equ BWS_HEIGHT-2
+START_COLUMN           .equ (BWS_LINE_WIDTH/2)-1
+END_COLUMN             .equ (BWS_LINE_WIDTH/2)-1
+
+BWS_A_SIE_HABEN        .equ BWS+(END_SCREEN_CORRECTION*BWS_LINE_WIDTH+10)
+BWS_A_TOTAL_POI        .equ BWS+((END_SCREEN_CORRECTION+2)*BWS_LINE_WIDTH+13)
+BWS_A_PUNKTE_ER        .equ BWS+((END_SCREEN_CORRECTION+4)*BWS_LINE_WIDTH+7)
+BWS_A_NOCH_EIN         .equ BWS+((END_SCREEN_CORRECTION+11)*BWS_LINE_WIDTH+8)
+BWS_A_JA               .equ BWS+((END_SCREEN_CORRECTION+13)*BWS_LINE_WIDTH+14)
+
+BWS_ADR_BONUS_L        .equ BWS+((START_ROW-END_ROW)/2+END_ROW-1)*BWS_LINE_WIDTH+(BWS_LINE_WIDTH/4-2)
+BWS_ADR_BONUS_R        .equ BWS+((START_ROW-END_ROW)/2+END_ROW-1)*BWS_LINE_WIDTH+(3*BWS_LINE_WIDTH/4+1)
+INT_ADR_BONUS_L        .equ INTERNAL_ARRAY+((START_ROW-END_ROW)/2-1)*BWS_LINE_WIDTH+(BWS_LINE_WIDTH/4-2)
+INT_ADR_BONUS_R        .equ INTERNAL_ARRAY+((START_ROW-END_ROW)/2-1)*BWS_LINE_WIDTH+(3*BWS_LINE_WIDTH/4+1)
+
+KEY_UP                 .equ 'G' ; G
+KEY_LEFT               .equ 'P' ; P
+KEY_RIGHT              .equ 'Q' ; Q
+KEY_DOWN               .equ 'O' ; O
+KEY_START              .equ 'S' ; S
+KEY_QUIT               .equ 0x03 ; vorher ^E
+KEY_NEXT               .equ 0x01 ; vorher ^J
+CHR_VISITED            .equ 0xff
+CHR_FREE               .equ ' '
+CHR_BONUS              .equ 0xca
+CHR_MINE               .equ 0xc9
+RECORD_UP              .equ 0x01
+RECORD_DOWN            .equ 0x02
+RECORD_RIGHT           .equ 0x03
+RECORD_LEFT            .equ 0x04
+RECORD_END             .equ 0x37
+IS_FREE                .equ 0x00
+IS_MINE                .equ 0x64
+NO_MINE                .equ 0x00
+RANDOM_MASK            .equ 0x03
+SET_TO_ZERO            .equ 0x0000
+WAIT_750MS             .equ 0xea60; 2 MHz
+WAIT_250MS             .equ 0x4e20; 2 MHz
+WAIT_130MS             .equ 0x2710; 2 MHz
+REC_DELAY_190MS        .equ 0x3a98; 2 MHz
+WAVE_LEN_285Hz         .equ 0x64; 2 MHz
+WAVE_PERIODS           .equ 0x50; 2 MHz
+QUIT_SOUND_P1          .equ 0x60
+QUIT_SOUND_P2          .equ 0xe0
+QUIT_SOUND_P3          .equ 0x01
+QUIT_SOUND_P4          .equ 0xee
+BLINK_COUNTER          .equ 10
+MINEFIELD_WIDTH        .equ BWS_LINE_WIDTH-2
+MINEFIELD_ARRAY_HEIGHT .equ (END_ROW-START_ROW+1)
 size_of_vorsicht_minen .equ 20
 size_of_sie_haben      .equ 12
 size_of_punkte_erreich .equ 18
 size_of_noch_ein_spiel .equ 16
 
-.macro  STOP
-loop:
-	jp loop
+.macro  FILL_SPACES
+.if ne(BWS_LINE_WIDTH-32)
+        .rept (BWS_LINE_WIDTH-32)
+        .db 0x20
+        .endm
+.endif
 .endm
 
-
-.area   CODE   (ABS)
-.org start
-	CCP_HEADER
+.area  CODE
+init::
+.if ne(BWS_LINE_WIDTH-32)
+        jp START
+        .ascii 'MINES   '
+        .dw 0
+.endif
 START:
-	INIT_JOYSTICK
+.if ne(BWS_LINE_WIDTH-40)
+        call joystick_init
+.endif
         call show_title
 wait_to_start:
         call up_inch
         cp #KEY_START
         jr nz,wait_to_start
 new_game:
-        ld hl,#RANDOM_INIT
-        ld (ptr_random_buffer),hl
         call clear_data
         ld hl,#SET_TO_ZERO
         ld (points_count),hl
@@ -156,7 +147,7 @@ main_loop:
         ld bc,#WAIT_250MS
         call wait
         jp main_loop
-do_up:
+do_up::
         call clear_status_line
         ld hl,(ptr_cursor)
         ld a,#CHR_VISITED
@@ -440,7 +431,7 @@ show_mine_field:
         push bc
         ld hl,#INTERNAL_ARRAY+2*BWS_LINE_WIDTH
         ld de,#BWS+(END_ROW+2)*BWS_LINE_WIDTH
-        ld c,#START_ROW-END_ROW-4; NET HEIGHT MINEFIELD
+        ld c,#START_ROW-END_ROW-3; NET HEIGHT MINEFIELD
 $show_new_line:
         ld b,#MINEFIELD_WIDTH
 $get_character:
@@ -502,9 +493,11 @@ wait:
         jr nz,wait
         ret
 clear_status_line:
+        ld a,#' '
         ld hl,#BWS_ADR_HINT
+        ld (hl),a
         ld de,#BWS_ADR_HINT+1
-        ld bc,#BWS_LINE_WIDTH-6; length of field is W-5 - miss by 1
+        ld bc,#len_vorsicht_minen-1
         ldir
         ret
 append_key:
@@ -520,10 +513,10 @@ print_mines_count:
         push hl
         push de
         ld hl,#str_vorsicht_minen
-        ld de,#BWS_ADR_HINT+1
-        ld bc,#size_of_vorsicht_minen
+        ld de,#BWS_ADR_HINT
+        ld bc,#len_vorsicht_minen
         ldir
-        ld hl,#BWS_ADR_HINT+13; '   VORSICHT '
+        ld hl,#BWS_ADR_HINT+9; 'VORSICHT '
         add #'0'
         ld (hl),a
         pop de
@@ -552,8 +545,8 @@ show_title:
         ld de,#BWS-0x3ff
         ld hl,#BWS-0x400
         ld bc,#BWS_SIZE-1
-	ld a,#0x70 ; whitr
-	ld (hl),a
+        ld a,#0x70 ; whitr
+        ld (hl),a
         ldir
 .endif
         ret
@@ -646,37 +639,47 @@ animate_left:
         dec hl
         ld (hl),a
         ret
-distribute_mines:
+.if ne(BWS_LINE_WIDTH-40)
+    CUT_OFF .equ (START_ROW-END_ROW-4)*BWS_LINE_WIDTH
+.else
+    CUT_OFF .equ (START_ROW-END_ROW-3)*BWS_LINE_WIDTH
+.endif
+
+distribute_mines::
         ld bc,(mines_count)
-$put_mine:
+$put_mine::
         push bc
-$generate_random_offset:
-        ld bc,(ptr_random_buffer)
-        ld a,c
-        and #RANDOM_MASK
-        ld b,a
-        ld a,r
-        bit 7,c
-        jr nz,$copy_bit_negate
-        set 7,a
-$copy_bit_negate:
-        ld c,a
-        ld hl,#INTERNAL_ARRAY+2*BWS_LINE_WIDTH
+distribute$new_number:
+        call rand16
+        ld a,h
+        and #RANDOM_MASK ; bc <0x400
+        ; while HL >= CUT_OFF call rand16
+        ld h,a
+        cp #>CUT_OFF   ; H>=HIGH(CUT_OFF)
+        jr c,distribute$is_smaller
+        jr nz,distribute$new_number
+        ld a,l
+        cp #<CUT_OFF
+        jp p,distribute$new_number
+distribute$is_smaller::
+        ld bc,#INTERNAL_ARRAY+2*BWS_LINE_WIDTH
+        ld e,l
+        ld d,h
         add hl,bc
-        ld (ptr_random_buffer),hl
         ld a,(hl)
         cp #IS_FREE
-        jr nz,$generate_random_offset
+
+        jr nz,distribute$new_number
         ld hl,#BWS+(END_ROW+2)*BWS_LINE_WIDTH
-        add hl,bc
+        add hl,de
         ld a,(hl)
         cp #CHR_FREE
-        jr nz,$generate_random_offset
-        ld de,#REMOVE_OFFSET
+        jr nz,distribute$new_number
+        ;AZ check distribution
+        ;ld a,#0x55
+        ;ld (hl),a
         ex de,hl
-        sbc hl,de
-        jr c,$generate_random_offset
-        ld hl,(ptr_random_buffer)
+        add hl,bc
         ld a,#IS_MINE
         ld (hl),a
         pop bc
@@ -685,7 +688,7 @@ $copy_bit_negate:
         or b
         jr nz,$put_mine
         ret
-do_quit:
+do_quit::
         ld a,#RECORD_END
         call append_key
         call quit_sound
@@ -727,12 +730,25 @@ go_next:
         cp #'J'
         jp z,new_game
         jp kill_all_and_halt
+
 kill_all_and_halt:
+.if ne(BWS_LINE_WIDTH-40)
         rst 0x20
-	.db UP_PRST7
-	.ascis 'Have a nice day. Exit... '
-	rst 0x38
+        .db UP_PRST7
+        .ascis 'Auf Wiedersehen! Und weg... '
+        rst 0x38
+.else
+        ld c,#UP_PRNST
+        ld de,#str_exit
+        call BOS
+        xor a
+        ret
+str_exit:
+        .asciz 'Auf Wiedersehen! Und weg... '
+.endif
+
 quit_sound:
+.if ne(BWS_LINE_WIDTH-40)
         ld l,#QUIT_SOUND_P1
         ld d,#QUIT_SOUND_P2
         ld e,#QUIT_SOUND_P3
@@ -775,8 +791,10 @@ quit$play_half_wave2:
         dec e
         dec l
         jr nz,quit$play_effect2
+.endif
         ret
 click_sound:
+.if ne(BWS_LINE_WIDTH-40)
         push af
         ld b,#WAVE_PERIODS
         xor a
@@ -791,152 +809,217 @@ $click_keep_level:
         xor #TAPE_OUT
         djnz $click_next_period
         pop af
-        ret
-up_inch:
-.if ne(BWS_LINE_WIDTH-32)
-	ld c,#1 ; CONSI
-	call 5
-.else
-	rst 0x20
-	.db UP_INKEY
-	or a
-	jr z,up_inch$joystick
 .endif
-	cp #0x0b; CURSOR UP
-	jr nz,up_inch$test_down
+        ret
+;
+; Galois LFSRs
+;
+rand16::
+        ld hl,(seed)
+        ld a,r
+        add h
+        ld h,a
+        xor a ; CF=0
+        rr h
+        rr l
+        jr  nc,rand16$write_seed
+        xor l
+        ld l,a
+        ld a,#0xB4
+        xor h
+        ld h,a
+rand16$write_seed:
+        ld (seed),hl
+        ret
+seed:
+        .dw 0xace1
+
+up_inch::
+        call rand16
+.if ne(BWS_LINE_WIDTH-32)
+        ld c,#UP_CSTS
+        call BOS
+        or a
+        jr z,up_inch
+        ld c,#UP_CONSI
+        call BOS
+.else
+        rst 0x20
+        .db UP_INKEY
+        or a
+        jr z,up_inch$joystick
+.endif
+        cp #0x0b; CURSOR UP
+        jr nz,up_inch$test_down
 up_inch$is_up:
-	ld a,#'G'
-	ret
+        ld a,#'G'
+        ret
 up_inch$test_down:
-	cp #0x0a; CURSOR DOWN
-	jr nz,up_inch$test_left
+        cp #0x0a; CURSOR DOWN
+        jr nz,up_inch$test_left
 up_inch$is_down:
-	ld a,#'O'
-	ret
+        ld a,#'O'
+        ret
 up_inch$test_left:
-	cp #0x08; CURSOR LEFT
-	jr nz,up_inch$test_right
+        cp #0x08; CURSOR LEFT
+        jr nz,up_inch$test_right
 up_inch$is_left:
-	ld a,#'P'
-	ret
+        ld a,#'P'
+        ret
 up_inch$test_right:
-	cp #0x09; CURSOR RIGHT
-	jr nz,up_inch$end
+        cp #0x09; CURSOR RIGHT
+        jr nz,up_inch$end
 up_inch$is_right:
-	ld a,#'Q'
+        ld a,#'Q'
 up_inch$end:
-	ret
+        ret
 .if ne(BWS_LINE_WIDTH-40)
 up_inch$joystick::
-	in a,(0x00)
-	and #0x1f
-	ld c,a
-	ld b,#0x80
+        in a,(0x00)
+        and #0x1f
+        ld c,a
+        ld b,#0x80
 up_inch$debounce1:
-	djnz up_inch$debounce1
-	in a,(0x00)
-	and #0x1f;
-	cp c
-	jr nz,up_inch$joystick
+        djnz up_inch$debounce1
+        in a,(0x00)
+        and #0x1f;
+        cp c
+        jr nz,up_inch$joystick
 joystick::
-	ld a,(last_joystick)
-	cp c
-	jr z,up_inch
-	ld a,c
-	ld (last_joystick),a
-	cp #0x1e; left
-	jr z,up_inch$is_left
-	cp #0x1d; right
-	jr z,up_inch$is_right
-	cp #0x1b; right
-	jr z,up_inch$is_down
-	cp #0x17; up
-	jr z,up_inch$is_up
-	and #0x10
-	ret nz
-	ld a,#'S'
-	ret
+        ld a,(last_joystick)
+        cp c
+        jr z,up_inch
+        ld a,c
+        ld (last_joystick),a
+        cp #0x1e; left
+        jr z,up_inch$is_left
+        cp #0x1d; right
+        jr z,up_inch$is_right
+        cp #0x1b; right
+        jr z,up_inch$is_down
+        cp #0x17; up
+        jr z,up_inch$is_up
+        and #0x10
+        ret nz
+        ld a,#'S'
+        ret
 joystick_init:
-	ld a,#0xcf; bitwise input
-	out (0x01),a 
-	ld a,#0x1f;
-	out (0x01),a
-	xor a
-	ld (last_joystick),a
-	ld a,#0x60 ; both enabled
-	out (0x00),a
-	ret
+        ld a,#0xcf; bitwise input
+        out (0x01),a
+        ld a,#0x1f;
+        out (0x01),a
+        xor a
+        ld (last_joystick),a
+        ld a,#0x60 ; both enabled
+        out (0x00),a
+        ret
 .endif
 txt_empty_screen:
+.if ne(BWS_LINE_WIDTH-40)
         .ascii '                                '
-	FILL_SPACES
-	.ascii '   MINEN:         PUNKTE:       '
-	FILL_SPACES
+        FILL_SPACES
+        .ascii '   '
+.endif
+        .ascii 'MINEN:'
+ofs_minen   .equ .-txt_empty_screen
+
+.if ne(BWS_LINE_WIDTH-40)
+        .ascii '    '
+.endif
+        .ascii '     PUNKTE:'
+ofs_points   .equ .-txt_empty_screen
+.if ne(BWS_LINE_WIDTH-40)
+        .ascii '       '
+.else
+        .ascii '     '
+ofs_vorsicht   .equ .-txt_empty_screen
+        .ascii '                 '
+.endif
+
+.if ne(BWS_LINE_WIDTH-40)
         .db 0xa8
-	.rept (BWS_LINE_WIDTH-2)
-	.db 0xa0
-	.endm
-	.db 0xa9
+        .rept (BWS_LINE_WIDTH-2)
+        .db 0xa0
+        .endm
+        .db 0xa9
 
         .db 0xa1
-	.rept (BWS_LINE_WIDTH-2)
-	.db 0x20
-	.endm
-	.db 0xa1
-
+.if ne(BWS_LINE_WIDTH-40)
+ofs_vorsicht   .equ .-txt_empty_screen+5; 5 is intentionally move right
+.endif
+        .rept (BWS_LINE_WIDTH-2)
+        .db ' '
+        .endm
+        .db 0xa1
         .db 0xa3
-	.rept (BWS_LINE_WIDTH/2-3)
-	.db 0xa0
-	.endm
-	.db 0xa4,0xa0,0xa4
-	.rept (BWS_LINE_WIDTH/2-2)
-	.db 0xa0
-	.endm
-	.db 0xa5
-
+.else
+        .db 0xa8
+.endif
+        .rept (BWS_LINE_WIDTH/2-3)
+        .db 0xa0
+        .endm
+        .db 0xa4,0xa0,0xa4
+        .rept (BWS_LINE_WIDTH/2-2)
+        .db 0xa0
+        .endm
+.if ne(BWS_LINE_WIDTH-40)
+        .db 0xa5
+.else
+        .db 0xa9
+.endif
         .db 0xa3
-	.rept (BWS_LINE_WIDTH/2-3)
-	.db 0xa0
-	.endm
-	.db 0xaa,0x20,0xa7
-	.rept (BWS_LINE_WIDTH/2-2)
-	.db 0xa0
-	.endm
+        .rept (BWS_LINE_WIDTH/2-3)
+        .db 0xa0
+        .endm
+        .db 0xaa,0x20,0xa7
+        .rept (BWS_LINE_WIDTH/2-2)
+        .db 0xa0
+        .endm
         .db 0xa5
 
-	;;22
-	.rept (BWS_HEIGHT-9)
-		.db 0xa1
-		.rept (BWS_LINE_WIDTH-2)
-		.db 0x20
-		.endm
-	 	.db 0xa1
-	.endm
+        ;;22
+        .rept (BWS_HEIGHT-9)
+                .db 0xa1
+                .rept (BWS_LINE_WIDTH-2)
+                .db 0x20
+                .endm
+                .db 0xa1
+        .endm
+.if ne(BWS_LINE_WIDTH-32)
+        .rept (4)
+        .db 0xa1
+        .rept (BWS_LINE_WIDTH-2)
+        .db 0x20
+        .endm
+        .db 0xa1
+        .endm
+.endif
 
         .db 0xa3
-	.rept (BWS_LINE_WIDTH/2-3)
-	.db 0xa0
-	.endm
-	.db 0xa9,0x20,0xa8
-	.rept (BWS_LINE_WIDTH/2-2)
-	.db 0xa0
-	.endm
-	.db 0xa5
+        .rept (BWS_LINE_WIDTH/2-3)
+        .db 0xa0
+        .endm
+        .db 0xa9,0x20,0xa8
+        .rept (BWS_LINE_WIDTH/2-2)
+        .db 0xa0
+        .endm
+        .db 0xa5
 
+.if ne(BWS_LINE_WIDTH-40)
         .db 0xa1
-	.ascii '       SCI       ' 
+        .ascii '     SCI     '
         .db 0xa1,0x20,0xa1
-	.ascii '       GAMES      '
+        .ascii '    GAMES     '
         .db 0xa1
-	
-	.db 0xa7
-	.rept (BWS_LINE_WIDTH/2-3)
-	.db 0xa0
-	.endm
-	.db 0xa2,0xa0,0xa2
-	.rept (BWS_LINE_WIDTH/2-2)
-	.db 0xa0
-	.endm       
+.endif
+        .db 0xa7
+        .rept (BWS_LINE_WIDTH/2-3)
+        .db 0xa0
+        .endm
+        .db 0xa2,0xa0,0xa2
+        .rept (BWS_LINE_WIDTH/2-2)
+        .db 0xa0
+        .endm
         .db 0xaa
 ptr_cursor:
         .db 0xcf,0xef                               ;Oo
@@ -951,43 +1034,44 @@ ptr_log_buffer:
 ptr_random_buffer:
         .db 0xbe,0x14                               ;>.
 last_joystick:
-	.db 0x00
+        .db 0x00
 str_vorsicht_minen:
-	.ascii '   VORSICHT   MINE/N'
+        .ascii 'VORSICHT   MINE/N'
+len_vorsicht_minen .equ .-str_vorsicht_minen
 str_sie_haben:
-	.ascii 'SIE    HABEN'
+        .ascii 'SIE    HABEN'
 str_punkte_erreicht:
-	.ascii 'PUNKTE    ERREICHT'
+        .ascii 'PUNKTE    ERREICHT'
 str_noch_ein_spiel:
-	.ascii 'NOCH EIN SPIEL ?'
+        .ascii 'NOCH EIN SPIEL ?'
 txt_title:
-	.ascii '\256\236\236\236\236\236\236\236\236\236\255           \212   \212\212  \212 '
-	FILL_SPACES
+        .ascii '\256\236\236\236\236\236\236\236\236\236\255           \212   \212\212  \212 '
+        FILL_SPACES
         .ascii '\237\271\266\263\262\266\270 \275\260\300          \212 \212\222\223\236\236\226\225\212\212'
-	FILL_SPACES
+        FILL_SPACES
         .db 0x9f,0xb8,0xb7,0x20,0xb5,0x20,0x20,0x20 ;.87 5   
         .db 0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
         .db 0x20,0x20,0x20,0x20,0x20,0x8a,0x20,0x99 ;     . .
         .db 0x20,0x20,0x20,0x20,0x20,0x20,0x9b,0x20 ;      . 
-	FILL_SPACES
+        FILL_SPACES
         .db 0x9f,0xb3,0x20,0xb4,0xb5,0x20,0xb2,0x20 ;.3 45 2 
         .db 0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
         .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x98 ;       .
         .db 0x20,0xc9,0x20,0x20,0xc9,0x20,0x9c,0x20 ; I  I . 
 .if ne(BWS_LINE_WIDTH-32)
-	.ascii 'S Start '
+        .ascii 'S Start '
 .endif
         .db 0x9f,0xb1,0xb6,0x20,0x20,0xb6,0xb0,0x20 ;.16  60 
         .db 0xb6,0xb0,0xc0,0x20,0x92,0x93,0x9e,0x9e ;60@ ....
         .db 0x96,0x95,0x20,0x20,0x20,0x20,0x20,0x9f ;..     .
         .db 0x20,0x20,0x86,0x87,0x20,0x20,0xc0,0x20 ;  ..  @ 
-	FILL_SPACES
+        FILL_SPACES
         .db 0x9f,0x70,0x72,0x65,0x73,0x65,0x6e,0x74 ;.present
         .db 0x73,0x3a,0xc0,0x99,0x20,0x20,0x20,0x20 ;s:@.    
         .db 0x20,0x20,0x9b,0x20,0x20,0x20,0x20,0x9b ;  .    .
         .db 0x20,0x20,0x85,0x84,0x20,0x20,0x99,0x20 ;  ..  . 
 .if ne(BWS_LINE_WIDTH-32)
-	.ascii '\235 Hoch  '
+        .ascii '\235 Hoch  '
 .endif
         .db 0xab,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8 ;+xxxxxxx
         .db 0xf8,0xf8,0xac,0x98,0x20,0xc9,0x20,0x20 ;xx,. I  
@@ -999,7 +1083,7 @@ txt_title:
         .db 0x20,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;  @     
         .db 0x96,0x95,0xf8,0xf8,0x92,0x93,0x20,0x20 ;..xx..  
 .if ne(BWS_LINE_WIDTH-32)
-	.ascii '\232 Runter'
+        .ascii '\232 Runter'
 .endif
         .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
         .db 0x20,0x20,0x20,0x9b,0x20,0x20,0x85,0x84 ;   .  ..
@@ -1011,7 +1095,7 @@ txt_title:
         .db 0x84,0x20,0x98,0x20,0x20,0x20,0x20,0x20 ;. .     
         .db 0x20,0xdf,0x9f,0xc0,0xdc,0x20,0x20,0x20 ; _.@\   
 .if ne(BWS_LINE_WIDTH-32)
-	.ascii '\224 Links '
+        .ascii '\224 Links '
 .endif
         .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
         .db 0x20,0x20,0x20,0x20,0x96,0x95,0xf8,0xf8 ;    ..xx
@@ -1023,18 +1107,18 @@ txt_title:
         .db 0x9e,0x96,0xd8,0x20,0x20,0x20,0x62,0x75 ;..X   bu
         .db 0x74,0x20,0x62,0x65,0x20,0x20,0x20,0x20 ;t be    
 .if ne(BWS_LINE_WIDTH-32)
-	.ascii '\227 Rechts'
+        .ascii '\227 Rechts'
 .endif
         .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
         .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
         .db 0x20,0xb7,0xff,0xff,0xb7,0x20,0x20,0x63 ; 7..7  c
         .db 0x61,0x72,0x65,0x66,0x75,0x6c,0x6c,0x21 ;arefull!
         FILL_SPACES
-	.ascii '                                '
+        .ascii '                                '
         FILL_SPACES
-	.ascii '                                '
+        .ascii '                                '
 .if ne(BWS_LINE_WIDTH-32)
-	.ascii ' oder   '
+        .ascii ' oder   '
 .endif
         .db 0x20,0x20,0x20,0x20,0xb2,0x20,0xb2,0x20 ;    2 2 
         .db 0xb3,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;3       
@@ -1046,7 +1130,7 @@ txt_title:
         .db 0xb4,0x20,0xb3,0x20,0xb7,0xb3,0xb5,0x20 ;4 3 735 
         .db 0xb2,0xb7,0xb4,0x20,0xb2,0xb0,0x20,0x20 ;274 20  
 .if ne(BWS_LINE_WIDTH-32)
-	.ascii 'Joystick'
+        .ascii 'Joystick'
 .endif
         .db 0x20,0xb2,0xb0,0x20,0xb5,0x20,0xb5,0x20 ; 20 5 5 
         .db 0xb4,0xb5,0xb0,0xb4,0xb5,0xb7,0xb9,0xb1 ;45045791
@@ -1058,24 +1142,31 @@ txt_title:
         .db 0xb4,0xb2,0xbb,0xb1,0xb7,0xb7,0xb5,0xb3 ;42;17753
         .db 0xb8,0xb7,0xb4,0x20,0x20,0xb0,0x20,0x20 ;874  0  
         FILL_SPACES
-	.ascii '                                '
+        .ascii '                                '
         FILL_SPACES
 .if ne(BWS_LINE_WIDTH-40)
-	.ascii '  fuer Brosig, A2 und Joystick  '
-	.ascii '                         PA01/88'
+        .ascii '  fuer Brosig, A2 und Joystick  '
+        .ascii '                         PA01/88'
         .ascii '        S   - START             '
         .ascii '        G \235 - AUFWAERTS         '
         .ascii '        O \232 - ABWAERTS          '
         .ascii '        P \224 - LINKS             '
         .ascii '        Q \227 - RECHTS            '
-	.ascii '                                '
+        .ascii '                                '
 .endif
-	.ascii '                                '
+        .ascii '                                '
         FILL_SPACES
-	.ascii ' C-1987 SOFTWARE CENTER ILMENAU '
+        .ascii ' C-1987 SOFTWARE CENTER ILMENAU '
         FILL_SPACES
-        .ascii '      by DIRK STREHLE           '  
+        .ascii '      by DIRK STREHLE           '
         FILL_SPACES
-	.ascii ' 2017MOD by Andreas Ziermann    '
+        .ascii ' 2017 MOD by Andreas Ziermann    '
         FILL_SPACES
-
+;
+; .BSS segment
+;
+.area BSS
+INTERNAL_ARRAY:
+        .ds BWS_LINE_WIDTH*MINEFIELD_ARRAY_HEIGHT
+LOG_BUFFER:
+        .ds 1

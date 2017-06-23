@@ -1,5 +1,5 @@
 ;--------------------------------------------------------------------------
-;  platform.inc for Z1013
+;  kcc_header.asm
 ;
 ;  Copyright (C) 2016, Andreas Ziermann
 ;
@@ -26,12 +26,26 @@
 ;   might be covered by the GNU General Public License.
 ;--------------------------------------------------------------------------
 
-BWS_LINE_WIDTH         .equ 32
-BWS_HEIGHT             .equ 32
-BWS_SIZE               .equ 32*32
+; specific header to automatic generate KCC format 
+; (which is used by simulator, disk, tape, USB, etc...)
 
-UP_PRST7               .equ 0x02
-UP_INKEY               .equ 0x04
+        .module kcc_header_z9001
 
-TAPE_OUT               .equ 0x80
-PIOB_DATA              .equ 0x02
+        .globl init
+        .globl s_CODE
+        .globl s_BSS
+
+        .area   _HEADER (abs)
+start_of_header:
+        .ascii 'MINES   '            ;name (placeholder 8 chars)
+        .ascii 'COM'                 ; extension
+        .db 0x00,0x00,0x00,0x00,0x00 ; reserved
+        .db 0x02                     ; next block
+        .dw s_CODE                   ; load address
+        .dw s_BSS-1                  ; end address
+        .dw init                     ; start address
+LEN_HEADER .equ .-start_of_header
+      .rept 128-LEN_HEADER
+        .db 0x00 ; reserved
+    .endm
+
