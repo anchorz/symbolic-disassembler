@@ -8,6 +8,8 @@ obj/z9001/%.kcc : obj/z9001/kcc_header.rel obj/z9001/%.rel
 	sdldz80 -mjwxi $(@:kcc=ihx)  -b _HEADER=0x280 -b CODE=0x300 $^
 	sdobjcopy -Iihex -Obinary  $(@:kcc=ihx) $(@:kcc=kc_)
 	dd if=$(@:kcc=kc_) of=$@ bs=128 conv=sync
+	./kcc2wav $@ Minefield_Z9001.wav
+	gzip Minefield_Z9001.wav
 
 obj/z1013/%.z80 : obj/z1013/z80_header.rel obj/z1013/%.rel
 	sdldz80 -mjwxi $(@:z80=ihx) -b _HEADER=0xe0 -b CODE=0x100 $^

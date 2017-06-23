@@ -73,7 +73,7 @@ QUIT_SOUND_P3          .equ 0x01
 QUIT_SOUND_P4          .equ 0xee
 BLINK_COUNTER          .equ 10
 MINEFIELD_WIDTH        .equ BWS_LINE_WIDTH-2
-MINEFIELD_ARRAY_HEIGHT .equ (END_ROW-START_ROW+1)
+MINEFIELD_ARRAY_HEIGHT .equ (START_ROW-END_ROW+1)
 size_of_vorsicht_minen .equ 20
 size_of_sie_haben      .equ 12
 size_of_punkte_erreich .equ 18
@@ -147,7 +147,7 @@ main_loop:
         ld bc,#WAIT_250MS
         call wait
         jp main_loop
-do_up::
+do_up:
         call clear_status_line
         ld hl,(ptr_cursor)
         ld a,#CHR_VISITED
@@ -645,9 +645,9 @@ animate_left:
     CUT_OFF .equ (START_ROW-END_ROW-3)*BWS_LINE_WIDTH
 .endif
 
-distribute_mines::
+distribute_mines:
         ld bc,(mines_count)
-$put_mine::
+$put_mine:
         push bc
 distribute$new_number:
         call rand16
@@ -661,7 +661,7 @@ distribute$new_number:
         ld a,l
         cp #<CUT_OFF
         jp p,distribute$new_number
-distribute$is_smaller::
+distribute$is_smaller:
         ld bc,#INTERNAL_ARRAY+2*BWS_LINE_WIDTH
         ld e,l
         ld d,h
@@ -688,7 +688,7 @@ distribute$is_smaller::
         or b
         jr nz,$put_mine
         ret
-do_quit::
+do_quit:
         ld a,#RECORD_END
         call append_key
         call quit_sound
@@ -814,7 +814,7 @@ $click_keep_level:
 ;
 ; Galois LFSRs
 ;
-rand16::
+rand16:
         ld hl,(seed)
         ld a,r
         add h
@@ -834,7 +834,7 @@ rand16$write_seed:
 seed:
         .dw 0xace1
 
-up_inch::
+up_inch:
         call rand16
 .if ne(BWS_LINE_WIDTH-32)
         ld c,#UP_CSTS
@@ -872,7 +872,7 @@ up_inch$test_right:
 up_inch$is_right:
         ld a,#'Q'
         ret
-up_inch$test_enter::
+up_inch$test_enter:
         cp #0x0d; enter
         jr nz,up_inch$fire
 up_inch$is_start:
@@ -885,7 +885,7 @@ up_inch$fire:
 up_inch$end:
         ret
 .if ne(BWS_LINE_WIDTH-40)
-up_inch$joystick::
+up_inch$joystick:
         in a,(0x00)
         and #0x1f
         ld c,a
@@ -896,7 +896,7 @@ up_inch$debounce1:
         and #0x1f;
         cp c
         jr nz,up_inch$joystick
-joystick::
+joystick:
         ld a,(last_joystick)
         cp c
         jr z,up_inch
@@ -1174,10 +1174,11 @@ txt_title:
         .ascii ' 2017 MOD by Andreas Ziermann    '
         FILL_SPACES
 ;
-; .BSS segment
+; kind of .BSS segment data
 ;
-.area BSS
+.area BSS 
 INTERNAL_ARRAY:
         .ds BWS_LINE_WIDTH*MINEFIELD_ARRAY_HEIGHT
 LOG_BUFFER:
         .ds 1
+
