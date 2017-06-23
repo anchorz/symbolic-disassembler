@@ -37,7 +37,11 @@
 
         .area   _HEADER (abs)
 start_of_header:
-        .ascii 'MINES   '            ;name (placeholder 8 chars)
+        .ascii 'MINES'               ;name (placeholder 8 chars)
+len_name .equ .-start_of_header
+	.rept 8-len_name
+	    .db 0x00
+	.endm	
         .ascii 'COM'                 ; extension
         .db 0x00,0x00,0x00,0x00,0x00 ; reserved
         .db 0x02                     ; next block

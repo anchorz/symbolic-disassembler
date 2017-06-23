@@ -868,9 +868,20 @@ up_inch$is_left:
         ret
 up_inch$test_right:
         cp #0x09; CURSOR RIGHT
-        jr nz,up_inch$end
+        jr nz,up_inch$test_enter
 up_inch$is_right:
         ld a,#'Q'
+        ret
+up_inch$test_enter::
+        cp #0x0d; enter
+        jr nz,up_inch$fire
+up_inch$is_start:
+        ld a,#'S'
+        ret
+up_inch$fire:
+        cp #0x1b; joystick fire
+        jr nz,up_inch$end
+        jr up_inch$is_start
 up_inch$end:
         ret
 .if ne(BWS_LINE_WIDTH-40)
