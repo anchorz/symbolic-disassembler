@@ -291,6 +291,9 @@ do_right:
         dec hl
         ld a,#CHR_MAN
         ld (hl),a
+        call count_mines
+        cp #NO_MINE
+        call nz,print_mines_count
         xor a
         ret
 add_bonus_right:
@@ -331,6 +334,9 @@ do_left:
         inc hl
         ld a,#CHR_MAN
         ld (hl),a
+        call count_mines
+        cp #NO_MINE
+        call nz,print_mines_count
         xor a
         ret
 add_bonus_left:
