@@ -35,3 +35,6 @@ BOS             .equ 0x0005
 UP_CONSI        .equ  1; console input
 UP_PRNST        .equ  9; print string
 UP_CSTS         .equ 11; console status
+
+Z1013                  .equ 0
+Z9001                  .equ 1

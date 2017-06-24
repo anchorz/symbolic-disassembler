@@ -35,3 +35,6 @@ UP_INKEY               .equ 0x04
 
 TAPE_OUT               .equ 0x80
 PIOB_DATA              .equ 0x02
+
+Z1013                  .equ 1
+Z9001                  .equ 0

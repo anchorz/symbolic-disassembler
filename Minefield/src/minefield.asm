@@ -11,7 +11,7 @@
 
 LOG_BUFFER_INIT        .equ (LOG_BUFFER-1)
 
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
     CHR_MAN                .equ 0x17
     END_ROW                .equ 5
     END_SCREEN_CORRECTION  .equ 9 ; starting line of the text
@@ -80,7 +80,7 @@ size_of_punkte_erreich .equ 18
 size_of_noch_ein_spiel .equ 16
 
 .macro  FILL_SPACES
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         .rept (BWS_LINE_WIDTH-32)
         .db 0x20
         .endm
@@ -89,13 +89,13 @@ size_of_noch_ein_spiel .equ 16
 
 .area  CODE
 init::
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         jp START
         .ascii 'MINES   '
         .dw 0
 .endif
 START:
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         call joystick_init
 .endif
         call show_title
@@ -547,7 +547,7 @@ show_title:
         ld de,#BWS
         ld bc,#BWS_SIZE
         ldir
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         ld de,#BWS-0x3ff
         ld hl,#BWS-0x400
         ld bc,#BWS_SIZE-1
@@ -645,7 +645,7 @@ animate_left:
         dec hl
         ld (hl),a
         ret
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
     CUT_OFF .equ (START_ROW-END_ROW-4)*BWS_LINE_WIDTH
 .else
     CUT_OFF .equ (START_ROW-END_ROW-3)*BWS_LINE_WIDTH
@@ -738,7 +738,7 @@ go_next:
         jp kill_all_and_halt
 
 kill_all_and_halt:
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         rst 0x20
         .db UP_PRST7
         .ascis 'Auf Wiedersehen! Und weg... '
@@ -754,7 +754,7 @@ str_exit:
 .endif
 
 quit_sound:
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         ld l,#QUIT_SOUND_P1
         ld d,#QUIT_SOUND_P2
         ld e,#QUIT_SOUND_P3
@@ -800,7 +800,7 @@ quit$play_half_wave2:
 .endif
         ret
 click_sound:
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         push af
         ld b,#WAVE_PERIODS
         xor a
@@ -842,7 +842,7 @@ seed:
 
 up_inch:
         call rand16
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         ld c,#UP_CSTS
         call BOS
         or a
@@ -890,7 +890,7 @@ up_inch$fire:
         jr up_inch$is_start
 up_inch$end:
         ret
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
 up_inch$joystick:
         in a,(0x00)
         and #0x1f
@@ -932,7 +932,7 @@ joystick_init:
         ret
 .endif
 txt_empty_screen:
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         .ascii '                                '
         FILL_SPACES
         .ascii '   '
@@ -940,12 +940,12 @@ txt_empty_screen:
         .ascii 'MINEN:'
 ofs_minen   .equ .-txt_empty_screen
 
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         .ascii '    '
 .endif
         .ascii '     PUNKTE:'
 ofs_points   .equ .-txt_empty_screen
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         .ascii '       '
 .else
         .ascii '     '
@@ -953,7 +953,7 @@ ofs_vorsicht   .equ .-txt_empty_screen
         .ascii '                 '
 .endif
 
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         .db 0xa8
         .rept (BWS_LINE_WIDTH-2)
         .db 0xa0
@@ -961,7 +961,7 @@ ofs_vorsicht   .equ .-txt_empty_screen
         .db 0xa9
 
         .db 0xa1
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
 ofs_vorsicht   .equ .-txt_empty_screen+5; 5 is intentionally move right
 .endif
         .rept (BWS_LINE_WIDTH-2)
@@ -979,7 +979,7 @@ ofs_vorsicht   .equ .-txt_empty_screen+5; 5 is intentionally move right
         .rept (BWS_LINE_WIDTH/2-2)
         .db 0xa0
         .endm
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         .db 0xa5
 .else
         .db 0xa9
@@ -1002,7 +1002,7 @@ ofs_vorsicht   .equ .-txt_empty_screen+5; 5 is intentionally move right
                 .endm
                 .db 0xa1
         .endm
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         .rept (4)
         .db 0xa1
         .rept (BWS_LINE_WIDTH-2)
@@ -1022,7 +1022,7 @@ ofs_vorsicht   .equ .-txt_empty_screen+5; 5 is intentionally move right
         .endm
         .db 0xa5
 
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         .db 0xa1
         .ascii '     SCI     '
         .db 0xa1,0x20,0xa1
@@ -1075,7 +1075,7 @@ txt_title:
         .db 0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
         .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x98 ;       .
         .db 0x20,0xc9,0x20,0x20,0xc9,0x20,0x9c,0x20 ; I  I . 
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         .ascii 'S Start '
 .endif
         .db 0x9f,0xb1,0xb6,0x20,0x20,0xb6,0xb0,0x20 ;.16  60 
@@ -1087,7 +1087,7 @@ txt_title:
         .db 0x73,0x3a,0xc0,0x99,0x20,0x20,0x20,0x20 ;s:@.    
         .db 0x20,0x20,0x9b,0x20,0x20,0x20,0x20,0x9b ;  .    .
         .db 0x20,0x20,0x85,0x84,0x20,0x20,0x99,0x20 ;  ..  . 
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         .ascii '\235 Hoch  '
 .endif
         .db 0xab,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8 ;+xxxxxxx
@@ -1099,7 +1099,7 @@ txt_title:
         .db 0x20,0x20,0x20,0x9f,0x20,0x20,0x86,0x87 ;   .  ..
         .db 0x20,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;  @     
         .db 0x96,0x95,0xf8,0xf8,0x92,0x93,0x20,0x20 ;..xx..  
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         .ascii '\232 Runter'
 .endif
         .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
@@ -1111,7 +1111,7 @@ txt_title:
         .db 0x20,0x20,0x20,0x9c,0x20,0x85,0x95,0x92 ;   . ...
         .db 0x84,0x20,0x98,0x20,0x20,0x20,0x20,0x20 ;. .     
         .db 0x20,0xdf,0x9f,0xc0,0xdc,0x20,0x20,0x20 ; _.@\   
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         .ascii '\224 Links '
 .endif
         .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
@@ -1123,7 +1123,7 @@ txt_title:
         .db 0x70,0x79,0x20,0xdb,0xf8,0x90,0x20,0x20 ;py [x.  
         .db 0x9e,0x96,0xd8,0x20,0x20,0x20,0x62,0x75 ;..X   bu
         .db 0x74,0x20,0x62,0x65,0x20,0x20,0x20,0x20 ;t be    
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         .ascii '\227 Rechts'
 .endif
         .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
@@ -1134,7 +1134,7 @@ txt_title:
         .ascii '                                '
         FILL_SPACES
         .ascii '                                '
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         .ascii ' oder   '
 .endif
         .db 0x20,0x20,0x20,0x20,0xb2,0x20,0xb2,0x20 ;    2 2 
@@ -1146,7 +1146,7 @@ txt_title:
         .db 0xb3,0xb2,0xb2,0x20,0x20,0xb7,0xb3,0x20 ;322  73 
         .db 0xb4,0x20,0xb3,0x20,0xb7,0xb3,0xb5,0x20 ;4 3 735 
         .db 0xb2,0xb7,0xb4,0x20,0xb2,0xb0,0x20,0x20 ;274 20  
-.if ne(BWS_LINE_WIDTH-32)
+.if Z9001
         .ascii 'Joystick'
 .endif
         .db 0x20,0xb2,0xb0,0x20,0xb5,0x20,0xb5,0x20 ; 20 5 5 
@@ -1161,7 +1161,7 @@ txt_title:
         FILL_SPACES
         .ascii '                                '
         FILL_SPACES
-.if ne(BWS_LINE_WIDTH-40)
+.if Z1013
         .ascii '  fuer Brosig, A2 und Joystick  '
         .ascii '                         PA01/88'
         .ascii '        S   - START             '
