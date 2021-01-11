@@ -4,6 +4,7 @@ z1013                           =       0
 ; z9001 specific constants
 ;
 BOS                             =       0x0005
+COUNT                           =       0x0023
 KEYBU                           =       0x0025
 CURS                            =       0x002d
 WBOOT                           =       0xF003
@@ -25,7 +26,7 @@ MENU_TOP                        =       (TOP_LINES+2)
 ALIGN_MIDDLE                    =       4
 GAMES_LINES                     =       6
 GAME_START_Y                    =       2
-SLOW_DOWN_13066                 =       21000
+SLOW_DOWN_13066                 =       18000
 POS_LIVES                       =       BWS+23*SCREEN_WIDTH
 POS_TOP_WALL                    =       BWS+ 1*SCREEN_WIDTH
 POS_TOP_GAME                    =       BWS+ 0*SCREEN_WIDTH+8+ALIGN_MIDDLE
@@ -80,11 +81,7 @@ START:
 .endm
 
 .macro INKEY
-        ld      a,(KEYBU)
-        push    af
-        xor     a
-        ld      (KEYBU),a
-        pop     af
+        call    inkey
 .endm
 
 .macro END_PROGRAM
