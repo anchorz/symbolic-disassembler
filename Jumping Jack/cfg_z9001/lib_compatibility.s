@@ -4,7 +4,6 @@
         ;
         .globl  prst7
         .globl  set_cursor
-        .globl  inkey
         
 prst7:  pop     hl
 
@@ -37,15 +36,3 @@ set_cursor:
         pop     hl
         ret
 
-inkey:
-        ld      a,(0x0023)              ; COUNT
-        or      a
-        ret     z
-        ld      a,(0x0025)
-        push    af
-        ld      a,#1
-        ld      (0x0023),a
-        xor     a
-        ld      (0x0025),a
-        pop     af
-        ret

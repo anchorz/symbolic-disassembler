@@ -5,9 +5,26 @@ z1013                           =       0
 ;
 BOS                             =       0x0005
 COUNT                           =       0x0023
+;letztes gültiges Zeichen
+LAKEY                           =       0x0024
+;Tastaturpuffer
 KEYBU                           =       0x0025
 CURS                            =       0x002d
+;erste zu rollende Zeile -1
+P1ROL                           =       0x003b
+;letzte zu rollende Zeile +1
+P2ROL                           =       0x003c
+;erste zu rollende Spalte -1
+P3ROL                           =       0x003d
+;letzte zu rollende Spalte +1
+P4ROL                           =       0x003e
+
 WBOOT                           =       0xF003
+CONST                           =       0xF006
+CONIN                           =       0xF009
+COOUT                           =       0xF00C
+inkey                           =       0xFD33
+
 UP_CONSI                        =       1
 UP_CONSO                        =       2
 UP_PRNST                        =       9
