@@ -30,6 +30,7 @@ UP_CONSO                        =       2
 UP_PRNST                        =       9
 UP_CSTS                         =       11
 UP_SETCU                        =       18
+; Löschen des Cursors
 UP_DCU                          =       29
 ;
 ; platform specific

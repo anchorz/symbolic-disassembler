@@ -32,122 +32,123 @@
                            000009    30 UP_PRNST                        =       9
                            00000B    31 UP_CSTS                         =       11
                            000012    32 UP_SETCU                        =       18
-                           00001D    33 UP_DCU                          =       29
-                                     34 ;
-                                     35 ; platform specific
-                                     36 ;
-                           000028    37 SCREEN_WIDTH                    =       40
-                           000018    38 SCREEN_HEIGHT                   =       24
-                                     39 
-                           00000E    40 TOP_LINES                       =       14
-                           000230    41 TITLE_TOP_SIZE                  =       SCREEN_WIDTH*TOP_LINES
-                           000010    42 MENU_TOP                        =       (TOP_LINES+2)
-                           000004    43 ALIGN_MIDDLE                    =       4
-                           000006    44 GAMES_LINES                     =       6
-                           000002    45 GAME_START_Y                    =       2
-                           004650    46 SLOW_DOWN_13066                 =       18000
-                           00EF98    47 POS_LIVES                       =       BWS+23*SCREEN_WIDTH
-                           00EC28    48 POS_TOP_WALL                    =       BWS+ 1*SCREEN_WIDTH
-                           00EC0C    49 POS_TOP_GAME                    =       BWS+ 0*SCREEN_WIDTH+8+ALIGN_MIDDLE
-                           00EC0D    50 POS_GAME_OVER                   =       BWS+ 0*SCREEN_WIDTH+9+ALIGN_MIDDLE
-                           000370    51 POS_COPYRIGHT                   =       SCREEN_WIDTH*22
-                           00000D    52 POSDIFF_NAME                    =       SCREEN_WIDTH-HINT_COPYRIGHT_size+3
-                           000005    53 POSDIFF_YEAR                    =       5
-                           000008    54 POSDIFF_POINTS                  =       8
-                           FFFFFFD8    55 POSDIFF_YOUR_SCORE              =       -(SCREEN_WIDTH)
-                           000003    56 POSDIFF_YOUR_SCORE_DY           =       3
-                           000004    57 POSDIFF_HIGHSCORE_DY            =       4
-                           000001    58 MONSTER_CORRECTION              =       1
-                                     59 
-                                     60 .macro PROGRAM_START
-                                     61         jp START
-                                     62         .ascii 'JUMP    '
-                                     63         .dw 0
-                                     64 START:
-                                     65         .endm
-                                     66 
-                                     67 .macro SCREEN_POS
-                                     68         .ascii '    '
-                                     69  .endm
-                                     70 
-                                     71 .macro CLRSCR
-                                     72         ld      c,#UP_CONSO
-                                     73         ld      e,#0x0c
-                                     74         call    BOS
-                                     75         ld      c,#UP_DCU
-                                     76         call    BOS
-                                     77 .endm
-                                     78 
-                                     79 .macro OUTCH
-                                     80         push    bc
-                                     81         push    de
-                                     82         ld      c,#UP_CONSO
-                                     83         ld      e,a
-                                     84         call    BOS
-                                     85         pop     de
-                                     86         pop     bc
-                                     87 .endm
-                                     88 
-                                     89 .macro INCH
-                                     90         xor     a
-                                     91         ld      (KEYBU),a
-                                     92         ld      c,#UP_CONSI
-                                     93         call    BOS
-                                     94 .endm
-                                     95 
-                                     96 .macro PRST7
-                                     97         call    prst7
-                                     98 .endm
-                                     99 
-                                    100 .macro INKEY
-                                    101         call    inkey
-                                    102 .endm
-                                    103 
-                                    104 .macro END_PROGRAM
-                                    105         jp      WBOOT
-                                    106 .endm
-                                    107 
-                                    108 .macro SET_CURSOR_DE    Y,X
-                                    109         push    bc
-                                    110         ld      de,#(Y+1)*256+(X+1)
-                                    111         ld      c,#UP_SETCU
-                                    112         call    BOS
-                                    113         pop     bc
-                                    114 .endm
-                                    115 
-                                    116 .macro SET_CURSOR_HL    Y,X
-                                    117         push    de
-                                    118         push    bc
-                                    119         ld      de,#(Y+1)*256+(X+1)
-                                    120         ld      h,d
-                                    121         ld      l,e
-                                    122         ld      c,#UP_SETCU
-                                    123         call    BOS
-                                    124         pop     bc
-                                    125         pop     de
-                                    126 .endm
-                                    127 
-                                    128 .macro SET_CURSOR
-                                    129         call    set_cursor
-                                    130 .endm
-                                    131 
-                                    132 .macro REMOVE_CURSOR
-                                    133         ld      hl,(CURS)
-                                    134         ld      (hl),#' '
-                                    135         res     2,h
-                                    136         res     7,(hl)
-                                    137         set     2,h
-                                    138 .endm
-                                    139 
-                                    140 .macro CURSOR_DISABLE
-                                    141         push    bc
-                                    142         ld      c,#UP_DCU
-                                    143         call    BOS
-                                    144         pop     bc
-                                    145 .endm
-                                    146 
-                                    147 .macro Z1013_LINE
-                                    148 .endm
+                                     33 ; Löschen des Cursors
+                           00001D    34 UP_DCU                          =       29
+                                     35 ;
+                                     36 ; platform specific
+                                     37 ;
+                           000028    38 SCREEN_WIDTH                    =       40
+                           000018    39 SCREEN_HEIGHT                   =       24
+                                     40 
+                           00000E    41 TOP_LINES                       =       14
+                           000230    42 TITLE_TOP_SIZE                  =       SCREEN_WIDTH*TOP_LINES
+                           000010    43 MENU_TOP                        =       (TOP_LINES+2)
+                           000004    44 ALIGN_MIDDLE                    =       4
+                           000006    45 GAMES_LINES                     =       6
+                           000002    46 GAME_START_Y                    =       2
+                           004650    47 SLOW_DOWN_13066                 =       18000
+                           00EF98    48 POS_LIVES                       =       BWS+23*SCREEN_WIDTH
+                           00EC28    49 POS_TOP_WALL                    =       BWS+ 1*SCREEN_WIDTH
+                           00EC0C    50 POS_TOP_GAME                    =       BWS+ 0*SCREEN_WIDTH+8+ALIGN_MIDDLE
+                           00EC0D    51 POS_GAME_OVER                   =       BWS+ 0*SCREEN_WIDTH+9+ALIGN_MIDDLE
+                           000370    52 POS_COPYRIGHT                   =       SCREEN_WIDTH*22
+                           00000D    53 POSDIFF_NAME                    =       SCREEN_WIDTH-HINT_COPYRIGHT_size+3
+                           000005    54 POSDIFF_YEAR                    =       5
+                           000008    55 POSDIFF_POINTS                  =       8
+                           FFFFFFD8    56 POSDIFF_YOUR_SCORE              =       -(SCREEN_WIDTH)
+                           000003    57 POSDIFF_YOUR_SCORE_DY           =       3
+                           000004    58 POSDIFF_HIGHSCORE_DY            =       4
+                           000001    59 MONSTER_CORRECTION              =       1
+                                     60 
+                                     61 .macro PROGRAM_START
+                                     62         jp START
+                                     63         .ascii 'JUMP    '
+                                     64         .dw 0
+                                     65 START:
+                                     66         .endm
+                                     67 
+                                     68 .macro SCREEN_POS
+                                     69         .ascii '    '
+                                     70  .endm
+                                     71 
+                                     72 .macro CLRSCR
+                                     73         ld      c,#UP_CONSO
+                                     74         ld      e,#0x0c
+                                     75         call    BOS
+                                     76         ld      c,#UP_DCU
+                                     77         call    BOS
+                                     78 .endm
+                                     79 
+                                     80 .macro OUTCH
+                                     81         push    bc
+                                     82         push    de
+                                     83         ld      c,#UP_CONSO
+                                     84         ld      e,a
+                                     85         call    BOS
+                                     86         pop     de
+                                     87         pop     bc
+                                     88 .endm
+                                     89 
+                                     90 .macro INCH
+                                     91         xor     a
+                                     92         ld      (KEYBU),a
+                                     93         ld      c,#UP_CONSI
+                                     94         call    BOS
+                                     95 .endm
+                                     96 
+                                     97 .macro PRST7
+                                     98         call    prst7
+                                     99 .endm
+                                    100 
+                                    101 .macro INKEY
+                                    102         call    inkey
+                                    103 .endm
+                                    104 
+                                    105 .macro END_PROGRAM
+                                    106         jp      WBOOT
+                                    107 .endm
+                                    108 
+                                    109 .macro SET_CURSOR_DE    Y,X
+                                    110         push    bc
+                                    111         ld      de,#(Y+1)*256+(X+1)
+                                    112         ld      c,#UP_SETCU
+                                    113         call    BOS
+                                    114         pop     bc
+                                    115 .endm
+                                    116 
+                                    117 .macro SET_CURSOR_HL    Y,X
+                                    118         push    de
+                                    119         push    bc
+                                    120         ld      de,#(Y+1)*256+(X+1)
+                                    121         ld      h,d
+                                    122         ld      l,e
+                                    123         ld      c,#UP_SETCU
+                                    124         call    BOS
+                                    125         pop     bc
+                                    126         pop     de
+                                    127 .endm
+                                    128 
+                                    129 .macro SET_CURSOR
+                                    130         call    set_cursor
+                                    131 .endm
+                                    132 
+                                    133 .macro REMOVE_CURSOR
+                                    134         ld      hl,(CURS)
+                                    135         ld      (hl),#' '
+                                    136         res     2,h
+                                    137         res     7,(hl)
+                                    138         set     2,h
+                                    139 .endm
+                                    140 
+                                    141 .macro CURSOR_DISABLE
+                                    142         push    bc
+                                    143         ld      c,#UP_DCU
+                                    144         call    BOS
+                                    145         pop     bc
+                                    146 .endm
+                                    147 
+                                    148 .macro Z1013_LINE
+                                    149 .endm
                                       3 ; 
                                       4 ; constant
                                       5 ; 
