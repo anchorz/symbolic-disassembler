@@ -71,7 +71,7 @@ field_size                       = 0x0024
         .db     0x00,0x00,0x00,0x00,0x00
         .db     3
         .dw     sadr
-        .dw     eadr
+        .dw     eadr+1
         .dw     sadr
         .db     0x00
         .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
@@ -399,7 +399,7 @@ solved:
         ld      a,(level)
         ld      c,a
         ld      de,(puzzle)
-        call    encode
+        jp      encode
 geschafft:
         .ascii  '* S O L V E D *'
 cu_init:
