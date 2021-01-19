@@ -7,7 +7,7 @@ SDLD_OPT=-mwxiu
 
 OBJECTS = $(OUT)
 
-all: $(addprefix obj/,$(TARGETS)) $(TARGETS)
+all: $(TARGETS)
 
 include z9001.mk
 include z1013.mk

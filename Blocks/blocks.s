@@ -1,21 +1,14 @@
+        .module blocks
+        .include 'platform.s'
 ; 
 ; constant
 ; 
-VK_CLS                           = 0x0c
-CONSI                            = 0x01
-RCONB                            = 0x0a
-DCU                              = 0x1d
-SCREEN_HEIGHT                    = 0x18
-SCREEN_WIDTH                     = 0x28
 FG_BLACK                         = 0x00
 FG_GREEN                         = 0x20
 FG_CYAN                          = 0x60
 BG_BLACK                         = 0x00
 BG_GREEN                         = 0x02
 BG_YELLOW                        = 0x03
-POSY_INPUT_LINE                  = 0x16
-POSX_INPUT_LINE                  = 0x17
-INPUT_LINE_size                  = 0x0f
 FIELD_SIZE                       = 0x0c
 FIELD_END                        = 0xff
 STONE_RECT_size                  = 0x04
@@ -34,19 +27,9 @@ MASK_LOWER_BITS                  = 0x03
 MASK_CAPITAL_LETTERS             = 0x3f
 MINIMUM_DISTANCE                 = 0xff
 
-BOS                              = 0x0005
-OUTA                             = 0xf305
-ATRIB                            = 0x0027
-CURS                             = 0x002d
-P1ROL                            = 0x003b
-P3ROL                            = 0x003d
-CONBU                            = 0x0080
-BWS                              = 0xec00
-OFFSET_COLOR                     = 0x0400
 POS_END_42                       = 0x0204
 cmd_size                         = 0x0008
 vers_size                        = 0x0009
-kdo_size                         = 0x0018
 mainpic_size                     = 0x01aa
 txt_prompt_size                  = 0x0002
 Level0_size                      = 0x0008
@@ -62,31 +45,10 @@ senk3_size                       = 0x000e
 red2_size                        = 0x000a
 puzzles_size                     = 0x3169
 field_size                       = 0x0024
-;
-; .KCC Header
-;
-        .ascii  'BLOCKS'
-        .db     0x00,0x00
-        .ascii  'COM'
-        .db     0x00,0x00,0x00,0x00,0x00
-        .db     3
-        .dw     sadr
-        .dw     eadr+1
-        .dw     sadr
-        .db     0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-        .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+
+        .globl  sadr
+        .globl  eadr
+
 sadr:
         jp      start
 cmd:
@@ -94,8 +56,7 @@ cmd:
 cmd_end_marker:
         .dw     0x0000
 start:
-        ld      c,#DCU
-        call    BOS
+        CURSOR_DISABLE
         ld      hl,#mainpic
         call    decomp
         call    smallwindw
@@ -107,17 +68,15 @@ start:
         ld      (puzzle),hl
         call    reset
 mainloop:
-        ld      c,#DCU
-        call    BOS
-        ld      c,#CONSI
-        call    BOS
+        CURSOR_DISABLE
+        UP_INCH
         cp      #'Q'
         jr      z,ende
         ld      hl,#kdo
-        ld      bc,#kdo_size
+        ld      bc,#kdotab-kdo
         cpir
         jr      nz,mainloop
-        ld      a,#kdo_size-1
+        ld      a,#kdotab-kdo-1
         sub     c
         srl     a
         add     a,a
@@ -133,8 +92,7 @@ mainloop:
         ret
 ende:
         call    fullwindw
-        xor     a
-        ret
+        SYS_EXIT
 vers:
         .ascii  '1/15/2021'
 kdo:
@@ -150,6 +108,9 @@ kdo:
         .db     'x',0x00
         .db     'A','a'
         .db     ' ',0x0d
+.if  z1013
+        .db     'N',0x00
+.endif
 kdotab:
         .dw     codeinp
         .dw     reset
@@ -163,114 +124,23 @@ kdotab:
         .dw     move_down
         .dw     next_stone
         .dw     toggle
+.if  z1013        
+        .dw     solved
+.endif
 toggle:
         ld      a,(toggled)
         cpl
         ld      (toggled),a
         ret
 smallwindw:
-        ld      hl,#(POSY_INPUT_LINE+1)*256+(POSY_INPUT_LINE-1)
-        ld      (P1ROL),hl
-        ld      hl,#(POSX_INPUT_LINE+INPUT_LINE_size)*256+(POSX_INPUT_LINE-1)
-        ld      (P3ROL),hl
-        ld      hl,#BWS+21*SCREEN_WIDTH+22
-        ld      (CURS),hl
-        ld      hl,#BWS+21*SCREEN_WIDTH+22
-        ld      (CURS),hl
-        ld      hl,##BWS+21*SCREEN_WIDTH+22-OFFSET_COLOR
-        ld      a,(hl)
-        ld      (ATRIB),a
-        ld      a,#VK_CLS
-        call    OUTA
+        CLS_SMALL_WINDOW
         ret
 fullwindw:
-        ld      hl,#(SCREEN_HEIGHT+1)*256+0
-        ld      (P1ROL),hl
-        ld      hl,#(SCREEN_WIDTH+1)*256+0
-        ld      (P3ROL),hl
-        ld      a,#FG_GREEN+BG_BLACK
-        ld      (ATRIB),a
-        ld      a,#VK_CLS
-        call    OUTA
+        CLS_FULL_WINDOW
         ret
 mainpic:
-        .db     0x00,0x64,0xc8,0x00,0x30,0x2d,0x00,0x60 ;.dH.0-.`
-        .db     0x4b,0x00,0x64,0x2a,0x00,0x63,0x0e,0x00 ;K.d*.c..
-        .db     0x64,0x06,0x00,0x34,0x14,0x00,0x63,0x0e ;d..4..c.
-        .db     0x00,0x64,0x1a,0x00,0x63,0x0e,0x00,0x34 ;.d..c..4
-        .db     0x1a,0x00,0x63,0x0e,0x00,0x64,0x1a,0x00 ;..c..d..
-        .db     0x63,0x0e,0x00,0x64,0x06,0x00,0x34,0x14 ;c..d..4.
-        .db     0x00,0x63,0x0e,0x00,0x64,0x1a,0x00,0x63 ;.c..d..c
-        .db     0x0e,0x00,0x64,0x1a,0x00,0x63,0x0e,0x00 ;..d..c..
-        .db     0x64,0x1a,0x00,0x63,0x0e,0x00,0x64,0x1a ;d..c..d.
-        .db     0x00,0x63,0x0e,0x00,0x64,0x06,0x34,0x00 ;.c..d.4.
-        .db     0x64,0x04,0x34,0x00,0x64,0x05,0x34,0x00 ;d.4.d.4.
-        .db     0x64,0x08,0x00,0x63,0x0e,0x00,0x64,0x1a ;d..c..d.
-        .db     0x00,0x63,0x0e,0x00,0x64,0x1a,0x00,0x63 ;.c..d..c
-        .db     0x0e,0x00,0x64,0x06,0x00,0x14,0x0f,0x00 ;..d.....
-        .db     0x64,0x05,0x67,0x00,0x63,0x0d,0x00,0x64 ;d.g.c..d
-        .db     0x7f,0x20,0x00,0x9e,0x28,0x20,0x20,0xa8 ;. ..(  (
-        .db     0xa9,0x20,0xa1,0x20,0xa8,0xa9,0xa8,0xa0 ;) ! ()( 
-        .db     0xa1,0xa1,0x20,0xa8,0xa0,0x00,0x20,0x06 ;!! ( . .
-        .db     0x56,0x50,0x4f,0x48,0x4c,0x45,0x52,0x53 ;VPOHLERS
-        .db     0x20,0x20,0x32,0x30,0x32,0x30,0x00,0x20 ;  2020. 
-        .db     0x06,0xa3,0xa2,0xa9,0xa1,0x20,0x00,0xa1 ;.#")! .!
-        .db     0x03,0x20,0xa3,0xa2,0xa9,0xa7,0xa9,0x00 ;. #")').
-        .db     0x20,0x1a,0xa7,0xa0,0xaa,0xa7,0xa0,0xa7 ; .' *' '
-        .db     0xaa,0xa7,0xa0,0xa1,0x20,0xa1,0xa0,0xaa ;*' ! ! *
-        .db     0x00,0x20,0x04,0x2d,0x20,0x46,0x52,0x45 ;. .- FRE
-        .db     0x45,0x20,0x54,0x48,0x45,0x20,0x53,0x54 ;E THE ST
-        .db     0x4f,0x4e,0x45,0x20,0x2d,0x20,0x20,0x00 ;ONE -  .
-        .db     0xf8,0x28,0x00,0x20,0x2d,0x45,0x2c,0x53 ;x(. -E,S
-        .db     0x2c,0x44,0x2c,0x58,0x20,0x73,0x65,0x6c ;,D,X sel
-        .db     0x65,0x63,0x74,0x00,0x20,0x03,0x65,0x2c ;ect. .e,
-        .db     0x73,0x2c,0x64,0x2c,0x78,0x20,0x6d,0x6f ;s,d,x mo
-        .db     0x76,0x65,0x00,0x20,0x58,0xbc,0x00,0xb6 ;ve. X<.6
-        .db     0x0c,0xbd,0x00,0x20,0x06,0x4c,0x65,0x76 ;.=. .Lev
-        .db     0x65,0x6c,0x00,0x20,0x0f,0xb4,0x00,0x20 ;el. .4. 
-        .db     0x0c,0xb5,0x00,0x20,0x1a,0xb4,0x00,0x20 ;.5. .4. 
-        .db     0x0c,0xb5,0x00,0x20,0x06,0x50,0x75,0x7a ;.5. .Puz
-        .db     0x7a,0x6c,0x65,0x00,0x20,0x0e,0xb4,0x00 ;zle. .4.
-        .db     0x20,0x0c,0xb5,0x00,0x20,0x1a,0xb4,0x00 ; .5. .4.
-        .db     0x20,0x0c,0xb5,0x00,0x20,0x06,0x4d,0x6f ; .5. .Mo
-        .db     0x76,0x65,0x73,0x00,0x20,0x0f,0xb4,0x00 ;ves. .4.
-        .db     0x20,0x27,0xb4,0x00,0x20,0x27,0xb4,0x00 ; '4. '4.
-        .db     0x20,0x0c,0xb5,0x00,0x20,0x1a,0xb4,0x00 ; .5. .4.
-        .db     0x20,0x0c,0xb5,0x00,0x20,0x1a,0xb4,0x00 ; .5. .4.
-        .db     0x20,0x0c,0xb5,0x00,0x20,0x06,0x43,0x6f ; .5. .Co
-        .db     0x64,0x65,0x2f,0x52,0x65,0x73,0x65,0x74 ;de/Reset
-        .db     0x2f,0x51,0x75,0x69,0x74,0x00,0x20,0x05 ;/Quit. .
-        .db     0xb4,0x00,0x20,0x0c,0xb5,0x00,0x20,0x1a ;4. .5. .
-        .db     0xb4,0x00,0x20,0x0c,0xb5,0x00,0x20,0x05 ;4. .5. .
-        .db     0xa8,0x00,0xa0,0x0f,0xa9,0x00,0x20,0x04 ;(. .). .
-        .db     0xb4,0x00,0x20,0x0c,0xb5,0x00,0x20,0x05 ;4. .5. .
-        .db     0xa1,0x3e,0x00,0x20,0x0e,0xa1,0x00,0x20 ;!>. .!. 
-        .db     0x04,0xbb,0x00,0xfb,0x0c,0xba,0x00,0x20 ;.;.{.:. 
-        .db     0x05,0xa7,0x00,0xa0,0x0f,0xaa,0x00,0x20 ;.'. .*. 
-        .db     0x2a,0x01                               ;*.
-decomp:
-        ld      de,#BWS-OFFSET_COLOR
-decomp1:
-        ld      a,(hl)
-        cp      #DECODE_END
-        ret     z
-        or      a
-        jr      z,decomp3
-        ld      (de),a
-        inc     de
-decomp2:
-        inc     hl
-        jr      decomp1
-decomp3:
-        inc     hl
-        ld      a,(hl)
-        inc     hl
-        ld      b,(hl)
-decomp4:
-        ld      (de),a
-        inc     de
-        djnz    decomp4
-        jr      decomp2
+        MAIN_PIC
+        DECOMP
 codeinp:
         call    prnst0
 txt_prompt:
@@ -279,8 +149,7 @@ ret_from_prnst0:
         ld      de,#CONBU
         ld      a,#10
         ld      (de),a
-        ld      c,#RCONB
-        call    BOS
+        INPUT_LINE
         jp      c,reset
         inc     de
         ld      a,(de)
@@ -342,13 +211,9 @@ sp2a:
         ld      (puzzle),de
         jp      reset
 s2:
+        SET_CURSOR POSITION_INPUT_LINE
         call    prnst0
-        ld      b,l
-        ld      (hl),d
-        ld      (hl),d
-        ld      l,a
-        ld      (hl),d
-        nop
+        TXT_ERROR
         jp      codeinp
 reset:
         ld      a,(level)
@@ -370,9 +235,9 @@ res1:
         add     hl,de
         djnz    res1
         ld      bc,#Level0_size
-        ld      de,#BWS+9*SCREEN_WIDTH+29
+        ld      de,#POSITION_LEVEL
         ldir
-        ld      de,#BWS+11*SCREEN_WIDTH+32
+        ld      de,#POSITION_PUZZEL
         ld      hl,(puzzle)
         inc     hl
         call    hlkon
@@ -387,15 +252,15 @@ Level3:
         .ascii  '  Expert'
 solved:
         ld      hl,#geschafft
-        ld      de,#BWS+16*SCREEN_WIDTH+22
+        ld      de,#POSITION_SUCCESS
         ld      bc,#geschafft_size
         ldir
-        ld      c,#CONSI
-        call    BOS
+        UP_INCH
         call    nextpuzzle
         call    reset
-        ld      a,#VK_CLS
-        call    OUTA
+        ;       löscht das aktuelle Fenster, sprich das Kleine!
+        ;       und, das ist wichtig, setzt den Cursor wieder auf den Anfang
+        ROLL_SMALL_WIN
         ld      a,(level)
         ld      c,a
         ld      de,(puzzle)
@@ -652,7 +517,7 @@ encode:
         cp      #'Z'+1
         jr      nc,encode
         ld      h,a
-        call    OUTA
+        CALL_OUTA
         ld      a,h
         add     a,a
         add     a,d
@@ -781,17 +646,17 @@ show_mv:
         ld      hl,(moves)
         inc     hl
         ld      (moves),hl
-        ld      de,#BWS+13*SCREEN_WIDTH+32
+        ld      de,#POSITION_MOVES
         call    hlkon
 show:
         ld      b,#geschafft_size+1
         ld      a,#' '
-        ld      hl,#BWS+16*SCREEN_WIDTH+22
+        ld      hl,#POSITION_SUCCESS
 show0:
         ld      (hl),a
         inc     hl
         djnz    show0
-        ld      hl,#BWS+10*SCREEN_WIDTH+3
+        ld      hl,#POSITION_FIELD
         ld      de,#SCREEN_WIDTH-FIELD_SIZE
         ld      a,#' '
         ex      af,af'
@@ -801,12 +666,7 @@ show0:
 show2:
         ld      b,#FIELD_SIZE
 show1:
-        ld      (hl),a
-        res     2,h
-        ex      af,af'
-        ld      (hl),a
-        ex      af,af'
-        set     2,h
+        PUT_A_COLORED
         inc     hl
         djnz    show1
         add     hl,de
@@ -840,7 +700,7 @@ calc_pos:
         ld      e,0(ix)
         ld      d,1(ix)
 calc_pos0:
-        ld      hl,#BWS+10*SCREEN_WIDTH+3-2*SCREEN_WIDTH
+        ld      hl,#POSITION_FIELD-2*SCREEN_WIDTH
         ld      bc,#2*SCREEN_WIDTH
         inc     d
 calc_pos1:
@@ -907,10 +767,7 @@ draw2:
 draw1:
         ld      a,(de)
         ld      (hl),a
-        res     2,h
-        ld      a,#FG_BLACK|BG_GREEN
-        ld      (hl),a
-        set     2,h
+        PUT_A_COLORED_ARG (FG_BLACK|BG_GREEN)
         inc     hl
         inc     de
         djnz    draw1
@@ -923,7 +780,7 @@ draw1:
         dec     c
         jr      nz,draw2
         ret
-COOUT:
+;COOUT:
 ; unchecked data source
         .db     0x7e,0xfe,0x20,0x30,0x02,0x3e,0x20,0xcd ;~~ 0.> M
         .db     0x05,0xf3,0x23,0x10,0xf3,0xc9           ;.s#.sI
@@ -946,7 +803,7 @@ OUTH1:
         jr      c,OUTH2
         add     a,#'F'-'A'+2
 OUTH2:
-        call    OUTA
+        CALL_OUTA
         ret
 hlkon:
         push    bc
@@ -983,7 +840,7 @@ PRS1:
         inc     hl
         or      a
         jr      z,PRS2
-        call    OUTA
+        CALL_OUTA
         jr      PRS1
 PRS2:
         ex      (sp),hl
@@ -2612,6 +2469,10 @@ puzzles:
 eadr:
         .db     0xff
 ;
+; _DATA wird zur Berechnung Programmgröße verwendet
+;	
+        .area    _DATA
+;
 ; das hier sind wahrscheinlich nur Füllbytes, um
 ; auf die 128-Byte Blockgröße aufzufüllen
 ; im KCC-Header steht eadr als Endeaddresse
@@ -2629,18 +2490,17 @@ field:
         .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
         .db     0x00,0x00,0x00,0x00
 level:
-        .db     0x00                                    ;.
+        .db     0x00
 puzzle:
-        .db     0x00,0x00                               ;..
+        .db     0x00,0x00
 moves:
-        .db     0x00,0x00                               ;..
+        .db     0x00,0x00
 pptr:
-        .db     0x00,0x00                               ;..
+        .db     0x00,0x00
 custone:
-        .db     0x00,0x00                               ;..
+        .db     0x00,0x00
 pcnt:
-        .db     0x00                                    ;.
+        .db     0x00
 stones:
-; unchecked data source
-        .db     0x00,0x00                               ;..
+        .db     0x00,0x00
 ; end of source
