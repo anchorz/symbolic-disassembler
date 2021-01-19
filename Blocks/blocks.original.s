@@ -384,7 +384,8 @@ solved:
         ld      a,(level)
         ld      c,a
         ld      de,(puzzle)
-        call    encode
+        ; bugfix Andreas
+        jp      encode
 geschafft:
         .db     0x2a,0x20,0x53,0x20,0x4f,0x20,0x4c,0x20 ;* S O L 
         .db     0x56,0x20,0x45,0x20,0x44,0x20,0x2a      ;V E D *

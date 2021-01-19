@@ -13,7 +13,7 @@
         .dw     sadr
         ; beim Z9001 sollte diese Addresse auf das letzte Byte, also eadr zeigen
         ; beim KC85/3 aber auf eadr+1
-        .dw     eadr+1
+        .dw     eadr
         .dw     sadr
         .db     0x00
         .db     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
