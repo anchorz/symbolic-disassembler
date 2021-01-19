@@ -8,7 +8,7 @@ obj/z9001/$(OUT).kcc: obj/z9001/kcc_header.rel $(addsuffix .rel,$(addprefix obj/
 	$(OBJCOPY) -Iihex -Obinary $(@:kcc=ihx) "$@"
 
 obj/z9001/%.rel:%.s cfg_z9001/platform.s
-	$(AS) -Icfg_z9001 -plosgff  "$@" "$<"
+	$(AS) -Icfg_z9001 $(SDAS_OPT) "$@" "$<"
 
 obj/z9001/%.rel:cfg_z9001/%.s cfg_z9001/platform.s 
-	$(AS) -Icfg_z9001 -plosgff  "$@" "$<"
+	$(AS) -Icfg_z9001 $(SDAS_OPT) "$@" "$<"

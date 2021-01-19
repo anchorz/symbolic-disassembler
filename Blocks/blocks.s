@@ -50,6 +50,7 @@ field_size                       = 0x0024
         .globl  eadr
 
 sadr:
+main:
         jp      start
 cmd:
         .ascii  'BLOCKS  '
@@ -2464,8 +2465,6 @@ puzzles:
         .db     0x2a,0x02,0x62,0x06,0x2f,0x92,0x16,0x09 ;*.b./...
         .db     0x40,0x70,0x85,0xff,0x0a,0x86,0x0e,0x33 ;@p.....3
         .db     0x37,0x10,0x44,0x61,0x88,0x90,0xa8,0xb0 ;7.Da..(0
-; eigentlich sollte eadr auf das Byte hinter dem Ende zeigen
-; aber im Original war es nunmal hier
 eadr:
         .db     0xff
 ;
