@@ -100,6 +100,7 @@ START:
 
 .macro INKEY
         call    inkey
+        ei
 .endm
 
 .macro END_PROGRAM

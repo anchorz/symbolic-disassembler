@@ -1,5 +1,8 @@
         .module jumping_jack
         .include 'platform.s'
+
+        .globl  _main
+        .globl  sadr
 ; 
 ; constant
 ; 
@@ -72,8 +75,9 @@ MONSTER_IMG_size                 = 0x0038
 ;
 ;
 ;
+_main:
+sadr:
         PROGRAM_START
-        ;jp      no_lives
         CLRSCR
         ld      de,#BWS
         ld      hl,#TOP_IMAGE
@@ -859,6 +863,7 @@ no_lives::
         PRST7
         .ascis ' INPUT YOUR INITIALS: __ '
         ; remove 2xcursor
+input::
         ld      hl,#BWS+17*SCREEN_WIDTH+28
         ld      (hl),#' '
         ld      hl,#BWS+0*SCREEN_WIDTH+1
@@ -1325,3 +1330,6 @@ TXT_HAZARD:
 TXT_NEW_HIGH_SCORE:
         .ascii  '* NEW HIGH SCORE *'
 ; end of source
+;
+; mark the end of ROM-image to calculate size for Z80/KCC header
+        .area  _DATA
