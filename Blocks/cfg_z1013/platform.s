@@ -18,6 +18,17 @@ VK_ENTER                        =       0x0d
 ;
 ; platform specific constants
 ;
+FG_BLACK                        =       0x00
+FG_GREEN                        =       0x20
+FG_CYAN                         =       0x60
+BG_BLACK                        =       0x00
+BG_GREEN                        =       0x02
+BG_YELLOW                       =       0x03
+FRAME_COLOR                     =       FG_CYAN+BG_YELLOW
+STONE_COLOR                     =       FG_BLACK+BG_GREEN
+RED_STONE_COLOR                 =       FG_BLACK+BG_GREEN
+SELC                            =       0xc2
+SELCR                           =       0xc3
 SCREEN_WIDTH                    =       32
 SCREEN_HEIGHT                   =       32
 POSY_INPUT_LINE                 =       26
@@ -32,6 +43,35 @@ POSITION_INPUT_LINE             =       BWS+POSY_INPUT_LINE*SCREEN_WIDTH+POSX_IN
 
 .macro CURSOR_DISABLE
         call    cursor_disable
+.endm
+
+.macro STONE_GFX
+waag2:
+        .db     0x02,0x04
+        .db     0xc1,0x9e,0x9e,0x89
+        .db     0x88,0xf8,0xf8,0xc8
+waag3:
+        .db     0x02,0x06
+        .db     0xc1,0x9e,0x9e,0x9e,0x9e,0x89
+        .db     0x88,0xf8,0xf8,0xf8,0xf8,0xc8
+senk2:
+        .db     0x04,0x02
+        .db     0xc1,0x89
+        .db     0x9f,0xc0
+        .db     0x9f,0xc0
+        .db     0x88,0xc8
+senk3:
+        .db     0x06,0x02
+        .db     0xc1,0x89
+        .db     0x9f,0xc0
+        .db     0x9f,0xc0
+        .db     0x9f,0xc0
+        .db     0x9f,0xc0
+        .db     0x88,0xc8
+red2:
+        .db     0x02,0x04
+        .db     0xff,0xff,0xff,0xff
+        .db     0xff,0xff,0xff,0xff
 .endm
 
 .macro UP_INCH
@@ -174,5 +214,11 @@ decomp:
         ld      (hl),a
 .endm
 
-.macro PUT_A_COLORED_ARG COLOR
+.macro SET_STONE_COLOR
+.endm
+
+.macro SET_NORMAL_STONE_COLOR
+.endm
+
+.macro SET_RED_STONE_COLOR
 .endm

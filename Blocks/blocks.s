@@ -1,19 +1,13 @@
         .module blocks
         .include 'platform.s'
+        
+        .globl _main
 ; 
 ; constant
 ; 
-FG_BLACK                         = 0x00
-FG_GREEN                         = 0x20
-FG_CYAN                          = 0x60
-BG_BLACK                         = 0x00
-BG_GREEN                         = 0x02
-BG_YELLOW                        = 0x03
 FIELD_SIZE                       = 0x0c
 FIELD_END                        = 0xff
 STONE_RECT_size                  = 0x04
-SELC                             = 0xc2
-SELCR                            = 0xc3
 EMPTY                            = 0x00
 HORIZONTAL                       = 0x00
 VERTICAL                         = 0x01
@@ -47,10 +41,9 @@ puzzles_size                     = 0x3169
 field_size                       = 0x0024
 
         .globl  sadr
-        .globl  eadr
 
 sadr:
-main:
+_main:
         jp      start
 cmd:
         .ascii  'BLOCKS  '
@@ -661,7 +654,7 @@ show0:
         ld      de,#SCREEN_WIDTH-FIELD_SIZE
         ld      a,#' '
         ex      af,af'
-        ld      a,#FG_CYAN+BG_YELLOW
+        ld      a,#FRAME_COLOR
         ex      af,af'
         ld      c,#FIELD_SIZE
 show2:
@@ -711,33 +704,21 @@ calc_pos1:
         add     hl,de
         add     hl,de
         ret
-waag2:
-        .db     0x02,0x04,0xc1,0x9e,0x9e,0x89,0x88,0xf8 ;..A....x
-        .db     0xf8,0xc8                               ;xH
-waag3:
-        .db     0x02,0x06,0xc1,0x9e,0x9e,0x9e,0x9e,0x89 ;..A.....
-        .db     0x88,0xf8,0xf8,0xf8,0xf8,0xc8           ;.xxxxH
-senk2:
-        .db     0x04,0x02,0xc1,0x89,0x9f,0xc0,0x9f,0xc0 ;..A..@.@
-        .db     0x88,0xc8                               ;.H
-senk3:
-        .db     0x06,0x02,0xc1,0x89,0x9f,0xc0,0x9f,0xc0 ;..A..@.@
-        .db     0x9f,0xc0,0x9f,0xc0,0x88,0xc8           ;.@.@.H
-red2:
-        .db     0x02,0x04,0xff,0xff,0xff,0xff,0xff,0xff ;........
-        .db     0xff,0xff                               ;..
+        STONE_GFX
 show_stone:
         call    calc_pos
         ld      bc,#SCREEN_WIDTH
         push    hl
         exx
         pop     hl
+        SET_NORMAL_STONE_COLOR
         ld      a,(pcnt)
         or      a
         jr      nz,show_stone1
         ld      de,#red2
         inc     a
         ld      (pcnt),a
+        SET_RED_STONE_COLOR
         jr      draw
 show_stone1:
         ld      a,2(ix)
@@ -768,7 +749,7 @@ draw2:
 draw1:
         ld      a,(de)
         ld      (hl),a
-        PUT_A_COLORED_ARG (FG_BLACK|BG_GREEN)
+        SET_STONE_COLOR
         inc     hl
         inc     de
         djnz    draw1
@@ -876,13 +857,13 @@ atoh:
         add     a,b
         ret
 lvl0cnt:
-        .db     0x90,0x01                               ;..
+        .db     0x90,0x01
 lvl1cnt:
-        .db     0x2c,0x01                               ;,.
+        .db     0x2c,0x01
 lvl2cnt:
-        .db     0xc8,0x00                               ;H.
+        .db     0xc8,0x00
 lvl3cnt:
-        .db     0x64,0x00                               ;d.
+        .db     0x64,0x00
 puzzles:
         .db     0x0a,0x03,0x8e,0x17,0x0c,0x45,0x90,0xa1 ;.....E.!
         .db     0xff,0x0a,0x0e,0x56,0x30,0x44,0x4c,0x65 ;...V0DLe
@@ -2465,11 +2446,10 @@ puzzles:
         .db     0x2a,0x02,0x62,0x06,0x2f,0x92,0x16,0x09 ;*.b./...
         .db     0x40,0x70,0x85,0xff,0x0a,0x86,0x0e,0x33 ;@p.....3
         .db     0x37,0x10,0x44,0x61,0x88,0x90,0xa8,0xb0 ;7.Da..(0
-eadr:
         .db     0xff
 ;
 ; _DATA wird zur Berechnung Programmgröße verwendet
-;	
+;
         .area    _DATA
 ;
 ; das hier sind wahrscheinlich nur Füllbytes, um
@@ -2502,4 +2482,6 @@ pcnt:
         .db     0x00
 stones:
         .db     0x00,0x00
+        .ds     17*4-2
 ; end of source
+

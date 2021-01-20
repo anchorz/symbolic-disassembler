@@ -1,7 +1,6 @@
         .module z80_header
 
         .globl  sadr
-        .globl  eadr
 ;
 ; define memory layout
 ;

@@ -1,8 +1,7 @@
         .module kcc_header
 
         .globl  sadr
-        .globl  eadr
-;
+ ;
 ; .KCC Header
 ;
         .ascii  'BLOCKS'
