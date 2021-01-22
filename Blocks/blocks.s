@@ -90,20 +90,30 @@ ende:
 vers:
         .ascii  '1/15/2021'
 kdo:
-        .db     'C',0x00
-        .db     'R',0x00
-        .db     'E',0x0b
-        .db     'S',0x08
-        .db     'D',0x09
-        .db     'X',0x0a
+        .db     'C'
+.if  eq,z9001
+        .db     'c'
+.else
+        .db     0
+.endif
+        .db     'R'
+.if  eq,z9001
+        .db     'r'
+.else
+        .db     0
+.endif
+        .db     'E',VK_UP
+        .db     'S',VK_LEFT
+        .db     'D',VK_RIGHT
+        .db     'X',VK_DOWN
         .db     'e',0x00
         .db     's',0x00
         .db     'd',0x00
         .db     'x',0x00
         .db     'A','a'
-        .db     ' ',0x0d
-.if  z1013
-        .db     'N',0x00
+        .db     ' ',VK_ENTER
+.if  eq,z9001
+        .db     'N','n'
 .endif
 kdotab:
         .dw     codeinp
@@ -118,7 +128,7 @@ kdotab:
         .dw     move_down
         .dw     next_stone
         .dw     toggle
-.if  z1013        
+.if  eq,z9001        
         .dw     solved
 .endif
 toggle:

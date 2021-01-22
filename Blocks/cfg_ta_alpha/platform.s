@@ -2,23 +2,26 @@ z9001                           =       0
 z1013                           =       0
 ta_alpha                        =       1
 ;
-; z9001 specific constants
+; ta specific constants
 ;
 BOS                             =       0x0005
 BWS                             =       0xf000
 OFFSET_COLOR                    =       0x0800
+cfg20_settings                  =       0xe469
+crt_cls                         =       0xe9e8
 
-UP_CONSI                        =       1
-UP_CONSO                        =       2
-UP_PRNST                        =       9
-UP_RCONB                        =       10
-UP_CSTS                         =       11
-UP_SETCU                        =       18
-; Löschen des Cursors
-UP_DCU                          =       29
+CFG20                           =       0x20
+CRT_REG                         =       0x50
+CRT_DATA                        =       0x51
+REG_10_CURSOR_START             =       10 
 
 VK_CLS                          =       0x0c
 VK_ENTER                        =       0x0d
+VK_LEFT                         =       0x1d
+VK_RIGHT                        =       0x1c
+VK_UP                           =       0x1e
+VK_DOWN                         =       0x1f
+
 ;
 ; platform specific constants
 ;
@@ -56,7 +59,7 @@ POSITION_PUZZEL                 =       BWS+11*SCREEN_WIDTH+32
 POSITION_INPUT_LINE             =       BWS+POSY_INPUT_LINE*SCREEN_WIDTH+POSX_INPUT_LINE
 FIELD_SIZE                      =       0x0c
 .macro CURSOR_DISABLE
-        ; call cursor_disable
+        call    crt_cursor_disable
 .endm
 
 TOP_LEFT   = 0x83
@@ -95,9 +98,6 @@ senk3:
         .db     BOTTOM_LEFT,BOTTOM_RIGHT
 red2:
         .db     0x02,0x04
-        ;.db     0xef,0xef,0xef,0xef
-        ;.db     0xef,0xef,0xef,0xef
-        
         .db     TOP_LEFT,TOP_MIDDLE,TOP_MIDDLE,TOP_RIGHT
         .db     BOTTOM_LEFT,BOTTOM_MIDDLE,BOTTOM_MIDDLE,BOTTOM_RIGHT
 
@@ -112,24 +112,24 @@ red2:
 .endm
 
 .macro  CALL_OUTA
-        ;call    OUTA
+        call    putchar
 .endm
 
 .macro  INPUT_LINE
-        ;ld      c,#UP_RCONB
-        ;call    BOS
+        call    inline
 .endm
 
 .macro  SET_CURSOR ADR
+        ld      hl,#ADR
+        ld      (CURS),hl
 .endm
 
 .macro ROLL_SMALL_WIN
-        ;ld      a,#VK_CLS
-        ;CALL_OUTA
+        call    cls_small_window
 .endm
 
 .macro  TXT_ERROR
-        .asciz  'Error'
+        .asciz  'Err'
 .endm
 
 .macro MAIN_PIC
@@ -150,7 +150,7 @@ red2:
 
         .ascii  '                                        '
         .ascii  '     E,S,D,X select   e,s,d,x move      '
-        .ascii  '                                        '
+        .ascii  '       <SPACE> toggle, A next           '
         .ascii  '                                        '
 
         .db     0x20,0x20,0x8f,0x8f,0x8f,0x8f,0x8f,0x8f,0x8f,0x8f,0x8f,0x8f,0x8f,0x8f,0x8f,0x8f,0x20,0x20,0x20,0x20
@@ -195,30 +195,11 @@ red2:
 .endm
 
 .macro CLS_SMALL_WINDOW
-        ;ld      hl,#(POSY_INPUT_LINE+1)*256+(POSY_INPUT_LINE-1)
-        ;ld      (P1ROL),hl
-        ;ld      hl,#(POSX_INPUT_LINE+INPUT_LINE_size)*256+(POSX_INPUT_LINE-1)
-        ;ld      (P3ROL),hl
-        ;ld      hl,#BWS+21*SCREEN_WIDTH+22
-        ;ld      (CURS),hl
-        ;ld      hl,#BWS+21*SCREEN_WIDTH+22
-        ;ld      (CURS),hl
-        ;ld      hl,##BWS+21*SCREEN_WIDTH+22-OFFSET_COLOR
-        ;ld      a,(hl)
-        ;ld      (ATRIB),a
-        ;ld      a,#VK_CLS
-        ;call    OUTA
+        call    cls_small_window
 .endm
 
 .macro CLS_FULL_WINDOW
-        ;ld      hl,#(SCREEN_HEIGHT+1)*256+0
-        ;ld      (P1ROL),hl
-        ;ld      hl,#(SCREEN_WIDTH+1)*256+0
-        ;ld      (P3ROL),hl
-        ;ld      a,#FG_GREEN+BG_BLACK
-        ;ld      (ATRIB),a
-        ;ld      a,#VK_CLS
-        ;call    OUTA
+        call    crt_cls
 .endm
 
 .macro DECOMP
@@ -282,7 +263,13 @@ next_window:
         ex      de,hl
         pop     bc
         djnz    next_window
-
+        ld      a,#BG_BLUE|FG_YELLOW
+        ld      hl,#BWS+OFFSET_COLOR+18*SCREEN_WIDTH+22
+        ld      (hl),a
+        ld      hl,#BWS+OFFSET_COLOR+18*SCREEN_WIDTH+27
+        ld      (hl),a
+        ld      hl,#BWS+OFFSET_COLOR+18*SCREEN_WIDTH+33
+        ld      (hl),a
         ret
 .endm
 

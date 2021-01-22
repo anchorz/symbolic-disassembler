@@ -30,6 +30,10 @@
 
         .globl  _inkey
 
+; PORT 2A
+M_SHIFT = 0x04
+M_GRAPH = 0x20
+
         .area   _CODE
 _inkey:
         ld      e,#0*8
@@ -74,7 +78,7 @@ _inkey:
         jr      nz,pressed
         ld      e,#10*8
         in      a,(IO_KEYBOARD+10)
-        and     #0xff-0x20-0x04                 ; GRAPH SHIFT
+        and     #0xff-M_GRAPH-M_SHIFT
         jr      nz,pressed
         ld      e,#11*8
         in      a,(IO_KEYBOARD+11)
@@ -93,6 +97,12 @@ bit_found:
         ld      hl,#kdb_table
         ld      d,#0
         add     hl,de
+        in      a,(IO_KEYBOARD+10)
+        and     a,#M_SHIFT
+        jr      z,map_key_code
+        ld      de,#kdb_table_size
+        add     hl,de
+map_key_code:
         ld      l,(hl)
         ret
 
@@ -109,3 +119,17 @@ kdb_table:
         .db 27,0,0,140,30,29,28,31
         .db 3,11,0,13,9,0,127,'0'
         .db 128,129,130,131,132,133,0,0
+kdb_table_size = . - kdb_table
+        ; shift
+        .db '7','6','5','4','3','2','1','0'
+        .db 0,'=','/','*',0,'.','9','8'
+        .db 'G','F','E','D','C','B','A',0
+        .db 'O','N','M','L','K','J','I','H'
+        .db 'W','V','U','T','S','R','Q','P'
+        .db 0,0,0,0,0,'Y','Z','X'
+        .db '/','&','%','$','@','"','!','='
+        .db '[','^','*',']',"`",'?',')','('
+        .db '\','_',':',';','>',' ',0,0
+        .db 27,0,0,140,30,29,28,31
+        .db 3,11,0,13,9,0,127,'0'
+        .db 134,135,136,137,138,139,0,0

@@ -41,6 +41,10 @@ UP_DCU                          =       29
 
 VK_CLS                          =       0x0c
 VK_ENTER                        =       0x0d
+VK_LEFT                         =       0x08
+VK_RIGHT                        =       0x09
+VK_UP                           =       0x0b
+VK_DOWN                         =       0x0a
 ;
 ; platform specific constants
 ;
