@@ -2,10 +2,10 @@
         .include 'platform.s'
         
         .globl  exit
-        .globl  inch
-        .globl  color_window
         .globl  crt_cursor_disable
         .globl  crt_cursor_enable
+        .globl  inch
+        .globl  color_window
         .globl  cls_small_window
         .globl  inline
         
@@ -16,7 +16,21 @@
 exit:
         call    crt_cls
         call    crt_cursor_enable
-        jp      0xe023
+        jp      mon_reboot
+
+crt_cursor_disable:
+        ld      a,#REG_10_CURSOR_START
+        out     (CRT_REG),a
+        ld      a,#0x29
+        out     (CRT_DATA),a
+        ret
+
+crt_cursor_enable:
+        ld      a,#REG_10_CURSOR_START
+        out     (CRT_REG),a
+        ld      a,#0x49
+        out     (CRT_DATA),a
+        ret
         
 putchar:
         push    hl
@@ -52,7 +66,8 @@ loop_inch:
         ;call    outhx
         ;pop     af
         ;ld      (hl),a
-        ;this time only reverse 'A' and 'a'
+        ;this time only
+        ;  reverse capitals
         bit     6,a             ;>0x3f
         jr      z,key_set
         xor     #0x20
@@ -94,20 +109,6 @@ color_next:
         dec     b
         jr      nz,color_next_line
         pop     de
-        ret
-
-crt_cursor_disable:
-        ld      a,#REG_10_CURSOR_START
-        out     (CRT_REG),a
-        ld      a,#0x29
-        out     (CRT_DATA),a
-        ret
-
-crt_cursor_enable:
-        ld      a,#REG_10_CURSOR_START
-        out     (CRT_REG),a
-        ld      a,#0x49
-        out     (CRT_DATA),a
         ret
         
 cls_small_window:

@@ -2,1964 +2,2111 @@
                                       2         .include 'platform.s'
                            000001     1 z9001                           =       1
                            000000     2 z1013                           =       0
-                                      3 ;
-                                      4 ; z9001 specific constants
-                                      5 ;
-                           000005     6 BOS                             =       0x0005
-                           000023     7 COUNT                           =       0x0023
-                                      8 ;letztes gültiges Zeichen
-                           000024     9 LAKEY                           =       0x0024
-                                     10 ;Tastaturpuffer
-                           000025    11 KEYBU                           =       0x0025
-                           00002D    12 CURS                            =       0x002d
-                                     13 ;erste zu rollende Zeile -1
-                           00003B    14 P1ROL                           =       0x003b
-                                     15 ;letzte zu rollende Zeile +1
-                           00003C    16 P2ROL                           =       0x003c
-                                     17 ;erste zu rollende Spalte -1
-                           00003D    18 P3ROL                           =       0x003d
-                                     19 ;letzte zu rollende Spalte +1
-                           00003E    20 P4ROL                           =       0x003e
-                                     21 
-                           00F003    22 WBOOT                           =       0xF003
-                           00F006    23 CONST                           =       0xF006
-                           00F009    24 CONIN                           =       0xF009
-                           00F00C    25 COOUT                           =       0xF00C
-                           00FD33    26 inkey                           =       0xFD33
-                                     27 
-                           000001    28 UP_CONSI                        =       1
-                           000002    29 UP_CONSO                        =       2
-                           000009    30 UP_PRNST                        =       9
-                           00000B    31 UP_CSTS                         =       11
-                           000012    32 UP_SETCU                        =       18
-                                     33 ; Löschen des Cursors
-                           00001D    34 UP_DCU                          =       29
-                                     35 ;
-                                     36 ; platform specific
-                                     37 ;
-                           000028    38 SCREEN_WIDTH                    =       40
-                           000018    39 SCREEN_HEIGHT                   =       24
-                                     40 
-                           00000E    41 TOP_LINES                       =       14
-                           000230    42 TITLE_TOP_SIZE                  =       SCREEN_WIDTH*TOP_LINES
-                           000010    43 MENU_TOP                        =       (TOP_LINES+2)
-                           000004    44 ALIGN_MIDDLE                    =       4
-                           000006    45 GAMES_LINES                     =       6
-                           000002    46 GAME_START_Y                    =       2
-                           004650    47 SLOW_DOWN_13066                 =       18000
-                           00EF98    48 POS_LIVES                       =       BWS+23*SCREEN_WIDTH
-                           00EC28    49 POS_TOP_WALL                    =       BWS+ 1*SCREEN_WIDTH
-                           00EC0C    50 POS_TOP_GAME                    =       BWS+ 0*SCREEN_WIDTH+8+ALIGN_MIDDLE
-                           00EC0D    51 POS_GAME_OVER                   =       BWS+ 0*SCREEN_WIDTH+9+ALIGN_MIDDLE
-                           000370    52 POS_COPYRIGHT                   =       SCREEN_WIDTH*22
-                           00000D    53 POSDIFF_NAME                    =       SCREEN_WIDTH-HINT_COPYRIGHT_size+3
-                           000005    54 POSDIFF_YEAR                    =       5
-                           000008    55 POSDIFF_POINTS                  =       8
-                           FFFFFFD8    56 POSDIFF_YOUR_SCORE              =       -(SCREEN_WIDTH)
-                           000003    57 POSDIFF_YOUR_SCORE_DY           =       3
-                           000004    58 POSDIFF_HIGHSCORE_DY            =       4
-                           000001    59 MONSTER_CORRECTION              =       1
-                                     60 
-                                     61 .macro PROGRAM_START
-                                     62         jp START
-                                     63         .ascii 'JUMP    '
-                                     64         .dw 0
-                                     65 START:
-                                     66         .endm
-                                     67 
-                                     68 .macro SCREEN_POS
-                                     69         .ascii '    '
-                                     70  .endm
-                                     71 
-                                     72 .macro CLRSCR
-                                     73         ld      c,#UP_CONSO
-                                     74         ld      e,#0x0c
-                                     75         call    BOS
-                                     76         ld      c,#UP_DCU
-                                     77         call    BOS
-                                     78 .endm
-                                     79 
-                                     80 .macro OUTCH
-                                     81         push    bc
-                                     82         push    de
-                                     83         ld      c,#UP_CONSO
-                                     84         ld      e,a
-                                     85         call    BOS
-                                     86         pop     de
-                                     87         pop     bc
-                                     88 .endm
+                           000000     3 ta_alpha                        =       0
+                                      4 ;
+                                      5 ; z9001 specific constants
+                                      6 ;
+                           000005     7 BOS                             =       0x0005
+                           000023     8 COUNT                           =       0x0023
+                                      9 ;letztes gültiges Zeichen
+                           000024    10 LAKEY                           =       0x0024
+                                     11 ;Tastaturpuffer
+                           000025    12 KEYBU                           =       0x0025
+                           00002D    13 CURS                            =       0x002d
+                                     14 ;erste zu rollende Zeile -1
+                           00003B    15 P1ROL                           =       0x003b
+                                     16 ;letzte zu rollende Zeile +1
+                           00003C    17 P2ROL                           =       0x003c
+                                     18 ;erste zu rollende Spalte -1
+                           00003D    19 P3ROL                           =       0x003d
+                                     20 ;letzte zu rollende Spalte +1
+                           00003E    21 P4ROL                           =       0x003e
+                           00EC00    22 BWS                             =       0xec00
+                           00F003    23 WBOOT                           =       0xF003
+                           00F006    24 CONST                           =       0xF006
+                           00F009    25 CONIN                           =       0xF009
+                           00F00C    26 COOUT                           =       0xF00C
+                           00FD33    27 inkey                           =       0xFD33
+                                     28 
+                           000001    29 UP_CONSI                        =       1
+                           000002    30 UP_CONSO                        =       2
+                           000009    31 UP_PRNST                        =       9
+                           00000B    32 UP_CSTS                         =       11
+                           000012    33 UP_SETCU                        =       18
+                                     34 ; Löschen des Cursors
+                           00001D    35 UP_DCU                          =       29
+                                     36 ;
+                                     37 ; platform specific
+                                     38 ;
+                           000028    39 SCREEN_WIDTH                    =       40
+                           000018    40 SCREEN_HEIGHT                   =       24
+                                     41 
+                           000008    42 VK_LEFT                         =       0x08
+                           000009    43 VK_RIGHT                        =       0x09
+                                     44 
+                           0000CB    45 VK_HEART                        =       0xcb
+                           0000C6    46 CHR_WALL                        =       0xc6
+                           0000CC    47 CHR_MAN_HEAD                    =       0xcc
+                           0000A1    48 CHR_MAN_STAY                    =       0xa1
+                           00009D    49 CHR_MAN_WALK                    =       0x9d
+                           000004    50 TRANSITION_MAN_WALK_STAY        =       0x04
+                           0000EE    51 CHR_MOVING_LINE                 =       0xee
+                           0000C4    52 VK_PLAYER                       =       0xc4
+                           0000CD    53 CHR_SMOKE                       =       0xcd
+                           000097    54 CHR_MAN_SLEEP                   =       0x97
+                           0000C9    55 CHR_MAN_SLEEP_HEAD              =       0xc9
+                           000095    56 CHR_ARROW_RIGHT_TOP             =       0x95
+                           000093    57 CHR_ARROW_RIGHT_BOTTOM          =       0x93
+                           0000F8    58 CHR_LINE_TOP                    =       0xf8
+                           00009E    59 CHR_LINE_BOTTOM                 =       0x9e
+                           0000A0    60 CHR_MIDDLE_LINE                 =       0xa0
+                                     61 
+                           00000E    62 TOP_LINES                       =       14
+                           000230    63 TITLE_TOP_SIZE                  =       SCREEN_WIDTH*TOP_LINES
+                           000010    64 MENU_TOP                        =       (TOP_LINES+2)
+                           000004    65 ALIGN_MIDDLE                    =       4
+                           000006    66 GAMES_LINES                     =       6
+                           000002    67 GAME_START_Y                    =       2
+                           004650    68 SLOW_DOWN_13066                 =       18000
+                           00EF98    69 POS_LIVES                       =       BWS+23*SCREEN_WIDTH
+                           00EC28    70 POS_TOP_WALL                    =       BWS+ 1*SCREEN_WIDTH
+                           00EC0C    71 POS_TOP_GAME                    =       BWS+ 0*SCREEN_WIDTH+8+ALIGN_MIDDLE
+                           00EC0D    72 POS_GAME_OVER                   =       BWS+ 0*SCREEN_WIDTH+9+ALIGN_MIDDLE
+                           000370    73 POS_COPYRIGHT                   =       SCREEN_WIDTH*22
+                           00001E    74 HINT_COPYRIGHT_size             =       0x001e
+                           00000D    75 POSDIFF_NAME                    =       SCREEN_WIDTH-HINT_COPYRIGHT_size+3
+                           000005    76 POSDIFF_YEAR                    =       5
+                           000008    77 POSDIFF_POINTS                  =       8
+                           FFFFFFD8    78 POSDIFF_YOUR_SCORE              =       -(SCREEN_WIDTH)
+                           000003    79 POSDIFF_YOUR_SCORE_DY           =       3
+                           000004    80 POSDIFF_HIGHSCORE_DY            =       4
+                           000001    81 MONSTER_CORRECTION              =       1
+                                     82 
+                                     83 .macro PROGRAM_START
+                                     84         jp START
+                                     85         .ascii 'JUMP    '
+                                     86         .dw 0
+                                     87 START:
+                                     88         .endm
                                      89 
-                                     90 .macro INCH
-                                     91         xor     a
-                                     92         ld      (KEYBU),a
-                                     93         ld      c,#UP_CONSI
-                                     94         call    BOS
-                                     95 .endm
-                                     96 
-                                     97 .macro PRST7
-                                     98         call    prst7
-                                     99 .endm
-                                    100 
-                                    101 .macro INKEY
-                                    102         call    inkey
-                                    103         ei
-                                    104 .endm
-                                    105 
-                                    106 .macro END_PROGRAM
-                                    107         jp      WBOOT
-                                    108 .endm
-                                    109 
-                                    110 .macro SET_CURSOR_DE    Y,X
-                                    111         push    bc
-                                    112         ld      de,#(Y+1)*256+(X+1)
-                                    113         ld      c,#UP_SETCU
-                                    114         call    BOS
-                                    115         pop     bc
-                                    116 .endm
-                                    117 
-                                    118 .macro SET_CURSOR_HL    Y,X
-                                    119         push    de
-                                    120         push    bc
-                                    121         ld      de,#(Y+1)*256+(X+1)
-                                    122         ld      h,d
-                                    123         ld      l,e
-                                    124         ld      c,#UP_SETCU
-                                    125         call    BOS
-                                    126         pop     bc
-                                    127         pop     de
-                                    128 .endm
-                                    129 
-                                    130 .macro SET_CURSOR
-                                    131         call    set_cursor
-                                    132 .endm
-                                    133 
-                                    134 .macro REMOVE_CURSOR
-                                    135         ld      hl,(CURS)
-                                    136         ld      (hl),#' '
-                                    137         res     2,h
-                                    138         res     7,(hl)
-                                    139         set     2,h
-                                    140 .endm
-                                    141 
-                                    142 .macro CURSOR_DISABLE
-                                    143         push    bc
-                                    144         ld      c,#UP_DCU
-                                    145         call    BOS
-                                    146         pop     bc
-                                    147 .endm
-                                    148 
-                                    149 .macro Z1013_LINE
+                                     90 .macro SCREEN_POS
+                                     91         .ascii '    '
+                                     92  .endm
+                                     93 
+                                     94 .macro CLRSCR
+                                     95         ld      c,#UP_CONSO
+                                     96         ld      e,#0x0c
+                                     97         call    BOS
+                                     98         ld      c,#UP_DCU
+                                     99         call    BOS
+                                    100 .endm
+                                    101 
+                                    102 .macro OUTCH
+                                    103         push    bc
+                                    104         push    de
+                                    105         ld      c,#UP_CONSO
+                                    106         ld      e,a
+                                    107         call    BOS
+                                    108         pop     de
+                                    109         pop     bc
+                                    110 .endm
+                                    111 
+                                    112 .macro INCH
+                                    113         xor     a
+                                    114         ld      (KEYBU),a
+                                    115         ld      c,#UP_CONSI
+                                    116         call    BOS
+                                    117 .endm
+                                    118 
+                                    119 .macro PRST7
+                                    120         call    prst7
+                                    121 .endm
+                                    122 
+                                    123 .macro INKEY
+                                    124         call    inkey
+                                    125         ei
+                                    126 .endm
+                                    127 
+                                    128 .macro END_PROGRAM
+                                    129         jp      WBOOT
+                                    130 .endm
+                                    131 
+                                    132 .macro SET_CURSOR_DE    Y,X
+                                    133         push    bc
+                                    134         ld      de,#(Y+1)*256+(X+1)
+                                    135         ld      c,#UP_SETCU
+                                    136         call    BOS
+                                    137         pop     bc
+                                    138 .endm
+                                    139 
+                                    140 .macro SET_CURSOR_HL    Y,X
+                                    141         push    de
+                                    142         push    bc
+                                    143         ld      de,#(Y+1)*256+(X+1)
+                                    144         ld      h,d
+                                    145         ld      l,e
+                                    146         ld      c,#UP_SETCU
+                                    147         call    BOS
+                                    148         pop     bc
+                                    149         pop     de
                                     150 .endm
+                                    151 
+                                    152 .macro SET_CURSOR
+                                    153         call    set_cursor
+                                    154 .endm
+                                    155 
+                                    156 .macro REMOVE_CURSOR
+                                    157         ld      hl,(CURS)
+                                    158         ld      (hl),#' '
+                                    159         res     2,h
+                                    160         res     7,(hl)
+                                    161         set     2,h
+                                    162 .endm
+                                    163 
+                                    164 .macro CURSOR_DISABLE
+                                    165         push    bc
+                                    166         ld      c,#UP_DCU
+                                    167         call    BOS
+                                    168         pop     bc
+                                    169 .endm
+                                    170 
+                                    171 .macro Z1013_LINE
+                                    172 .endm
+                                    173 
+                                    174 .macro TOP_IMAGE_CONTENT
+                                    175  ; line 1
+                                    176         SCREEN_POS
+                                    177         .db     0xae,0x9e,0x9e,0x9e,0x9e,0x9e,0x9e,0x9e ;........
+                                    178         .db     0x9e,0x9e,0xad,0x20,0x20,0x20,0x20,0x20 ;..-     
+                                    179         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    180         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    181         SCREEN_POS
+                                    182         
+                                    183         ; line 2
+                                    184         SCREEN_POS
+                                    185         .db     0x9f,0xb9,0xb6,0xb3,0xb2,0xb6,0xb8,0x20 ;.963268 
+                                    186         .db     0xbd,0xb0,0xc0,0x20,0x20,0x20,0x20,0x20 ;=0@     
+                                    187         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xb5 ;       5
+                                    188         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    189         SCREEN_POS
+                                    190 
+                                    191         ; line 3
+                                    192         SCREEN_POS
+                                    193         .db     0x9f,0xb8,0xb7,0x20,0xb5,0x20,0x20,0x20 ;.87 5   
+                                    194         .db     0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
+                                    195         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xb5 ;       5
+                                    196         .db     0x20,0x20,0x20,0x20,0xb7,0xb7,0x20,0x20 ;    77  
+                                    197         SCREEN_POS
+                                    198 
+                                    199         ; line 4
+                                    200         SCREEN_POS
+                                    201         .db     0x9f,0xb3,0x20,0xb4,0xb5,0x20,0xb2,0x20 ;.3 45 2 
+                                    202         .db     0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
+                                    203         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    204         .db     0xb6,0xb7,0x20,0xb9,0xb2,0xb2,0xb8,0x20 ;67 9228 
+                                    205         SCREEN_POS
+                                    206 
+                                    207         ; line 5
+                                    208         SCREEN_POS
+                                    209         .db     0x9f,0xb1,0xb6,0x20,0x20,0xb6,0xb0,0x20 ;.16  60 
+                                    210         .db     0xb6,0xb0,0xc0,0x20,0x20,0x20,0x20,0x20 ;60@     
+                                    211         .db     0x20,0x20,0xb2,0xb3,0x20,0x20,0x20,0x20 ;  23    
+                                    212         .db     0x20,0xba,0xa0,0xb4,0xb4,0xa0,0xb5,0x20 ; : 44 5 
+                                    213         SCREEN_POS
+                                    214 
+                                    215         ; line 6
+                                    216         SCREEN_POS
+                                    217         .db     0x9f,0x70,0x72,0x65,0x73,0x65,0x6e,0x74 ;.present
+                                    218         .db     0x73,0x3a,0xc0,0x20,0x20,0x20,0x20,0x20 ;s:@     
+                                    219         .db     0x20,0xb2,0xb0,0xb1,0xb3,0x20,0x20,0xb7 ; 2013  7
+                                    220         .db     0xb6,0xb1,0xb3,0xb8,0xb1,0xb1,0xb9,0x20 ;6138119 
+                                    221         SCREEN_POS
+                                    222 
+                                    223         ; line 7
+                                    224         SCREEN_POS
+                                    225         .db     0xab,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8 ;+xxxxxxx
+                                    226         .db     0xf8,0xf8,0xac,0x20,0x20,0x20,0x20,0x20 ;xx,     
+                                    227         .db     0x20,0xb0,0x20,0x20,0xb5,0xb7,0xb6,0x20 ; 0  576 
+                                    228         .db     0x20,0x20,0xb1,0xb3,0xb6,0xbc,0x20,0x20 ;  136<  
+                                    229         SCREEN_POS
+                                    230 
+                                    231         ; line 8
+                                    232         SCREEN_POS
+                                    233         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    234         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    235         .db     0xb1,0xb6,0xb6,0xb6,0xb6,0x20,0x20,0x20 ;16666   
+                                    236         .db     0x20,0x20,0x20,0xb1,0xb9,0x20,0x20,0x20 ;   19   
+                                    237          SCREEN_POS
+                                    238 
+                                    239         ; line 9
+                                    240         Z1013_LINE
+                                    241 
+                                    242         ; line 10
+                                    243         Z1013_LINE
+                                    244 
+                                    245         ; line 11
+                                    246         SCREEN_POS
+                                    247         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    248         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    249         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    250         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    251          SCREEN_POS
+                                    252 
+                                    253         ; line 12
+                                    254         SCREEN_POS
+                                    255         .db     0x20,0x20,0x20,0xb4,0x20,0x20,0x20,0x20 ;   4    
+                                    256         .db     0x20,0x20,0x20,0x20,0xb0,0x20,0x20,0x20 ;    0   
+                                    257         .db     0x20,0x20,0x20,0x20,0x20,0x20,0xb4,0x20 ;      4 
+                                    258         .db     0x20,0x20,0x20,0x20,0xb4,0xb2,0x20,0x20 ;    42  
+                                    259          SCREEN_POS
+                                    260 
+                                    261         ; line 13
+                                    262         SCREEN_POS
+                                    263         .db     0x20,0x20,0x20,0xb4,0xb4,0xb5,0xb5,0xbd ;   4455=
+                                    264         .db     0xbd,0xb5,0xb6,0xb3,0xb4,0xbc,0xbd,0xb2 ;=5634<=2
+                                    265         .db     0xb6,0xb3,0x20,0x20,0x20,0x20,0xb4,0xb1 ;63    41
+                                    266         .db     0xb8,0xb2,0xb6,0xb3,0xbb,0xb0,0x20,0x20 ;8263;0  
+                                    267          SCREEN_POS
+                                    268 
+                                    269         ; line 14
+                                    270         SCREEN_POS
+                                    271         .db     0x20,0xb3,0x20,0xb4,0xb4,0xb5,0xb5,0xb5 ; 3 44555
+                                    272         .db     0xb5,0xb5,0xb7,0xb0,0xb4,0xb4,0xb5,0xb1 ;55704451
+                                    273         .db     0xb7,0xb4,0x20,0x20,0xb3,0x20,0xb4,0xb9 ;74  3 49
+                                    274         .db     0xbd,0xb5,0x20,0xb3,0xb4,0xb8,0x20,0x20 ;=5 348  
+                                    275          SCREEN_POS
+                                    276 
+                                    277         ; line 15
+                                    278         SCREEN_POS
+                                    279         .db     0x20,0xb8,0xb7,0xb0,0xb1,0xb0,0xb1,0xb1 ; 8701011
+                                    280         .db     0xb1,0xb5,0x20,0x20,0xb0,0xb0,0xb1,0xb1 ;15  0011
+                                    281         .db     0xb7,0xb0,0x20,0x20,0xb8,0xb7,0xb0,0xb1 ;70  8701
+                                    282         .db     0xb6,0x20,0xb6,0x20,0xb0,0x20,0xb0,0x20 ;6 6 0 0 
+                                    283          SCREEN_POS
+                                    284 
+                                    285         ; line 16
+                                    286         SCREEN_POS
+                                    287         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    288         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    289         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    290         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    291         SCREEN_POS
+                                    292 .endm
+                                    293 
+                                    294 .macro MONSTER_IMG_CONTENT
+                                    295         .db     0x94,0x90,0x8b,0x90,0x8b,0x91,0x97,0x91 ;........
+                                    296         .db     0x19,0xb5,0x20,0xbe,0x20,0xbf,0x20,0xae ;.5 > ? .
+                                    297         .db     0x92,0x96,0xa0,0xa0,0xa0,0xa0,0x88,0xc1 ;..    .A
+                                    298         .db     0x20,0x95,0x20,0xb7,0x1e,0xff,0x20,0x92 ; . 7.. .
+                                    299         .db     0x17,0x8c,0xf9,0x8c,0x1d,0x1f,0xfc,0x8c ;..y...|.
+                                    300         .db     0x92,0x96,0x83,0x82,0x95,0x93,0x20,0x20 ;......  
+                                    301         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+                                    302 .endm
                                       3 
                                       4         .globl  _main
                                       5         .globl  sadr
-                                      6 ; 
-                                      7 ; constant
-                                      8 ; 
-                           000000     9 ZERO                             = 0x00
-                           000000    10 HI_ZERO                          = 0x00
-                           000001    11 LEVEL_1                          = 0x01
-                           000008    12 VK_LEFT                          = 0x08
-                           000009    13 VK_RIGHT                         = 0x09
-                           00000C    14 VK_CLS                           = 0x0c
-                           0000CB    15 VK_HEART                         = 0xcb
-                           0000C4    16 VK_PLAYER                        = 0xc4
-                           0000A0    17 CHR_MIDDLE_LINE                  = 0xa0
-                           0000CD    18 CHR_SMOKE                        = 0xcd
-                           0000C6    19 CHR_WALL                         = 0xc6
-                           0000CC    20 CHR_MAN_HEAD                     = 0xcc
-                           0000A1    21 CHR_MAN_STAY                     = 0xa1
-                           00009D    22 CHR_MAN_WALK                     = 0x9d
-                           000004    23 TRANSITION_MAN_WALK_STAY         = 0x04
-                           000097    24 CHR_MAN_SLEEP                    = 0x97
-                           0000C9    25 CHR_MAN_SLEEP_HEAD               = 0xc9
-                           000095    26 CHR_ARROW_RIGHT_TOP              = 0x95
-                           000093    27 CHR_ARROW_RIGHT_BOTTOM           = 0x93
-                           0000F8    28 CHR_LINE_TOP                     = 0xf8
-                           00009E    29 CHR_LINE_BOTTOM                  = 0x9e
-                           0000EE    30 CHR_MOVING_LINE                  = 0xee
-                           00005F    31 SMALL_CAPITALS                   = 0x5f
-                           000020    32 CAPITALIZE                       = 0x20
-                           000006    33 INITIAL_LIVES                    = 0x06
-                           000001    34 INITIAL_LEVEL                    = 0x01
-                           000005    35 MAX_FAIL_COUNTER                 = 0x05
-                           000002    36 INITIAL_FAIL_COUNTER             = 0x02
-                           000001    37 INITIAL_DELAY_COUNTER            = 0x01
-                           00000B    38 DELAY_COUNTER                    = 0x0b
-                           000008    39 DELAY_COUNTER2                   = 0x08
-                           000004    40 DELAY_COUNTER_JUMP               = 0x04
-                           000002    41 MOVE_2X_RIGHT                    = 0x02
-                           000004    42 MONSTER_WIDTH                    = 0x04
-                           000008    43 NUMBER_OF_LINES                  = 0x08
-                           000005    44 NUMBER_HIGHSCORE_ENTRIES         = 0x05
-                           000008    45 MAX_LEVEL                        = 0x08
-                                     46 
-                           00EC00    47 BWS                              = 0xec00
-                           0001FF    48 TOP_IMAGE_size                   = 0x01ff
-                           000005    49 VERSION_INFO_size                = 0x0005
-                           00000C    50 HINT_RIGHT_size                  = 0x000c
-                           00000C    51 HINT_LEFT_size                   = 0x000c
-                           00000C    52 HINT_JUMP_size                   = 0x000c
-                           00000C    53 HINT_PLAY_size                   = 0x000c
-                           00000C    54 HINT_EXIT_size                   = 0x000c
-                           00001E    55 HINT_COPYRIGHT_size              = 0x001e
-                           00000E    56 HINT_NAME_size                   = 0x000e
-                           00000E    57 HINT_YEAR_size                   = 0x000e
-                           00010F    58 LINE_BUFFER_size                 = 0x010f
-                           000005    59 OFFSET_HOLES_size                = 0x0005
-                           000005    60 OFFSET_HOLES_JUMP_PENALTY_size   = 0x0005
-                           000010    61 TXT_JUMP_size                    = 0x0010
-                           00000F    62 TXT_GAME_OVER_size               = 0x000f
-                           00000C    63 TXT_YOUR_SCORE_size              = 0x000c
-                           000009    64 TXT_HAZARD_size                  = 0x0009
-                           000012    65 TXT_NEW_HIGH_SCORE_size          = 0x0012
-                           000002    66 HIGH_SCORE_TABLE01_size          = 0x0002
-                           000002    67 HIGH_SCORE_TABLE02_size          = 0x0002
-                           000002    68 HIGH_SCORE_TABLE03_size          = 0x0002
-                           000002    69 HIGH_SCORE_TABLE04_size          = 0x0002
-                           000002    70 HIGH_SCORE_TABLE05_size          = 0x0002
-                           000002    71 HIGH_SCORE_TABLE_TMP_size        = 0x0002
-                           000002    72 INITIALS_size                    = 0x0002
-                           000038    73 MONSTER_PTR_size                 = 0x0038
-                           000038    74 MONSTER_IMG_size                 = 0x0038
-                                     75 ;
-                                     76 ;
-                                     77 ;
-      000300                         78 _main:
-      000300                         79 sadr:
-      000000                         80         PROGRAM_START
+                                      6         .globl  animation_delay
+                                      7 ; 
+                                      8 ; constant
+                                      9 ; 
+                           000000    10 ZERO                             = 0x00
+                           000000    11 HI_ZERO                          = 0x00
+                           000001    12 LEVEL_1                          = 0x01
+                           00000C    13 VK_CLS                           = 0x0c
+                           00005F    14 SMALL_CAPITALS                   = 0x5f
+                           000020    15 CAPITALIZE                       = 0x20
+                           000006    16 INITIAL_LIVES                    = 0x06
+                           000001    17 INITIAL_LEVEL                    = 0x01
+                           000005    18 MAX_FAIL_COUNTER                 = 0x05
+                           000002    19 INITIAL_FAIL_COUNTER             = 0x02
+                           000001    20 INITIAL_DELAY_COUNTER            = 0x01
+                           00000B    21 DELAY_COUNTER                    = 0x0b
+                           000008    22 DELAY_COUNTER2                   = 0x08
+                           000004    23 DELAY_COUNTER_JUMP               = 0x04
+                           000002    24 MOVE_2X_RIGHT                    = 0x02
+                           000004    25 MONSTER_WIDTH                    = 0x04
+                           000008    26 NUMBER_OF_LINES                  = 0x08
+                           000005    27 NUMBER_HIGHSCORE_ENTRIES         = 0x05
+                           000008    28 MAX_LEVEL                        = 0x08
+                                     29 
+                           0001FF    30 TOP_IMAGE_size                   = 0x01ff
+                           000005    31 VERSION_INFO_size                = 0x0005
+                           00000C    32 HINT_RIGHT_size                  = 0x000c
+                           00000C    33 HINT_LEFT_size                   = 0x000c
+                           00000C    34 HINT_JUMP_size                   = 0x000c
+                           00000C    35 HINT_PLAY_size                   = 0x000c
+                           00000C    36 HINT_EXIT_size                   = 0x000c
+                           00000E    37 HINT_NAME_size                   = 0x000e
+                           00000E    38 HINT_YEAR_size                   = 0x000e
+                           00010F    39 LINE_BUFFER_size                 = 0x010f
+                           000005    40 OFFSET_HOLES_size                = 0x0005
+                           000005    41 OFFSET_HOLES_JUMP_PENALTY_size   = 0x0005
+                           000010    42 TXT_JUMP_size                    = 0x0010
+                           00000F    43 TXT_GAME_OVER_size               = 0x000f
+                           00000C    44 TXT_YOUR_SCORE_size              = 0x000c
+                           000009    45 TXT_HAZARD_size                  = 0x0009
+                           000012    46 TXT_NEW_HIGH_SCORE_size          = 0x0012
+                           000002    47 HIGH_SCORE_TABLE01_size          = 0x0002
+                           000002    48 HIGH_SCORE_TABLE02_size          = 0x0002
+                           000002    49 HIGH_SCORE_TABLE03_size          = 0x0002
+                           000002    50 HIGH_SCORE_TABLE04_size          = 0x0002
+                           000002    51 HIGH_SCORE_TABLE05_size          = 0x0002
+                           000002    52 HIGH_SCORE_TABLE_TMP_size        = 0x0002
+                           000002    53 INITIALS_size                    = 0x0002
+                           000038    54 MONSTER_PTR_size                 = 0x0038
+                           000038    55 MONSTER_IMG_size                 = 0x0038
+                                     56 ;
+                                     57 ;
+                                     58 ;
+      000300                         59 _main:
+      000300                         60 sadr:
+      000000                         61         PROGRAM_START
       000300 C3 0D 03         [10]    1         jp START
       000303 4A 55 4D 50 20 20 20     2         .ascii 'JUMP    '
              20
       00030B 00 00                    3         .dw 0
       00030D                          4 START:
-      00000D                         81         CLRSCR
+      00000D                         62         CLRSCR
       00030D 0E 02            [ 7]    1         ld      c,#UP_CONSO
       00030F 1E 0C            [ 7]    2         ld      e,#0x0c
       000311 CD 05 00         [17]    3         call    BOS
       000314 0E 1D            [ 7]    4         ld      c,#UP_DCU
       000316 CD 05 00         [17]    5         call    BOS
-      000319 11 00 EC         [10]   82         ld      de,#BWS
-      00031C 21 0B 0A         [10]   83         ld      hl,#TOP_IMAGE
-      00031F 01 30 02         [10]   84         ld      bc,#TITLE_TOP_SIZE
-      000322 ED B0            [21]   85         ldir
-      000324 21 30 EE         [10]   86         ld      hl,#BWS+SCREEN_WIDTH*TOP_LINES
-      000327 36 CB            [10]   87         ld      (hl),#VK_HEART
-      000329 11 31 EE         [10]   88         ld      de,#BWS+SCREEN_WIDTH*TOP_LINES+1
-      00032C 01 27 00         [10]   89         ld      bc,#SCREEN_WIDTH-1
-      00032F ED B0            [21]   90         ldir
-      000331 11 50 EE         [10]   91         ld      de,#BWS+SCREEN_WIDTH*TOP_LINES+(SCREEN_WIDTH-8)
-      000334 21 B1 0C         [10]   92         ld      hl,#VERSION_INFO
-      000337 01 05 00         [10]   93         ld      bc,#VERSION_INFO_size
-      00033A ED B0            [21]   94         ldir
-      00033C 11 8E EE         [10]   95         ld      de,#BWS+SCREEN_WIDTH*MENU_TOP+10+ALIGN_MIDDLE
-      00033F 21 3B 0C         [10]   96         ld      hl,#HINT_RIGHT
-      000342 01 0C 00         [10]   97         ld      bc,#HINT_RIGHT_size
-      000345 ED B0            [21]   98         ldir
-      000347 0E 1C            [ 7]   99         ld      c,#SCREEN_WIDTH-HINT_RIGHT_size
-      000349 EB               [ 4]  100         ex      de,hl
-      00034A 09               [11]  101         add     hl,bc
-      00034B EB               [ 4]  102         ex      de,hl
-      00034C 0E 0C            [ 7]  103         ld      c,#HINT_RIGHT_size
-      00034E ED B0            [21]  104         ldir
-      000350 0E 1C            [ 7]  105         ld      c,#SCREEN_WIDTH-HINT_RIGHT_size
-      000352 EB               [ 4]  106         ex      de,hl
-      000353 09               [11]  107         add     hl,bc
-      000354 EB               [ 4]  108         ex      de,hl
-      000355 0E 0C            [ 7]  109         ld      c,#HINT_RIGHT_size
-      000357 ED B0            [21]  110         ldir
-      000359 0E 1C            [ 7]  111         ld      c,#SCREEN_WIDTH-HINT_RIGHT_size
-      00035B EB               [ 4]  112         ex      de,hl
-      00035C 09               [11]  113         add     hl,bc
-      00035D EB               [ 4]  114         ex      de,hl
-      00035E 0E 0C            [ 7]  115         ld      c,#HINT_RIGHT_size
-      000360 ED B0            [21]  116         ldir
-      000362 0E 1C            [ 7]  117         ld      c,#SCREEN_WIDTH-HINT_RIGHT_size
-      000364 EB               [ 4]  118         ex      de,hl
-      000365 09               [11]  119         add     hl,bc
-      000366 EB               [ 4]  120         ex      de,hl
-      000367 0E 0C            [ 7]  121         ld      c,#HINT_RIGHT_size
-      000369 ED B0            [21]  122         ldir
-      00036B 11 70 EF         [10]  123         ld      de,#BWS+POS_COPYRIGHT
-      00036E 0E 1E            [ 7]  124         ld      c,#HINT_COPYRIGHT_size
-      000370 ED B0            [21]  125         ldir
-      000372 0E 0D            [ 7]  126         ld      c,#POSDIFF_NAME
-      000374 EB               [ 4]  127         ex      de,hl
-      000375 09               [11]  128         add     hl,bc
-      000376 EB               [ 4]  129         ex      de,hl
-      000377 0E 0E            [ 7]  130         ld      c,#HINT_NAME_size
-      000379 ED B0            [21]  131         ldir
-      00037B 0E 05            [ 7]  132         ld      c,#POSDIFF_YEAR
-      00037D EB               [ 4]  133         ex      de,hl
-      00037E 09               [11]  134         add     hl,bc
-      00037F EB               [ 4]  135         ex      de,hl
-      000380 0E 12            [ 7]  136         ld      c,#HINT_YEAR_size+VERSION_INFO_size-1
-      000382 ED B0            [21]  137         ldir
-      000384                        138 choose_menu:
-      000384 AF               [ 4]  139         xor     a
-      000085                        140         INCH
+      000319 11 00 EC         [10]   63         ld      de,#BWS
+      00031C 21 FF 09         [10]   64         ld      hl,#TOP_IMAGE
+      00031F 01 30 02         [10]   65         ld      bc,#TITLE_TOP_SIZE
+      000322 ED B0            [21]   66         ldir
+      000324 21 30 EE         [10]   67         ld      hl,#BWS+SCREEN_WIDTH*TOP_LINES
+      000327 36 CB            [10]   68         ld      (hl),#VK_HEART
+      000329 11 31 EE         [10]   69         ld      de,#BWS+SCREEN_WIDTH*TOP_LINES+1
+      00032C 01 27 00         [10]   70         ld      bc,#SCREEN_WIDTH-1
+      00032F ED B0            [21]   71         ldir
+      000331 11 50 EE         [10]   72         ld      de,#BWS+SCREEN_WIDTH*TOP_LINES+(SCREEN_WIDTH-8)
+      000334 21 A5 0C         [10]   73         ld      hl,#VERSION_INFO
+      000337 01 05 00         [10]   74         ld      bc,#VERSION_INFO_size
+      00033A ED B0            [21]   75         ldir
+      00033C 11 8E EE         [10]   76         ld      de,#BWS+SCREEN_WIDTH*MENU_TOP+10+ALIGN_MIDDLE
+      00033F 21 2F 0C         [10]   77         ld      hl,#HINT_RIGHT
+      000342 01 0C 00         [10]   78         ld      bc,#HINT_RIGHT_size
+      000345 ED B0            [21]   79         ldir
+      000347 0E 1C            [ 7]   80         ld      c,#SCREEN_WIDTH-HINT_RIGHT_size
+      000349 EB               [ 4]   81         ex      de,hl
+      00034A 09               [11]   82         add     hl,bc
+      00034B EB               [ 4]   83         ex      de,hl
+      00034C 0E 0C            [ 7]   84         ld      c,#HINT_RIGHT_size
+      00034E ED B0            [21]   85         ldir
+      000350 0E 1C            [ 7]   86         ld      c,#SCREEN_WIDTH-HINT_RIGHT_size
+      000352 EB               [ 4]   87         ex      de,hl
+      000353 09               [11]   88         add     hl,bc
+      000354 EB               [ 4]   89         ex      de,hl
+      000355 0E 0C            [ 7]   90         ld      c,#HINT_RIGHT_size
+      000357 ED B0            [21]   91         ldir
+      000359 0E 1C            [ 7]   92         ld      c,#SCREEN_WIDTH-HINT_RIGHT_size
+      00035B EB               [ 4]   93         ex      de,hl
+      00035C 09               [11]   94         add     hl,bc
+      00035D EB               [ 4]   95         ex      de,hl
+      00035E 0E 0C            [ 7]   96         ld      c,#HINT_RIGHT_size
+      000360 ED B0            [21]   97         ldir
+      000362 0E 1C            [ 7]   98         ld      c,#SCREEN_WIDTH-HINT_RIGHT_size
+      000364 EB               [ 4]   99         ex      de,hl
+      000365 09               [11]  100         add     hl,bc
+      000366 EB               [ 4]  101         ex      de,hl
+      000367 0E 0C            [ 7]  102         ld      c,#HINT_RIGHT_size
+      000369 ED B0            [21]  103         ldir
+      00036B 11 70 EF         [10]  104         ld      de,#BWS+POS_COPYRIGHT
+      00036E 0E 1E            [ 7]  105         ld      c,#HINT_COPYRIGHT_size
+      000370 ED B0            [21]  106         ldir
+      000372 0E 0D            [ 7]  107         ld      c,#POSDIFF_NAME
+      000374 EB               [ 4]  108         ex      de,hl
+      000375 09               [11]  109         add     hl,bc
+      000376 EB               [ 4]  110         ex      de,hl
+      000377 0E 0E            [ 7]  111         ld      c,#HINT_NAME_size
+      000379 ED B0            [21]  112         ldir
+      00037B 0E 05            [ 7]  113         ld      c,#POSDIFF_YEAR
+      00037D EB               [ 4]  114         ex      de,hl
+      00037E 09               [11]  115         add     hl,bc
+      00037F EB               [ 4]  116         ex      de,hl
+      000380 0E 12            [ 7]  117         ld      c,#HINT_YEAR_size+VERSION_INFO_size-1
+      000382 ED B0            [21]  118         ldir
+      000384                        119 choose_menu:
+      000384 AF               [ 4]  120         xor     a
+      000085                        121         INCH
       000385 AF               [ 4]    1         xor     a
       000386 32 25 00         [13]    2         ld      (KEYBU),a
       000389 0E 01            [ 7]    3         ld      c,#UP_CONSI
       00038B CD 05 00         [17]    4         call    BOS
-      00038E FE 5F            [ 7]  141         cp      #SMALL_CAPITALS
-      000390 38 02            [12]  142         jr      c,capitalized
-      000392 D6 20            [ 7]  143         sub     #CAPITALIZE
-      000394                        144 capitalized:
-      000394 FE 45            [ 7]  145         cp      #'E'
-      000396 CA 93 09         [10]  146         jp      z,exit_game
-      000399 FE 50            [ 7]  147         cp      #'P'
-      00039B 20 E7            [12]  148         jr      nz,choose_menu
-      00039D                        149 new_game:
-      00009D                        150         CLRSCR
+      00038E FE 5F            [ 7]  122         cp      #SMALL_CAPITALS
+      000390 38 02            [12]  123         jr      c,capitalized
+      000392 D6 20            [ 7]  124         sub     #CAPITALIZE
+      000394                        125 capitalized:
+      000394 FE 45            [ 7]  126         cp      #'E'
+      000396 CA 87 09         [10]  127         jp      z,exit_game
+      000399 FE 50            [ 7]  128         cp      #'P'
+      00039B 20 E7            [12]  129         jr      nz,choose_menu
+      00039D                        130 new_game:
+      00009D                        131         CLRSCR
       00039D 0E 02            [ 7]    1         ld      c,#UP_CONSO
       00039F 1E 0C            [ 7]    2         ld      e,#0x0c
       0003A1 CD 05 00         [17]    3         call    BOS
       0003A4 0E 1D            [ 7]    4         ld      c,#UP_DCU
       0003A6 CD 05 00         [17]    5         call    BOS
-      0003A9 21 D6 0D         [10]  151         ld      hl,#LIVES
-      0003AC 36 06            [10]  152         ld      (hl),#INITIAL_LIVES
-      0003AE 21 D7 0D         [10]  153         ld      hl,#POINTS
-      0003B1 36 00            [10]  154         ld      (hl),#ZERO
-      0003B3 23               [ 6]  155         inc     hl
-      0003B4 36 00            [10]  156         ld      (hl),#ZERO
-      0003B6 06 06            [ 7]  157         ld      b,#INITIAL_LIVES
-      0003B8 21 98 EF         [10]  158         ld      hl,#POS_LIVES
-      0003BB                        159 draw_player:
-      0003BB 3E 02            [ 7]  160         ld      a,#MOVE_2X_RIGHT
-      0003BD 85               [ 4]  161         add     a,l
-      0003BE 6F               [ 4]  162         ld      l,a
-      0003BF 36 C4            [10]  163         ld      (hl),#VK_PLAYER
-      0003C1 10 F8            [13]  164         djnz    draw_player
-      0003C3 3E 01            [ 7]  165         ld      a,#INITIAL_LEVEL
-      0003C5 32 D9 0D         [13]  166         ld      (LEVEL),a
-      0003C8 3E 02            [ 7]  167         ld      a,#INITIAL_FAIL_COUNTER
-      0003CA 32 D0 0D         [13]  168         ld      (cnt_fail_trap),a
-      0003CD 32 D1 0D         [13]  169         ld      (cnt_fail_jump),a
-      0003D0 21 00 EC         [10]  170         ld      hl,#BWS
-      0003D3 36 20            [10]  171         ld      (hl),#' '
-      0003D5 11 01 EC         [10]  172         ld      de,#BWS+1
-      0003D8 01 96 03         [10]  173         ld      bc,#(3+GAME_START_Y+3*GAMES_LINES)*SCREEN_WIDTH-2
-      0003DB ED B0            [21]  174         ldir
-      0003DD 21 28 EC         [10]  175         ld      hl,#POS_TOP_WALL
-      0003E0 36 C6            [10]  176         ld      (hl),#CHR_WALL
-      0003E2 11 29 EC         [10]  177         ld      de,#POS_TOP_WALL+1
-      0003E5 01 27 00         [10]  178         ld      bc,#SCREEN_WIDTH-1
-      0003E8 ED B0            [21]  179         ldir
-      0003EA 21 70 EC         [10]  180         ld      hl,#POS_TOP_WALL+2*SCREEN_WIDTH-8
-      0003ED 36 C6            [10]  181         ld      (hl),#CHR_WALL
-      0003EF 2B               [ 6]  182         dec     hl
-      0003F0 2B               [ 6]  183         dec     hl
-      0003F1 36 95            [10]  184         ld      (hl),#CHR_ARROW_RIGHT_TOP
-      0003F3 2B               [ 6]  185         dec     hl
-      0003F4 36 F8            [10]  186         ld      (hl),#CHR_LINE_TOP
-      0003F6 21 98 EC         [10]  187         ld      hl,#POS_TOP_WALL+3*SCREEN_WIDTH-8
-      0003F9 36 C6            [10]  188         ld      (hl),#CHR_WALL
-      0003FB 2B               [ 6]  189         dec     hl
-      0003FC 2B               [ 6]  190         dec     hl
-      0003FD 36 93            [10]  191         ld      (hl),#CHR_ARROW_RIGHT_BOTTOM
-      0003FF 2B               [ 6]  192         dec     hl
-      000400 36 9E            [10]  193         ld      (hl),#CHR_LINE_BOTTOM
-      000402 21 DB 0D         [10]  194         ld      hl,#TXT_JUMP
-      000405 11 0C EC         [10]  195         ld      de,#POS_TOP_GAME
-      000408 01 10 00         [10]  196         ld      bc,#TXT_JUMP_size
-      00040B ED B0            [21]  197         ldir
-      00040D 3E 01            [ 7]  198         ld      a,#INITIAL_DELAY_COUNTER
-      00040F 21 D4 0D         [10]  199         ld      hl,#JUMP_DELAY
-      000412 77               [ 7]  200         ld      (hl),a
-      000413 21 D5 0D         [10]  201         ld      hl,#FAIL_DELAY
-      000416 77               [ 7]  202         ld      (hl),a
-      000417 23               [ 6]  203         inc     hl
-      000418 21 32 EF         [10]  204         ld      hl,#BWS+(GAME_START_Y+3*GAMES_LINES)*SCREEN_WIDTH+14+ALIGN_MIDDLE
-      00041B 22 D2 0D         [16]  205         ld      (MAN_HEAD),hl
-      00041E 36 CC            [10]  206         ld      (hl),#CHR_MAN_HEAD
-      000420 11 28 00         [10]  207         ld      de,#SCREEN_WIDTH
-      000423 19               [11]  208         add     hl,de
-      000424 36 A1            [10]  209         ld      (hl),#CHR_MAN_STAY
-      000426                        210 animation_loop:
-      000426 CD BD 04         [17]  211         call    animation_monster
-      000429 CD 7C 05         [17]  212         call    animation_lines
-      00042C CD EC 05         [17]  213         call    animation_delay
-      00042F 3A D4 0D         [13]  214         ld      a,(JUMP_DELAY)
-      000432 FE 01            [ 7]  215         cp      #INITIAL_DELAY_COUNTER
-      000434 20 29            [12]  216         jr      nz,handle_jump_delay
-      000436 3A D5 0D         [13]  217         ld      a,(FAIL_DELAY)
-      000439 FE 01            [ 7]  218         cp      #INITIAL_DELAY_COUNTER
-      00043B 20 1F            [12]  219         jr      nz,handle_fail_delay
-      00013D                        220         INKEY
+      0003A9 21 CA 0D         [10]  132         ld      hl,#LIVES
+      0003AC 36 06            [10]  133         ld      (hl),#INITIAL_LIVES
+      0003AE 21 CB 0D         [10]  134         ld      hl,#POINTS
+      0003B1 36 00            [10]  135         ld      (hl),#ZERO
+      0003B3 23               [ 6]  136         inc     hl
+      0003B4 36 00            [10]  137         ld      (hl),#ZERO
+      0003B6 06 06            [ 7]  138         ld      b,#INITIAL_LIVES
+      0003B8 21 98 EF         [10]  139         ld      hl,#POS_LIVES
+      0003BB                        140 draw_player:
+      0003BB 3E 02            [ 7]  141         ld      a,#MOVE_2X_RIGHT
+      0003BD 85               [ 4]  142         add     a,l
+      0003BE 6F               [ 4]  143         ld      l,a
+      0003BF 36 C4            [10]  144         ld      (hl),#VK_PLAYER
+      0003C1 10 F8            [13]  145         djnz    draw_player
+      0003C3 3E 01            [ 7]  146         ld      a,#INITIAL_LEVEL
+      0003C5 32 CD 0D         [13]  147         ld      (LEVEL),a
+      0003C8 3E 02            [ 7]  148         ld      a,#INITIAL_FAIL_COUNTER
+      0003CA 32 C4 0D         [13]  149         ld      (cnt_fail_trap),a
+      0003CD 32 C5 0D         [13]  150         ld      (cnt_fail_jump),a
+      0003D0 21 00 EC         [10]  151         ld      hl,#BWS
+      0003D3 36 20            [10]  152         ld      (hl),#' '
+      0003D5 11 01 EC         [10]  153         ld      de,#BWS+1
+      0003D8 01 96 03         [10]  154         ld      bc,#(3+GAME_START_Y+3*GAMES_LINES)*SCREEN_WIDTH-2
+      0003DB ED B0            [21]  155         ldir
+      0003DD 21 28 EC         [10]  156         ld      hl,#POS_TOP_WALL
+      0003E0 36 C6            [10]  157         ld      (hl),#CHR_WALL
+      0003E2 11 29 EC         [10]  158         ld      de,#POS_TOP_WALL+1
+      0003E5 01 27 00         [10]  159         ld      bc,#SCREEN_WIDTH-1
+      0003E8 ED B0            [21]  160         ldir
+      0003EA 21 70 EC         [10]  161         ld      hl,#POS_TOP_WALL+2*SCREEN_WIDTH-8
+      0003ED 36 C6            [10]  162         ld      (hl),#CHR_WALL
+      0003EF 2B               [ 6]  163         dec     hl
+      0003F0 2B               [ 6]  164         dec     hl
+      0003F1 36 95            [10]  165         ld      (hl),#CHR_ARROW_RIGHT_TOP
+      0003F3 2B               [ 6]  166         dec     hl
+      0003F4 36 F8            [10]  167         ld      (hl),#CHR_LINE_TOP
+      0003F6 21 98 EC         [10]  168         ld      hl,#POS_TOP_WALL+3*SCREEN_WIDTH-8
+      0003F9 36 C6            [10]  169         ld      (hl),#CHR_WALL
+      0003FB 2B               [ 6]  170         dec     hl
+      0003FC 2B               [ 6]  171         dec     hl
+      0003FD 36 93            [10]  172         ld      (hl),#CHR_ARROW_RIGHT_BOTTOM
+      0003FF 2B               [ 6]  173         dec     hl
+      000400 36 9E            [10]  174         ld      (hl),#CHR_LINE_BOTTOM
+      000402 21 CF 0D         [10]  175         ld      hl,#TXT_JUMP
+      000405 11 0C EC         [10]  176         ld      de,#POS_TOP_GAME
+      000408 01 10 00         [10]  177         ld      bc,#TXT_JUMP_size
+      00040B ED B0            [21]  178         ldir
+      00040D 3E 01            [ 7]  179         ld      a,#INITIAL_DELAY_COUNTER
+      00040F 21 C8 0D         [10]  180         ld      hl,#JUMP_DELAY
+      000412 77               [ 7]  181         ld      (hl),a
+      000413 21 C9 0D         [10]  182         ld      hl,#FAIL_DELAY
+      000416 77               [ 7]  183         ld      (hl),a
+      000417 23               [ 6]  184         inc     hl
+      000418 21 32 EF         [10]  185         ld      hl,#BWS+(GAME_START_Y+3*GAMES_LINES)*SCREEN_WIDTH+14+ALIGN_MIDDLE
+      00041B 22 C6 0D         [16]  186         ld      (MAN_HEAD),hl
+      00041E 36 CC            [10]  187         ld      (hl),#CHR_MAN_HEAD
+      000420 11 28 00         [10]  188         ld      de,#SCREEN_WIDTH
+      000423 19               [11]  189         add     hl,de
+      000424 36 A1            [10]  190         ld      (hl),#CHR_MAN_STAY
+      000426                        191 animation_loop:
+      000426 CD B1 04         [17]  192         call    animation_monster
+      000429 CD 70 05         [17]  193         call    animation_lines
+      00042C CD E0 05         [17]  194         call    animation_delay
+      00042F 3A C8 0D         [13]  195         ld      a,(JUMP_DELAY)
+      000432 FE 01            [ 7]  196         cp      #INITIAL_DELAY_COUNTER
+      000434 20 1D            [12]  197         jr      nz,handle_jump_delay
+      000436 3A C9 0D         [13]  198         ld      a,(FAIL_DELAY)
+      000439 FE 01            [ 7]  199         cp      #INITIAL_DELAY_COUNTER
+      00043B 20 13            [12]  200         jr      nz,handle_fail_delay
+      00013D                        201         INKEY
       00043D CD 33 FD         [17]    1         call    inkey
       000440 FB               [ 4]    2         ei
-      000441 FE 20            [ 7]  221         cp      #' '
-      000443 CA A9 06         [10]  222         jp      z,action_jump
-      000446 FE 08            [ 7]  223         cp      #VK_LEFT
-      000448 CC F9 05         [17]  224         call    z,action_left
-      00044B FE 09            [ 7]  225         cp      #VK_RIGHT
-      00044D CC 50 06         [17]  226         call    z,action_right
-                           000001   227 .if z9001
-                                    228         ;debugginh
-      000450 FE 55            [ 7]  229         cp      #'U'
-      000452 20 08            [12]  230         jr      nz,handle_fail_delay
-      000454 21 64 EC         [10]  231         ld      hl,#BWS+GAME_START_Y*SCREEN_WIDTH+20
-      000457 36 CC            [10]  232         ld      (hl),#CHR_MAN_HEAD
-      000459 22 D2 0D         [16]  233         ld      (MAN_HEAD),hl
-                                    234 .endif
-      00045C                        235 handle_fail_delay:
-      00045C CD 0D 07         [17]  236         call    check_fall_through
-      00045F                        237 handle_jump_delay:
-      00045F 3A D4 0D         [13]  238         ld      a,(JUMP_DELAY)
-      000462 FE 01            [ 7]  239         cp      #INITIAL_DELAY_COUNTER
-      000464 28 04            [12]  240         jr      z,jump_delay_counter_set
-      000466 3D               [ 4]  241         dec     a
-      000467 32 D4 0D         [13]  242         ld      (JUMP_DELAY),a
-      00046A                        243 jump_delay_counter_set:
-      00046A 3A D5 0D         [13]  244         ld      a,(FAIL_DELAY)
-      00046D FE 01            [ 7]  245         cp      #INITIAL_DELAY_COUNTER
-      00046F 28 42            [12]  246         jr      z,player_activity
-      000471 3D               [ 4]  247         dec     a
-      000472 32 D5 0D         [13]  248         ld      (FAIL_DELAY),a
-      000475 FE 01            [ 7]  249         cp      #INITIAL_DELAY_COUNTER
-      000477 20 3A            [12]  250         jr      nz,player_activity
-      000479 2A D2 0D         [16]  251         ld      hl,(MAN_HEAD)
-                                    252         ; test for bottom line
-      00047C 11 D0 EE         [10]  253         ld      de,#BWS+(GAME_START_Y+3*GAMES_LINES-2)*SCREEN_WIDTH
-      00047F A7               [ 4]  254         and     a
-      000480 ED 52            [15]  255         sbc     hl,de
-      000482 38 16            [12]  256         jr      c,player_wake_up
-      000484 3A D6 0D         [13]  257         ld      a,(LIVES)
-      000487 3D               [ 4]  258         dec     a
-      000488 32 D6 0D         [13]  259         ld      (LIVES),a
-      00048B 21 9A EF         [10]  260         ld      hl,#BWS+(GAME_START_Y+3*GAMES_LINES+3)*SCREEN_WIDTH+2
-      00048E 16 00            [ 7]  261         ld      d,#HI_ZERO
-      000490 87               [ 4]  262         add     a,a
-      000491 5F               [ 4]  263         ld      e,a
-      000492 19               [11]  264         add     hl,de
-      000493 36 20            [10]  265         ld      (hl),#' '
-      000495 FE 00            [ 7]  266         cp      #ZERO
-      000497 CA 24 08         [10]  267         jp      z,no_lives
-      00049A                        268 player_wake_up:
-      00049A 2A D2 0D         [16]  269         ld      hl,(MAN_HEAD)
-      00049D 36 CC            [10]  270         ld      (hl),#CHR_MAN_HEAD
-      00049F 2B               [ 6]  271         dec     hl
-      0004A0 3E 20            [ 7]  272         ld      a,#' '
-      0004A2 77               [ 7]  273         ld      (hl),a
-      0004A3 23               [ 6]  274         inc     hl
-      0004A4 23               [ 6]  275         inc     hl
-      0004A5 23               [ 6]  276         inc     hl
-      0004A6 77               [ 7]  277         ld      (hl),a
-      0004A7 2B               [ 6]  278         dec     hl
-      0004A8 11 28 00         [10]  279         ld      de,#SCREEN_WIDTH
-      0004AB 19               [11]  280         add     hl,de
-      0004AC 77               [ 7]  281         ld      (hl),a
-      0004AD 23               [ 6]  282         inc     hl
-      0004AE 77               [ 7]  283         ld      (hl),a
-      0004AF 2B               [ 6]  284         dec     hl
-      0004B0 2B               [ 6]  285         dec     hl
-      0004B1 36 9D            [10]  286         ld      (hl),#CHR_MAN_WALK
-      0004B3                        287 player_activity:
-      0004B3 CD 5E 07         [17]  288         call    check_level_finished
-      0004B6 C3 26 04         [10]  289         jp      animation_loop
-                                    290 ; unchecked data source
-      0004B9 67 75 66 69            291         .db     0x67,0x75,0x66,0x69                     ;gufi
-      0004BD                        292 animation_monster:
-      0004BD 3A D9 0D         [13]  293         ld      a,(LEVEL)
-      0004C0 32 DA 0D         [13]  294         ld      (counter),a
-      0004C3 FE 01            [ 7]  295         cp      #LEVEL_1
-      0004C5 C8               [11]  296         ret     z
-      0004C6 01 EB 0D         [10]  297         ld      bc,#MONSTER_PTR
-      0004C9 11 23 0E         [10]  298         ld      de,#MONSTER_IMG
-      0004CC                        299 handle_one_monster:
-      0004CC 0A               [ 7]  300         ld      a,(bc)
-      0004CD 6F               [ 4]  301         ld      l,a
-      0004CE 03               [ 6]  302         inc     bc
-      0004CF 0A               [ 7]  303         ld      a,(bc)
-      0004D0 67               [ 4]  304         ld      h,a
-      0004D1 CD E0 04         [17]  305         call    handle_by_ptr
-      0004D4 3A DA 0D         [13]  306         ld      a,(counter)
-      0004D7 3D               [ 4]  307         dec     a
-      0004D8 32 DA 0D         [13]  308         ld      (counter),a
-      0004DB FE 01            [ 7]  309         cp      #LEVEL_1
-      0004DD C8               [11]  310         ret     z
-      0004DE 18 EC            [12]  311         jr      handle_one_monster
-      0004E0                        312 handle_by_ptr:
-      0004E0 C5               [11]  313         push    bc
-      0004E1 3E 04            [ 7]  314         ld      a,#MONSTER_WIDTH
-      0004E3 D5               [11]  315         push    de
-      0004E4                        316 handle_by_column:
-      0004E4 36 20            [10]  317         ld      (hl),#' '
-      0004E6 11 28 00         [10]  318         ld      de,#SCREEN_WIDTH
-      0004E9 19               [11]  319         add     hl,de
-      0004EA 36 20            [10]  320         ld      (hl),#' '
-      0004EC A7               [ 4]  321         and     a
-      0004ED ED 52            [15]  322         sbc     hl,de
-      0004EF 2B               [ 6]  323         dec     hl
-      0004F0 E5               [11]  324         push    hl
-      0004F1 08               [ 4]  325         ex      af,af'
-      0004F2 11 EF EC         [10]  326         ld      de,#BWS+(GAME_START_Y+4)*SCREEN_WIDTH-1
-      0004F5 A7               [ 4]  327         and     a
-      0004F6 ED 52            [15]  328         sbc     hl,de
-      0004F8 38 0D            [12]  329         jr      c,correct_ptr
-      0004FA C5               [11]  330         push    bc
-      0004FB 06 06            [ 7]  331         ld      b,#GAMES_LINES
-      0004FD 11 78 00         [10]  332         ld      de,#3*SCREEN_WIDTH
-      000500                        333 get_column:
-      000500 A7               [ 4]  334         and     a
-      000501 ED 52            [15]  335         sbc     hl,de
-      000503 38 13            [12]  336         jr      c,test_column
-      000505 10 F9            [13]  337         djnz    get_column
-      000507                        338 correct_ptr:
-      000507 11 27 00         [10]  339         ld      de,#SCREEN_WIDTH-1
-      00050A ED 5A            [15]  340         adc     hl,de
-      00050C 28 03            [12]  341         jr      z,start_from_bottom
-      00050E E1               [10]  342         pop     hl
-      00050F 18 19            [12]  343         jr      update_pointers
-      000511                        344 start_from_bottom:
-      000511 E1               [10]  345         pop     hl
-      000512 11 08 02         [10]  346         ld      de,#((GAMES_LINES-2)*3+1)*SCREEN_WIDTH
-      000515 19               [11]  347         add     hl,de
-      000516 18 12            [12]  348         jr      update_pointers
-      000518                        349 test_column:
-      000518 C1               [10]  350         pop     bc
-      000519 11 27 00         [10]  351         ld      de,#SCREEN_WIDTH-1
-      00051C ED 5A            [15]  352         adc     hl,de
-      00051E 28 03            [12]  353         jr      z,move_one_line_up
-      000520 E1               [10]  354         pop     hl
-      000521 18 07            [12]  355         jr      update_pointers
-      000523                        356 move_one_line_up:
-      000523 E1               [10]  357         pop     hl
-      000524 11 50 00         [10]  358         ld      de,#2*SCREEN_WIDTH
-      000527 A7               [ 4]  359         and     a
-      000528 ED 52            [15]  360         sbc     hl,de
-      00052A                        361 update_pointers:
-      00052A 0B               [ 6]  362         dec     bc
-      00052B 7D               [ 4]  363         ld      a,l
-      00052C 02               [ 7]  364         ld      (bc),a
-      00052D 03               [ 6]  365         inc     bc
-      00052E 7C               [ 4]  366         ld      a,h
-      00052F 02               [ 7]  367         ld      (bc),a
-      000530 03               [ 6]  368         inc     bc
-      000531 0A               [ 7]  369         ld      a,(bc)
-      000532 6F               [ 4]  370         ld      l,a
-      000533 03               [ 6]  371         inc     bc
-      000534 0A               [ 7]  372         ld      a,(bc)
-      000535 67               [ 4]  373         ld      h,a
-      000536 08               [ 4]  374         ex      af,af'
-      000537 3D               [ 4]  375         dec     a
-      000538 FE 00            [ 7]  376         cp      #ZERO
-      00053A 28 02            [12]  377         jr      z,draw_monster
-      00053C 18 A6            [12]  378         jr      handle_by_column
-      00053E                        379 draw_monster:
-      00053E D1               [10]  380         pop     de
-      00053F C1               [10]  381         pop     bc
-      000540 0B               [ 6]  382         dec     bc
-      000541 3E 04            [ 7]  383         ld      a,#MONSTER_WIDTH
-      000543                        384 draw_monster_segment:
-      000543 08               [ 4]  385         ex      af,af'
-      000544 0A               [ 7]  386         ld      a,(bc)
-      000545 6F               [ 4]  387         ld      l,a
-      000546 03               [ 6]  388         inc     bc
-      000547 0A               [ 7]  389         ld      a,(bc)
-      000548 67               [ 4]  390         ld      h,a
-      000549 03               [ 6]  391         inc     bc
-      00054A 1A               [ 7]  392         ld      a,(de)
-      00054B 77               [ 7]  393         ld      (hl),a
-      00054C 13               [ 6]  394         inc     de
-      00054D 1A               [ 7]  395         ld      a,(de)
-      00054E D5               [11]  396         push    de
-      00054F 11 28 00         [10]  397         ld      de,#SCREEN_WIDTH
-      000552 19               [11]  398         add     hl,de
-      000553 77               [ 7]  399         ld      (hl),a
-      000554 CD 60 05         [17]  400         call    monster_check_crash
-      000557 D1               [10]  401         pop     de
-      000558 13               [ 6]  402         inc     de
-      000559 08               [ 4]  403         ex      af,af'
-      00055A 3D               [ 4]  404         dec     a
-      00055B FE 00            [ 7]  405         cp      #ZERO
-      00055D 20 E4            [12]  406         jr      nz,draw_monster_segment
-      00055F C9               [10]  407         ret
-      000560                        408 monster_check_crash:
-      000560 A7               [ 4]  409         and     a
-      000561 ED 52            [15]  410         sbc     hl,de
-      000563 EB               [ 4]  411         ex      de,hl
-      000564 2A D2 0D         [16]  412         ld      hl,(MAN_HEAD)
-      000567 A7               [ 4]  413         and     a
-      000568 ED 52            [15]  414         sbc     hl,de
-      00056A EB               [ 4]  415         ex      de,hl
-      00056B C0               [11]  416         ret     nz
-      00056C 11 28 00         [10]  417         ld      de,#SCREEN_WIDTH
-      00056F 19               [11]  418         add     hl,de
-      000570 23               [ 6]  419         inc     hl
-      000571 36 97            [10]  420         ld      (hl),#CHR_MAN_SLEEP
-      000573 23               [ 6]  421         inc     hl
-      000574 36 C9            [10]  422         ld      (hl),#CHR_MAN_SLEEP_HEAD
-      000576 3E 0B            [ 7]  423         ld      a,#DELAY_COUNTER
-      000578 32 D5 0D         [13]  424         ld      (FAIL_DELAY),a
-      00057B C9               [10]  425         ret
-      00057C                        426 animation_lines:
-      00057C 3E EE            [ 7]  427         ld      a,#CHR_MOVING_LINE
-      00057E 21 B6 0C         [10]  428         ld      hl,#LINE_BUFFER
-      000581 77               [ 7]  429         ld      (hl),a
-      000582 11 B7 0C         [10]  430         ld      de,#LINE_BUFFER+1
-      000585 01 0E 01         [10]  431         ld      bc,#LINE_BUFFER_size-1
-      000588 ED B0            [21]  432         ldir
-      00058A 3A D0 0D         [13]  433         ld      a,(cnt_fail_trap)
-      00058D 11 C6 0D         [10]  434         ld      de,#OFFSET_HOLES
-      000590 1B               [ 6]  435         dec     de
-      000591                        436 loop_failed_penalty_holes:
-      000591 F5               [11]  437         push    af
-      000592 13               [ 6]  438         inc     de
-      000593 1A               [ 7]  439         ld      a,(de)
-      000594 3C               [ 4]  440         inc     a
-      000595 12               [ 7]  441         ld      (de),a
-      000596 4F               [ 4]  442         ld      c,a
-      000597 06 00            [ 7]  443         ld      b,#HI_ZERO
-      000599 21 B6 0C         [10]  444         ld      hl,#LINE_BUFFER
-      00059C 09               [11]  445         add     hl,bc
-      00059D 36 20            [10]  446         ld      (hl),#' '
-      00059F 23               [ 6]  447         inc     hl
-      0005A0 36 20            [10]  448         ld      (hl),#' '
-      0005A2 23               [ 6]  449         inc     hl
-      0005A3 36 20            [10]  450         ld      (hl),#' '
-      0005A5 F1               [10]  451         pop     af
-      0005A6 3D               [ 4]  452         dec     a
-      0005A7 20 E8            [12]  453         jr      nz,loop_failed_penalty_holes
-      0005A9 3A D1 0D         [13]  454         ld      a,(cnt_fail_jump)
-      0005AC 11 CB 0D         [10]  455         ld      de,#OFFSET_HOLES_JUMP_PENALTY
-      0005AF 1B               [ 6]  456         dec     de
-      0005B0                        457 loop_jump_penalty_holes:
-      0005B0 F5               [11]  458         push    af
-      0005B1 13               [ 6]  459         inc     de
-      0005B2 1A               [ 7]  460         ld      a,(de)
-      0005B3 3D               [ 4]  461         dec     a
-      0005B4 12               [ 7]  462         ld      (de),a
-      0005B5 4F               [ 4]  463         ld      c,a
-      0005B6 06 00            [ 7]  464         ld      b,#HI_ZERO
-      0005B8 21 B6 0C         [10]  465         ld      hl,#LINE_BUFFER
-      0005BB 09               [11]  466         add     hl,bc
-      0005BC 36 20            [10]  467         ld      (hl),#' '
-      0005BE 23               [ 6]  468         inc     hl
-      0005BF 36 20            [10]  469         ld      (hl),#' '
-      0005C1 23               [ 6]  470         inc     hl
-      0005C2 36 20            [10]  471         ld      (hl),#' '
-      0005C4 F1               [10]  472         pop     af
-      0005C5 3D               [ 4]  473         dec     a
-      0005C6 20 E8            [12]  474         jr      nz,loop_jump_penalty_holes
-      0005C8 3E 06            [ 7]  475         ld      a,#GAMES_LINES
-      0005CA 21 B6 0C         [10]  476         ld      hl,#LINE_BUFFER
-      0005CD 11 50 EC         [10]  477         ld      de,#BWS+(GAME_START_Y*SCREEN_WIDTH)+0
-      0005D0                        478 print_line:
-      0005D0 01 28 00         [10]  479         ld      bc,#SCREEN_WIDTH
-      0005D3 E5               [11]  480         push    hl
-      0005D4 EB               [ 4]  481         ex      de,hl
-      0005D5 09               [11]  482         add     hl,bc
-      0005D6 09               [11]  483         add     hl,bc
-      0005D7 EB               [ 4]  484         ex      de,hl
-      0005D8 E1               [10]  485         pop     hl
-      0005D9 ED B0            [21]  486         ldir
-      0005DB 3D               [ 4]  487         dec     a
-      0005DC 20 F2            [12]  488         jr      nz,print_line
-      0005DE 21 70 EF         [10]  489         ld      hl,#BWS+(2+GAME_START_Y+(GAMES_LINES*3))*SCREEN_WIDTH+0
-      0005E1 11 71 EF         [10]  490         ld      de,#BWS+(2+GAME_START_Y+(GAMES_LINES*3))*SCREEN_WIDTH+1
-      0005E4 01 27 00         [10]  491         ld      bc,#SCREEN_WIDTH-1
-      0005E7 36 C6            [10]  492         ld      (hl),#CHR_WALL
-      0005E9 ED B0            [21]  493         ldir
-      0005EB C9               [10]  494         ret
-      0005EC                        495 animation_delay:
-      0005EC 21 50 46         [10]  496         ld      hl,#SLOW_DOWN_13066
-      0005EF 11 01 00         [10]  497         ld      de,#1
-      0005F2 A7               [ 4]  498         and     a
-      0005F3                        499 delay_loop:
-      0005F3 2B               [ 6]  500         dec     hl
-      0005F4 ED 52            [15]  501         sbc     hl,de
-      0005F6 20 FB            [12]  502         jr      nz,delay_loop
-      0005F8 C9               [10]  503         ret
-      0005F9                        504 action_left:
-      0005F9 F5               [11]  505         push    af
-      0005FA 2A D2 0D         [16]  506         ld      hl,(MAN_HEAD)
-      0005FD 7E               [ 7]  507         ld      a,(hl)
-      0005FE 36 20            [10]  508         ld      (hl),#' '
-      000600 2B               [ 6]  509         dec     hl
-      000601 22 D2 0D         [16]  510         ld      (MAN_HEAD),hl
-      000604 77               [ 7]  511         ld      (hl),a
-      000605 11 28 00         [10]  512         ld      de,#SCREEN_WIDTH
-      000608 19               [11]  513         add     hl,de
-      000609 23               [ 6]  514         inc     hl
-      00060A 7E               [ 7]  515         ld      a,(hl)
-      00060B 36 20            [10]  516         ld      (hl),#' '
-      00060D FE 9D            [ 7]  517         cp      #CHR_MAN_WALK
-      00060F 28 04            [12]  518         jr      z,transition_left_stay
-      000611 FE A1            [ 7]  519         cp      #CHR_MAN_STAY
-      000613 28 04            [12]  520         jr      z,transition_left_walk
-      000615                        521 transition_left_stay:
-      000615 C6 04            [ 7]  522         add     a,#TRANSITION_MAN_WALK_STAY
-      000617 18 02            [12]  523         jr      update_left
-      000619                        524 transition_left_walk:
-      000619 D6 04            [ 7]  525         sub     #TRANSITION_MAN_WALK_STAY
-      00061B                        526 update_left:
-      00061B 2B               [ 6]  527         dec     hl
-      00061C 77               [ 7]  528         ld      (hl),a
-      00061D 3E 07            [ 7]  529         ld      a,#GAMES_LINES+1
-      00061F 01 4F EC         [10]  530         ld      bc,#BWS+(GAME_START_Y)*SCREEN_WIDTH-1
-      000622                        531 loop_left_border_check:
-      000622 C5               [11]  532         push    bc
-      000623 60               [ 4]  533         ld      h,b
-      000624 69               [ 4]  534         ld      l,c
-      000625 ED 5B D2 0D      [20]  535         ld      de,(MAN_HEAD)
-      000629 A7               [ 4]  536         and     a
-      00062A ED 52            [15]  537         sbc     hl,de
-      00062C 28 0E            [12]  538         jr      z,correct_left_border
-      00062E                        539 left_border_next_adr:
-      00062E C1               [10]  540         pop     bc
-      00062F 11 78 00         [10]  541         ld      de,#3*SCREEN_WIDTH
-      000632 60               [ 4]  542         ld      h,b
-      000633 69               [ 4]  543         ld      l,c
-      000634 19               [11]  544         add     hl,de
-      000635 44               [ 4]  545         ld      b,h
-      000636 4D               [ 4]  546         ld      c,l
-      000637 3D               [ 4]  547         dec     a
-      000638 20 E8            [12]  548         jr      nz,loop_left_border_check
-      00063A F1               [10]  549         pop     af
-      00063B C9               [10]  550         ret
-      00063C                        551 correct_left_border:
-      00063C 2A D2 0D         [16]  552         ld      hl,(MAN_HEAD)
-      00063F 11 28 00         [10]  553         ld      de,#SCREEN_WIDTH
-      000642 36 C6            [10]  554         ld      (hl),#CHR_WALL
-      000644 19               [11]  555         add     hl,de
-      000645 36 CC            [10]  556         ld      (hl),#CHR_MAN_HEAD
-      000647 22 D2 0D         [16]  557         ld      (MAN_HEAD),hl
-      00064A 19               [11]  558         add     hl,de
-      00064B 36 9D            [10]  559         ld      (hl),#CHR_MAN_WALK
-      00064D C3 2E 06         [10]  560         jp      left_border_next_adr
-      000650                        561 action_right:
-      000650 F5               [11]  562         push    af
-      000651 2A D2 0D         [16]  563         ld      hl,(MAN_HEAD)
-      000654 7E               [ 7]  564         ld      a,(hl)
-      000655 36 20            [10]  565         ld      (hl),#' '
-      000657 23               [ 6]  566         inc     hl
-      000658 22 D2 0D         [16]  567         ld      (MAN_HEAD),hl
-      00065B 77               [ 7]  568         ld      (hl),a
-      00065C 11 28 00         [10]  569         ld      de,#SCREEN_WIDTH
-      00065F 19               [11]  570         add     hl,de
-      000660 2B               [ 6]  571         dec     hl
-      000661 7E               [ 7]  572         ld      a,(hl)
-      000662 36 20            [10]  573         ld      (hl),#' '
-      000664 FE 9D            [ 7]  574         cp      #CHR_MAN_WALK
-      000666 28 04            [12]  575         jr      z,transition_stay
-      000668 FE A1            [ 7]  576         cp      #CHR_MAN_STAY
-      00066A 28 04            [12]  577         jr      z,transition_walk
-      00066C                        578 transition_stay:
-      00066C C6 04            [ 7]  579         add     a,#TRANSITION_MAN_WALK_STAY
-      00066E 18 02            [12]  580         jr      update_right
-      000670                        581 transition_walk:
-      000670 D6 04            [ 7]  582         sub     #TRANSITION_MAN_WALK_STAY
-      000672                        583 update_right:
-      000672 23               [ 6]  584         inc     hl
-      000673 77               [ 7]  585         ld      (hl),a
-      000674 3E 07            [ 7]  586         ld      a,#GAMES_LINES+1
-      000676 01 78 EC         [10]  587         ld      bc,#BWS+(GAME_START_Y+1)*SCREEN_WIDTH+0
-      000679                        588 loop_right_border_check:
-      000679 C5               [11]  589         push    bc
-      00067A 60               [ 4]  590         ld      h,b
-      00067B 69               [ 4]  591         ld      l,c
-      00067C ED 5B D2 0D      [20]  592         ld      de,(MAN_HEAD)
-      000680 A7               [ 4]  593         and     a
-      000681 ED 52            [15]  594         sbc     hl,de
-      000683 28 0E            [12]  595         jr      z,correct_right_border
-      000685                        596 right_border_next_adr:
-      000685 C1               [10]  597         pop     bc
-      000686 11 78 00         [10]  598         ld      de,#3*SCREEN_WIDTH
-      000689 60               [ 4]  599         ld      h,b
-      00068A 69               [ 4]  600         ld      l,c
-      00068B 19               [11]  601         add     hl,de
-      00068C 44               [ 4]  602         ld      b,h
-      00068D 4D               [ 4]  603         ld      c,l
-      00068E 3D               [ 4]  604         dec     a
-      00068F 20 E8            [12]  605         jr      nz,loop_right_border_check
-      000691 F1               [10]  606         pop     af
-      000692 C9               [10]  607         ret
-      000693                        608 correct_right_border:
-      000693 2A D2 0D         [16]  609         ld      hl,(MAN_HEAD)
-      000696 4E               [ 7]  610         ld      c,(hl)
-      000697 36 9D            [10]  611         ld      (hl),#CHR_MAN_WALK
-      000699 11 28 00         [10]  612         ld      de,#SCREEN_WIDTH
-      00069C A7               [ 4]  613         and     a
-      00069D ED 52            [15]  614         sbc     hl,de
-      00069F 71               [ 7]  615         ld      (hl),c
-      0006A0 22 D2 0D         [16]  616         ld      (MAN_HEAD),hl
-      0006A3 19               [11]  617         add     hl,de
-      0006A4 19               [11]  618         add     hl,de
-      0006A5 36 EE            [10]  619         ld      (hl),#CHR_MOVING_LINE
-      0006A7 18 DC            [12]  620         jr      right_border_next_adr
-      0006A9                        621 action_jump:
-      0006A9 2A D2 0D         [16]  622         ld      hl,(MAN_HEAD)
-      0006AC 11 28 00         [10]  623         ld      de,#SCREEN_WIDTH
-      0006AF A7               [ 4]  624         and     a
-      0006B0 ED 52            [15]  625         sbc     hl,de
-      0006B2 7E               [ 7]  626         ld      a,(hl)
-      0006B3 FE 20            [ 7]  627         cp      #' '
-      0006B5 28 0B            [12]  628         jr      z,jump_ok
-      0006B7 FE EE            [ 7]  629         cp      #CHR_MOVING_LINE
-      0006B9 28 2B            [12]  630         jr      z,jump_fail
-      0006BB FE C6            [ 7]  631         cp      #CHR_WALL
-      0006BD 28 27            [12]  632         jr      z,jump_fail
-      0006BF C3 5C 04         [10]  633         jp      handle_fail_delay
-      0006C2                        634 jump_ok:
-      0006C2 D9               [ 4]  635         exx
-      0006C3 CD C4 07         [17]  636         call    add_10_points
-      0006C6 D9               [ 4]  637         exx
-      0006C7 19               [11]  638         add     hl,de
-      0006C8 36 20            [10]  639         ld      (hl),#' '
-      0006CA 19               [11]  640         add     hl,de
-      0006CB 36 20            [10]  641         ld      (hl),#' '
-      0006CD 1E 78            [ 7]  642         ld      e,#3*SCREEN_WIDTH
-      0006CF A7               [ 4]  643         and     a
-      0006D0 ED 52            [15]  644         sbc     hl,de
-      0006D2 36 9D            [10]  645         ld      (hl),#CHR_MAN_WALK
-      0006D4 1E 28            [ 7]  646         ld      e,#SCREEN_WIDTH
-      0006D6 A7               [ 4]  647         and     a
-      0006D7 ED 52            [15]  648         sbc     hl,de
-      0006D9 36 CC            [10]  649         ld      (hl),#CHR_MAN_HEAD
-      0006DB 22 D2 0D         [16]  650         ld      (MAN_HEAD),hl
-      0006DE 3E 04            [ 7]  651         ld      a,#DELAY_COUNTER_JUMP
-      0006E0 32 D4 0D         [13]  652         ld      (JUMP_DELAY),a
-      0006E3 C3 5C 04         [10]  653         jp      handle_fail_delay
-      0006E6                        654 jump_fail:
-      0006E6 19               [11]  655         add     hl,de
-      0006E7 2B               [ 6]  656         dec     hl
-      0006E8 3E CD            [ 7]  657         ld      a,#CHR_SMOKE
-      0006EA 77               [ 7]  658         ld      (hl),a
-      0006EB 23               [ 6]  659         inc     hl
-      0006EC 23               [ 6]  660         inc     hl
-      0006ED 23               [ 6]  661         inc     hl
-      0006EE 77               [ 7]  662         ld      (hl),a
-      0006EF 2B               [ 6]  663         dec     hl
-      0006F0 2B               [ 6]  664         dec     hl
-      0006F1 36 20            [10]  665         ld      (hl),#' '
-      0006F3 19               [11]  666         add     hl,de
-      0006F4 36 97            [10]  667         ld      (hl),#CHR_MAN_SLEEP
-      0006F6 23               [ 6]  668         inc     hl
-      0006F7 36 C9            [10]  669         ld      (hl),#CHR_MAN_SLEEP_HEAD
-      0006F9 3E 0B            [ 7]  670         ld      a,#DELAY_COUNTER
-      0006FB 32 D5 0D         [13]  671         ld      (FAIL_DELAY),a
-      0006FE 3A D1 0D         [13]  672         ld      a,(cnt_fail_jump)
-      000701 FE 05            [ 7]  673         cp      #MAX_FAIL_COUNTER
-      000703 CA 5C 04         [10]  674         jp      z,handle_fail_delay
-      000706 3C               [ 4]  675         inc     a
-      000707 32 D1 0D         [13]  676         ld      (cnt_fail_jump),a
-      00070A C3 5C 04         [10]  677         jp      handle_fail_delay
-      00070D                        678 check_fall_through:
-      00070D 3A D4 0D         [13]  679         ld      a,(JUMP_DELAY)
-      000710 FE 01            [ 7]  680         cp      #INITIAL_DELAY_COUNTER
-      000712 C0               [11]  681         ret     nz
-      000713                        682 check_for_trap:
-      000713 2A D2 0D         [16]  683         ld      hl,(MAN_HEAD)
-      000716 11 28 00         [10]  684         ld      de,#SCREEN_WIDTH
-      000719 19               [11]  685         add     hl,de
-      00071A 19               [11]  686         add     hl,de
-      00071B 7E               [ 7]  687         ld      a,(hl)
-      00071C FE 20            [ 7]  688         cp      #' '
-      00071E C0               [11]  689         ret     nz
-      00071F 3A D5 0D         [13]  690         ld      a,(FAIL_DELAY)
-      000722 FE 01            [ 7]  691         cp      #INITIAL_DELAY_COUNTER
-      000724 28 15            [12]  692         jr      z,erase_player_fell_down
-      000726 2A D2 0D         [16]  693         ld      hl,(MAN_HEAD)
-      000729 3E 20            [ 7]  694         ld      a,#' '
-      00072B 2B               [ 6]  695         dec     hl
-      00072C 77               [ 7]  696         ld      (hl),a
-      00072D 23               [ 6]  697         inc     hl
-      00072E 23               [ 6]  698         inc     hl
-      00072F 23               [ 6]  699         inc     hl
-      000730 77               [ 7]  700         ld      (hl),a
-      000731 2B               [ 6]  701         dec     hl
-      000732 19               [11]  702         add     hl,de
-      000733 77               [ 7]  703         ld      (hl),a
-      000734 23               [ 6]  704         inc     hl
-      000735 77               [ 7]  705         ld      (hl),a
-      000736 2B               [ 6]  706         dec     hl
-      000737 2B               [ 6]  707         dec     hl
-      000738 77               [ 7]  708         ld      (hl),a
-      000739 18 08            [12]  709         jr      player_fell_down
-      00073B                        710 erase_player_fell_down:
-      00073B 2A D2 0D         [16]  711         ld      hl,(MAN_HEAD)
-      00073E 3E 20            [ 7]  712         ld      a,#' '
-      000740 77               [ 7]  713         ld      (hl),a
-      000741 19               [11]  714         add     hl,de
-      000742 77               [ 7]  715         ld      (hl),a
-      000743                        716 player_fell_down:
-      000743 19               [11]  717         add     hl,de
-      000744 19               [11]  718         add     hl,de
-      000745 22 D2 0D         [16]  719         ld      (MAN_HEAD),hl
-      000748 19               [11]  720         add     hl,de
-      000749 36 97            [10]  721         ld      (hl),#CHR_MAN_SLEEP
-      00074B 23               [ 6]  722         inc     hl
-      00074C 36 C9            [10]  723         ld      (hl),#CHR_MAN_SLEEP_HEAD
-      00074E 3E 08            [ 7]  724         ld      a,#DELAY_COUNTER2
-      000750 32 D5 0D         [13]  725         ld      (FAIL_DELAY),a
-      000753 3A D0 0D         [13]  726         ld      a,(cnt_fail_trap)
-      000756 FE 05            [ 7]  727         cp      #MAX_FAIL_COUNTER
-      000758 C8               [11]  728         ret     z
-      000759 3C               [ 4]  729         inc     a
-      00075A 32 D0 0D         [13]  730         ld      (cnt_fail_trap),a
-      00075D C9               [10]  731         ret
-      00075E                        732 check_level_finished:
-      00075E 2A D2 0D         [16]  733         ld      hl,(MAN_HEAD)
-      000761 11 6F EC         [10]  734         ld      de,#BWS+(GAME_START_Y*SCREEN_WIDTH)+(SCREEN_WIDTH-9)
-      000764 A7               [ 4]  735         and     a
-      000765 ED 52            [15]  736         sbc     hl,de
-      000767 20 39            [12]  737         jr      nz,round_end
-      000769 3A D9 0D         [13]  738         ld      a,(LEVEL)
-      00076C FE 08            [ 7]  739         cp      #MAX_LEVEL
-      00076E 28 01            [12]  740         jr      z,new_level_set
-      000770 3C               [ 4]  741         inc     a
-      000771                        742 new_level_set:
-      000771 32 D9 0D         [13]  743         ld      (LEVEL),a
-      000774 21 33 EF         [10]  744         ld      hl,#BWS+(GAME_START_Y+3*GAMES_LINES)*SCREEN_WIDTH+(15+ALIGN_MIDDLE)
-      000777 22 D2 0D         [16]  745         ld      (MAN_HEAD),hl
-      00077A 3E 28            [ 7]  746         ld      a,#SCREEN_WIDTH
-      00077C 36 CC            [10]  747         ld      (hl),#CHR_MAN_HEAD
-      00077E 85               [ 4]  748         add     a,l
-      00077F 6F               [ 4]  749         ld      l,a
-      000780 36 A1            [10]  750         ld      (hl),#CHR_MAN_STAY
-      000782 21 D0 0D         [10]  751         ld      hl,#cnt_fail_trap
-      000785 3E 02            [ 7]  752         ld      a,#INITIAL_FAIL_COUNTER
-      000787 77               [ 7]  753         ld      (hl),a
-      000788 21 D1 0D         [10]  754         ld      hl,#cnt_fail_jump
-      00078B 77               [ 7]  755         ld      (hl),a
-      00078C 21 6D EC         [10]  756         ld      hl,#BWS+GAME_START_Y*SCREEN_WIDTH+(SCREEN_WIDTH-11)
-      00078F 36 F8            [10]  757         ld      (hl),#CHR_LINE_TOP
-      000791 23               [ 6]  758         inc     hl
-      000792 36 95            [10]  759         ld      (hl),#CHR_ARROW_RIGHT_TOP
-      000794 23               [ 6]  760         inc     hl
-      000795 36 20            [10]  761         ld      (hl),#' '
-      000797 21 95 EC         [10]  762         ld      hl,#BWS+(GAME_START_Y+1)*SCREEN_WIDTH++(SCREEN_WIDTH-11)
-      00079A 36 9E            [10]  763         ld      (hl),#CHR_LINE_BOTTOM
-      00079C 23               [ 6]  764         inc     hl
-      00079D 36 93            [10]  765         ld      (hl),#CHR_ARROW_RIGHT_BOTTOM
-      00079F 23               [ 6]  766         inc     hl
-      0007A0 36 20            [10]  767         ld      (hl),#' '
-      0007A2                        768 round_end:
-      0007A2 13               [ 6]  769         inc     de
-      0007A3 13               [ 6]  770         inc     de
-      0007A4 2A D2 0D         [16]  771         ld      hl,(MAN_HEAD)
-      0007A7 A7               [ 4]  772         and     a
-      0007A8 ED 52            [15]  773         sbc     hl,de
-      0007AA 3E 0B            [ 7]  774         ld      a,#DELAY_COUNTER
-      0007AC C0               [11]  775         ret     nz
-      0007AD 32 D5 0D         [13]  776         ld      (FAIL_DELAY),a
-      0007B0 13               [ 6]  777         inc     de
-      0007B1 ED 53 D2 0D      [20]  778         ld      (MAN_HEAD),de
-      0007B5 3E 20            [ 7]  779         ld      a,#' '
-      0007B7 1B               [ 6]  780         dec     de
-      0007B8 12               [ 7]  781         ld      (de),a
-      0007B9 83               [ 4]  782         add     a,e
-      0007BA 5F               [ 4]  783         ld      e,a
-      0007BB 12               [ 7]  784         ld      (de),a
-      0007BC 6F               [ 4]  785         ld      l,a
-      0007BD 19               [11]  786         add     hl,de
-      0007BE 36 97            [10]  787         ld      (hl),#CHR_MAN_SLEEP
-      0007C0 23               [ 6]  788         inc     hl
-      0007C1 36 C9            [10]  789         ld      (hl),#CHR_MAN_SLEEP_HEAD
-      0007C3 C9               [10]  790         ret
-      0007C4                        791 add_10_points:
-      0004C4                        792         SET_CURSOR_DE 0 23+POSDIFF_POINTS
-      0007C4 C5               [11]    1         push    bc
-      0007C5 11 20 01         [10]    2         ld      de,#(0+1)*256+(23+POSDIFF_POINTS+1)
-      0007C8 0E 12            [ 7]    3         ld      c,#UP_SETCU
-      0007CA CD 05 00         [17]    4         call    BOS
-      0007CD C1               [10]    5         pop     bc
-      0007CE 2A D7 0D         [16]  793         ld      hl,(POINTS)
-      0007D1 11 0A 00         [10]  794         ld      de,#10
-      0007D4 19               [11]  795         add     hl,de
-      0007D5 22 D7 0D         [16]  796         ld      (POINTS),hl
-      0007D8 CD E1 07         [17]  797         call    print_decimal
-      0007DB 3E 20            [ 7]  798         ld      a,#' '
-      0007DD 32 24 EC         [13]  799         ld      (BWS+0*SCREEN_WIDTH+23+POSDIFF_POINTS+5),a
-      0007E0 C9               [10]  800         ret
-      0007E1                        801 print_decimal:
-      0007E1 E5               [11]  802         push    hl
-      0007E2 01 10 27         [10]  803         ld      bc,#10000
-      0007E5 CD 0D 08         [17]  804         call    get_decimal_digit
-      0007E8 01 E8 03         [10]  805         ld      bc,#1000
-      0007EB CD 0D 08         [17]  806         call    get_decimal_digit
-      0007EE 01 64 00         [10]  807         ld      bc,#100
-      0007F1 CD 0D 08         [17]  808         call    get_decimal_digit
-      0007F4 01 0A 00         [10]  809         ld      bc,#10
-      0007F7 CD 0D 08         [17]  810         call    get_decimal_digit
-      0007FA 01 01 00         [10]  811         ld      bc,#1
-      0007FD CD 0D 08         [17]  812         call    get_decimal_digit
-      000500                        813         REMOVE_CURSOR;
-      000800 2A 2D 00         [16]    1         ld      hl,(CURS)
-      000803 36 20            [10]    2         ld      (hl),#' '
-      000805 CB 94            [ 8]    3         res     2,h
-      000807 CB BE            [15]    4         res     7,(hl)
-      000809 CB D4            [ 8]    5         set     2,h
-      00080B E1               [10]  814         pop     hl
-      00080C C9               [10]  815         ret
-      00080D                        816 get_decimal_digit:
-      00080D AF               [ 4]  817         xor     a
-      00080E                        818 decimal_loop:
-      00080E A7               [ 4]  819         and     a
-      00080F ED 42            [15]  820         sbc     hl,bc
-      000811 3C               [ 4]  821         inc     a
-      000812 D2 0E 08         [10]  822         jp      nc,decimal_loop
-      000815 3D               [ 4]  823         dec     a
-      000816 09               [11]  824         add     hl,bc
-      000817 C6 30            [ 7]  825         add     a,#'0'
-      000519                        826         OUTCH
-      000819 C5               [11]    1         push    bc
-      00081A D5               [11]    2         push    de
-      00081B 0E 02            [ 7]    3         ld      c,#UP_CONSO
-      00081D 5F               [ 4]    4         ld      e,a
-      00081E CD 05 00         [17]    5         call    BOS
-      000821 D1               [10]    6         pop     de
-      000822 C1               [10]    7         pop     bc
-      000823 C9               [10]  827         ret
-      000824                        828 no_lives::
-      000524                        829         PRST7
-      000824 CD B1 0E         [17]    1         call    prst7
-      000827 0C A0                  830         .db     0x0c,0xa0
-      000829 21 7B 0E         [10]  831         ld      hl,#TXT_GAME_OVER
-      00082C 11 0D EC         [10]  832         ld      de,#POS_GAME_OVER
-      00082F 01 0F 00         [10]  833         ld      bc,#TXT_GAME_OVER_size
-      000832 ED B0            [21]  834         ldir
-      000834 0E 40            [ 7]  835         ld      c,#3*SCREEN_WIDTH-TXT_GAME_OVER_size-1+POSDIFF_YOUR_SCORE
-      000836 7B               [ 4]  836         ld      a,e
-      000837 81               [ 4]  837         add     a,c
-      000838 5F               [ 4]  838         ld      e,a
-      000839 0E 0C            [ 7]  839         ld      c,#TXT_YOUR_SCORE_size
-      00083B ED B0            [21]  840         ldir
-      00083D 0E 47            [ 7]  841         ld      c,#2*SCREEN_WIDTH-TXT_YOUR_SCORE_size+3
-      00083F 7B               [ 4]  842         ld      a,e
-      000840 81               [ 4]  843         add     a,c
-      000841 5F               [ 4]  844         ld      e,a
-      000842 0E 09            [ 7]  845         ld      c,#TXT_HAZARD_size
-      000844 ED B0            [21]  846         ldir
-      000846 21 E0 ED         [10]  847         ld      hl,#BWS+15*SCREEN_WIDTH+0+(3*POSDIFF_YOUR_SCORE)
-      000849 36 A0            [10]  848         ld      (hl),#CHR_MIDDLE_LINE
-      00084B 11 E1 ED         [10]  849         ld      de,#BWS+15*SCREEN_WIDTH+1+(3*POSDIFF_YOUR_SCORE)
-      00084E 0E 27            [ 7]  850         ld      c,#SCREEN_WIDTH-1
-      000850 ED B0            [21]  851         ldir
-      000852 2A D7 0D         [16]  852         ld      hl,(POINTS)
-      000555                        853         SET_CURSOR_DE (5-POSDIFF_YOUR_SCORE_DY) (21+ALIGN_MIDDLE)
-      000855 C5               [11]    1         push    bc
-      000856 11 1A 03         [10]    2         ld      de,#((5-POSDIFF_YOUR_SCORE_DY)+1)*256+((21+ALIGN_MIDDLE)+1)
-      000859 0E 12            [ 7]    3         ld      c,#UP_SETCU
-      00085B CD 05 00         [17]    4         call    BOS
-      00085E C1               [10]    5         pop     bc
-      00085F CD E1 07         [17]  854         call    print_decimal
-      000862 3A D9 0D         [13]  855         ld      a,(LEVEL)
-      000865 C6 2F            [ 7]  856         add     a,#'0'-1
-      000867 32 BB EC         [13]  857         ld      (BWS+7*SCREEN_WIDTH+23+ALIGN_MIDDLE+3*POSDIFF_YOUR_SCORE),a
-      00086A ED 5B 5D 0E      [20]  858         ld      de,(HIGH_SCORE_TABLE01.points)
-      00086E A7               [ 4]  859         and     a
-      00086F ED 52            [15]  860         sbc     hl,de
-      000871 D4 D9 09         [17]  861         call    nc,draw_new_highscore_box
-      000574                        862         SET_CURSOR_HL (17-POSDIFF_YOUR_SCORE_DY) (3+ALIGN_MIDDLE)
-      000874 D5               [11]    1         push    de
-      000875 C5               [11]    2         push    bc
-      000876 11 08 0F         [10]    3         ld      de,#((17-POSDIFF_YOUR_SCORE_DY)+1)*256+((3+ALIGN_MIDDLE)+1)
-      000879 62               [ 4]    4         ld      h,d
-      00087A 6B               [ 4]    5         ld      l,e
-      00087B 0E 12            [ 7]    6         ld      c,#UP_SETCU
-      00087D CD 05 00         [17]    7         call    BOS
-      000880 C1               [10]    8         pop     bc
-      000881 D1               [10]    9         pop     de
-      000582                        863         PRST7
-      000882 CD B1 0E         [17]    1         call    prst7
-      000885 20 49 4E 50 55 54 20   864         .ascis ' INPUT YOUR INITIALS: __ '
+      000441 FE 20            [ 7]  202         cp      #' '
+      000443 CA 9D 06         [10]  203         jp      z,action_jump
+      000446 FE 08            [ 7]  204         cp      #VK_LEFT
+      000448 CC ED 05         [17]  205         call    z,action_left
+      00044B FE 09            [ 7]  206         cp      #VK_RIGHT
+      00044D CC 44 06         [17]  207         call    z,action_right
+                           000000   208 .if  eq,z9001
+                                    209         ;debuggin
+                                    210         cp      #'U'
+                                    211         jr      nz,next_cmd
+                                    212         ld      hl,#BWS+GAME_START_Y*SCREEN_WIDTH+20
+                                    213         ld      (hl),#CHR_MAN_HEAD
+                                    214         ld      (MAN_HEAD),hl
+                                    215         jr      handle_fail_delay
+                                    216 next_cmd:
+                                    217         cp      #'X'
+                                    218         jr      nz,handle_fail_delay
+                                    219         jp      no_lives
+                                    220 .endif
+      000450                        221 handle_fail_delay:
+      000450 CD 01 07         [17]  222         call    check_fall_through
+      000453                        223 handle_jump_delay:
+      000453 3A C8 0D         [13]  224         ld      a,(JUMP_DELAY)
+      000456 FE 01            [ 7]  225         cp      #INITIAL_DELAY_COUNTER
+      000458 28 04            [12]  226         jr      z,jump_delay_counter_set
+      00045A 3D               [ 4]  227         dec     a
+      00045B 32 C8 0D         [13]  228         ld      (JUMP_DELAY),a
+      00045E                        229 jump_delay_counter_set:
+      00045E 3A C9 0D         [13]  230         ld      a,(FAIL_DELAY)
+      000461 FE 01            [ 7]  231         cp      #INITIAL_DELAY_COUNTER
+      000463 28 42            [12]  232         jr      z,player_activity
+      000465 3D               [ 4]  233         dec     a
+      000466 32 C9 0D         [13]  234         ld      (FAIL_DELAY),a
+      000469 FE 01            [ 7]  235         cp      #INITIAL_DELAY_COUNTER
+      00046B 20 3A            [12]  236         jr      nz,player_activity
+      00046D 2A C6 0D         [16]  237         ld      hl,(MAN_HEAD)
+                                    238         ; test for bottom line
+      000470 11 D0 EE         [10]  239         ld      de,#BWS+(GAME_START_Y+3*GAMES_LINES-2)*SCREEN_WIDTH
+      000473 A7               [ 4]  240         and     a
+      000474 ED 52            [15]  241         sbc     hl,de
+      000476 38 16            [12]  242         jr      c,player_wake_up
+      000478 3A CA 0D         [13]  243         ld      a,(LIVES)
+      00047B 3D               [ 4]  244         dec     a
+      00047C 32 CA 0D         [13]  245         ld      (LIVES),a
+      00047F 21 9A EF         [10]  246         ld      hl,#BWS+(GAME_START_Y+3*GAMES_LINES+3)*SCREEN_WIDTH+2
+      000482 16 00            [ 7]  247         ld      d,#HI_ZERO
+      000484 87               [ 4]  248         add     a,a
+      000485 5F               [ 4]  249         ld      e,a
+      000486 19               [11]  250         add     hl,de
+      000487 36 20            [10]  251         ld      (hl),#' '
+      000489 FE 00            [ 7]  252         cp      #ZERO
+      00048B CA 18 08         [10]  253         jp      z,no_lives
+      00048E                        254 player_wake_up:
+      00048E 2A C6 0D         [16]  255         ld      hl,(MAN_HEAD)
+      000491 36 CC            [10]  256         ld      (hl),#CHR_MAN_HEAD
+      000493 2B               [ 6]  257         dec     hl
+      000494 3E 20            [ 7]  258         ld      a,#' '
+      000496 77               [ 7]  259         ld      (hl),a
+      000497 23               [ 6]  260         inc     hl
+      000498 23               [ 6]  261         inc     hl
+      000499 23               [ 6]  262         inc     hl
+      00049A 77               [ 7]  263         ld      (hl),a
+      00049B 2B               [ 6]  264         dec     hl
+      00049C 11 28 00         [10]  265         ld      de,#SCREEN_WIDTH
+      00049F 19               [11]  266         add     hl,de
+      0004A0 77               [ 7]  267         ld      (hl),a
+      0004A1 23               [ 6]  268         inc     hl
+      0004A2 77               [ 7]  269         ld      (hl),a
+      0004A3 2B               [ 6]  270         dec     hl
+      0004A4 2B               [ 6]  271         dec     hl
+      0004A5 36 9D            [10]  272         ld      (hl),#CHR_MAN_WALK
+      0004A7                        273 player_activity:
+      0004A7 CD 52 07         [17]  274         call    check_level_finished
+      0004AA C3 26 04         [10]  275         jp      animation_loop
+                                    276 ; unchecked data source
+      0004AD 67 75 66 69            277         .db     0x67,0x75,0x66,0x69                     ;gufi
+      0004B1                        278 animation_monster:
+      0004B1 3A CD 0D         [13]  279         ld      a,(LEVEL)
+      0004B4 32 CE 0D         [13]  280         ld      (counter),a
+      0004B7 FE 01            [ 7]  281         cp      #LEVEL_1
+      0004B9 C8               [11]  282         ret     z
+      0004BA 01 DF 0D         [10]  283         ld      bc,#MONSTER_PTR
+      0004BD 11 17 0E         [10]  284         ld      de,#MONSTER_IMG
+      0004C0                        285 handle_one_monster:
+      0004C0 0A               [ 7]  286         ld      a,(bc)
+      0004C1 6F               [ 4]  287         ld      l,a
+      0004C2 03               [ 6]  288         inc     bc
+      0004C3 0A               [ 7]  289         ld      a,(bc)
+      0004C4 67               [ 4]  290         ld      h,a
+      0004C5 CD D4 04         [17]  291         call    handle_by_ptr
+      0004C8 3A CE 0D         [13]  292         ld      a,(counter)
+      0004CB 3D               [ 4]  293         dec     a
+      0004CC 32 CE 0D         [13]  294         ld      (counter),a
+      0004CF FE 01            [ 7]  295         cp      #LEVEL_1
+      0004D1 C8               [11]  296         ret     z
+      0004D2 18 EC            [12]  297         jr      handle_one_monster
+      0004D4                        298 handle_by_ptr:
+      0004D4 C5               [11]  299         push    bc
+      0004D5 3E 04            [ 7]  300         ld      a,#MONSTER_WIDTH
+      0004D7 D5               [11]  301         push    de
+      0004D8                        302 handle_by_column:
+      0004D8 36 20            [10]  303         ld      (hl),#' '
+      0004DA 11 28 00         [10]  304         ld      de,#SCREEN_WIDTH
+      0004DD 19               [11]  305         add     hl,de
+      0004DE 36 20            [10]  306         ld      (hl),#' '
+      0004E0 A7               [ 4]  307         and     a
+      0004E1 ED 52            [15]  308         sbc     hl,de
+      0004E3 2B               [ 6]  309         dec     hl
+      0004E4 E5               [11]  310         push    hl
+      0004E5 08               [ 4]  311         ex      af,af'
+      0004E6 11 EF EC         [10]  312         ld      de,#BWS+(GAME_START_Y+4)*SCREEN_WIDTH-1
+      0004E9 A7               [ 4]  313         and     a
+      0004EA ED 52            [15]  314         sbc     hl,de
+      0004EC 38 0D            [12]  315         jr      c,correct_ptr
+      0004EE C5               [11]  316         push    bc
+      0004EF 06 06            [ 7]  317         ld      b,#GAMES_LINES
+      0004F1 11 78 00         [10]  318         ld      de,#3*SCREEN_WIDTH
+      0004F4                        319 get_column:
+      0004F4 A7               [ 4]  320         and     a
+      0004F5 ED 52            [15]  321         sbc     hl,de
+      0004F7 38 13            [12]  322         jr      c,test_column
+      0004F9 10 F9            [13]  323         djnz    get_column
+      0004FB                        324 correct_ptr:
+      0004FB 11 27 00         [10]  325         ld      de,#SCREEN_WIDTH-1
+      0004FE ED 5A            [15]  326         adc     hl,de
+      000500 28 03            [12]  327         jr      z,start_from_bottom
+      000502 E1               [10]  328         pop     hl
+      000503 18 19            [12]  329         jr      update_pointers
+      000505                        330 start_from_bottom:
+      000505 E1               [10]  331         pop     hl
+      000506 11 08 02         [10]  332         ld      de,#((GAMES_LINES-2)*3+1)*SCREEN_WIDTH
+      000509 19               [11]  333         add     hl,de
+      00050A 18 12            [12]  334         jr      update_pointers
+      00050C                        335 test_column:
+      00050C C1               [10]  336         pop     bc
+      00050D 11 27 00         [10]  337         ld      de,#SCREEN_WIDTH-1
+      000510 ED 5A            [15]  338         adc     hl,de
+      000512 28 03            [12]  339         jr      z,move_one_line_up
+      000514 E1               [10]  340         pop     hl
+      000515 18 07            [12]  341         jr      update_pointers
+      000517                        342 move_one_line_up:
+      000517 E1               [10]  343         pop     hl
+      000518 11 50 00         [10]  344         ld      de,#2*SCREEN_WIDTH
+      00051B A7               [ 4]  345         and     a
+      00051C ED 52            [15]  346         sbc     hl,de
+      00051E                        347 update_pointers:
+      00051E 0B               [ 6]  348         dec     bc
+      00051F 7D               [ 4]  349         ld      a,l
+      000520 02               [ 7]  350         ld      (bc),a
+      000521 03               [ 6]  351         inc     bc
+      000522 7C               [ 4]  352         ld      a,h
+      000523 02               [ 7]  353         ld      (bc),a
+      000524 03               [ 6]  354         inc     bc
+      000525 0A               [ 7]  355         ld      a,(bc)
+      000526 6F               [ 4]  356         ld      l,a
+      000527 03               [ 6]  357         inc     bc
+      000528 0A               [ 7]  358         ld      a,(bc)
+      000529 67               [ 4]  359         ld      h,a
+      00052A 08               [ 4]  360         ex      af,af'
+      00052B 3D               [ 4]  361         dec     a
+      00052C FE 00            [ 7]  362         cp      #ZERO
+      00052E 28 02            [12]  363         jr      z,draw_monster
+      000530 18 A6            [12]  364         jr      handle_by_column
+      000532                        365 draw_monster:
+      000532 D1               [10]  366         pop     de
+      000533 C1               [10]  367         pop     bc
+      000534 0B               [ 6]  368         dec     bc
+      000535 3E 04            [ 7]  369         ld      a,#MONSTER_WIDTH
+      000537                        370 draw_monster_segment:
+      000537 08               [ 4]  371         ex      af,af'
+      000538 0A               [ 7]  372         ld      a,(bc)
+      000539 6F               [ 4]  373         ld      l,a
+      00053A 03               [ 6]  374         inc     bc
+      00053B 0A               [ 7]  375         ld      a,(bc)
+      00053C 67               [ 4]  376         ld      h,a
+      00053D 03               [ 6]  377         inc     bc
+      00053E 1A               [ 7]  378         ld      a,(de)
+      00053F 77               [ 7]  379         ld      (hl),a
+      000540 13               [ 6]  380         inc     de
+      000541 1A               [ 7]  381         ld      a,(de)
+      000542 D5               [11]  382         push    de
+      000543 11 28 00         [10]  383         ld      de,#SCREEN_WIDTH
+      000546 19               [11]  384         add     hl,de
+      000547 77               [ 7]  385         ld      (hl),a
+      000548 CD 54 05         [17]  386         call    monster_check_crash
+      00054B D1               [10]  387         pop     de
+      00054C 13               [ 6]  388         inc     de
+      00054D 08               [ 4]  389         ex      af,af'
+      00054E 3D               [ 4]  390         dec     a
+      00054F FE 00            [ 7]  391         cp      #ZERO
+      000551 20 E4            [12]  392         jr      nz,draw_monster_segment
+      000553 C9               [10]  393         ret
+      000554                        394 monster_check_crash:
+      000554 A7               [ 4]  395         and     a
+      000555 ED 52            [15]  396         sbc     hl,de
+      000557 EB               [ 4]  397         ex      de,hl
+      000558 2A C6 0D         [16]  398         ld      hl,(MAN_HEAD)
+      00055B A7               [ 4]  399         and     a
+      00055C ED 52            [15]  400         sbc     hl,de
+      00055E EB               [ 4]  401         ex      de,hl
+      00055F C0               [11]  402         ret     nz
+      000560 11 28 00         [10]  403         ld      de,#SCREEN_WIDTH
+      000563 19               [11]  404         add     hl,de
+      000564 23               [ 6]  405         inc     hl
+      000565 36 97            [10]  406         ld      (hl),#CHR_MAN_SLEEP
+      000567 23               [ 6]  407         inc     hl
+      000568 36 C9            [10]  408         ld      (hl),#CHR_MAN_SLEEP_HEAD
+      00056A 3E 0B            [ 7]  409         ld      a,#DELAY_COUNTER
+      00056C 32 C9 0D         [13]  410         ld      (FAIL_DELAY),a
+      00056F C9               [10]  411         ret
+      000570                        412 animation_lines:
+      000570 3E EE            [ 7]  413         ld      a,#CHR_MOVING_LINE
+      000572 21 AA 0C         [10]  414         ld      hl,#LINE_BUFFER
+      000575 77               [ 7]  415         ld      (hl),a
+      000576 11 AB 0C         [10]  416         ld      de,#LINE_BUFFER+1
+      000579 01 0E 01         [10]  417         ld      bc,#LINE_BUFFER_size-1
+      00057C ED B0            [21]  418         ldir
+      00057E 3A C4 0D         [13]  419         ld      a,(cnt_fail_trap)
+      000581 11 BA 0D         [10]  420         ld      de,#OFFSET_HOLES
+      000584 1B               [ 6]  421         dec     de
+      000585                        422 loop_failed_penalty_holes:
+      000585 F5               [11]  423         push    af
+      000586 13               [ 6]  424         inc     de
+      000587 1A               [ 7]  425         ld      a,(de)
+      000588 3C               [ 4]  426         inc     a
+      000589 12               [ 7]  427         ld      (de),a
+      00058A 4F               [ 4]  428         ld      c,a
+      00058B 06 00            [ 7]  429         ld      b,#HI_ZERO
+      00058D 21 AA 0C         [10]  430         ld      hl,#LINE_BUFFER
+      000590 09               [11]  431         add     hl,bc
+      000591 36 20            [10]  432         ld      (hl),#' '
+      000593 23               [ 6]  433         inc     hl
+      000594 36 20            [10]  434         ld      (hl),#' '
+      000596 23               [ 6]  435         inc     hl
+      000597 36 20            [10]  436         ld      (hl),#' '
+      000599 F1               [10]  437         pop     af
+      00059A 3D               [ 4]  438         dec     a
+      00059B 20 E8            [12]  439         jr      nz,loop_failed_penalty_holes
+      00059D 3A C5 0D         [13]  440         ld      a,(cnt_fail_jump)
+      0005A0 11 BF 0D         [10]  441         ld      de,#OFFSET_HOLES_JUMP_PENALTY
+      0005A3 1B               [ 6]  442         dec     de
+      0005A4                        443 loop_jump_penalty_holes:
+      0005A4 F5               [11]  444         push    af
+      0005A5 13               [ 6]  445         inc     de
+      0005A6 1A               [ 7]  446         ld      a,(de)
+      0005A7 3D               [ 4]  447         dec     a
+      0005A8 12               [ 7]  448         ld      (de),a
+      0005A9 4F               [ 4]  449         ld      c,a
+      0005AA 06 00            [ 7]  450         ld      b,#HI_ZERO
+      0005AC 21 AA 0C         [10]  451         ld      hl,#LINE_BUFFER
+      0005AF 09               [11]  452         add     hl,bc
+      0005B0 36 20            [10]  453         ld      (hl),#' '
+      0005B2 23               [ 6]  454         inc     hl
+      0005B3 36 20            [10]  455         ld      (hl),#' '
+      0005B5 23               [ 6]  456         inc     hl
+      0005B6 36 20            [10]  457         ld      (hl),#' '
+      0005B8 F1               [10]  458         pop     af
+      0005B9 3D               [ 4]  459         dec     a
+      0005BA 20 E8            [12]  460         jr      nz,loop_jump_penalty_holes
+      0005BC 3E 06            [ 7]  461         ld      a,#GAMES_LINES
+      0005BE 21 AA 0C         [10]  462         ld      hl,#LINE_BUFFER
+      0005C1 11 50 EC         [10]  463         ld      de,#BWS+(GAME_START_Y*SCREEN_WIDTH)+0
+      0005C4                        464 print_line:
+      0005C4 01 28 00         [10]  465         ld      bc,#SCREEN_WIDTH
+      0005C7 E5               [11]  466         push    hl
+      0005C8 EB               [ 4]  467         ex      de,hl
+      0005C9 09               [11]  468         add     hl,bc
+      0005CA 09               [11]  469         add     hl,bc
+      0005CB EB               [ 4]  470         ex      de,hl
+      0005CC E1               [10]  471         pop     hl
+      0005CD ED B0            [21]  472         ldir
+      0005CF 3D               [ 4]  473         dec     a
+      0005D0 20 F2            [12]  474         jr      nz,print_line
+      0005D2 21 70 EF         [10]  475         ld      hl,#BWS+(2+GAME_START_Y+(GAMES_LINES*3))*SCREEN_WIDTH+0
+      0005D5 11 71 EF         [10]  476         ld      de,#BWS+(2+GAME_START_Y+(GAMES_LINES*3))*SCREEN_WIDTH+1
+      0005D8 01 27 00         [10]  477         ld      bc,#SCREEN_WIDTH-1
+      0005DB 36 C6            [10]  478         ld      (hl),#CHR_WALL
+      0005DD ED B0            [21]  479         ldir
+      0005DF C9               [10]  480         ret
+      0005E0                        481 animation_delay:
+      0005E0 21 50 46         [10]  482         ld      hl,#SLOW_DOWN_13066
+      0005E3 11 01 00         [10]  483         ld      de,#1
+      0005E6 A7               [ 4]  484         and     a
+      0005E7                        485 delay_loop:
+      0005E7 2B               [ 6]  486         dec     hl
+      0005E8 ED 52            [15]  487         sbc     hl,de
+      0005EA 20 FB            [12]  488         jr      nz,delay_loop
+      0005EC C9               [10]  489         ret
+      0005ED                        490 action_left:
+      0005ED F5               [11]  491         push    af
+      0005EE 2A C6 0D         [16]  492         ld      hl,(MAN_HEAD)
+      0005F1 7E               [ 7]  493         ld      a,(hl)
+      0005F2 36 20            [10]  494         ld      (hl),#' '
+      0005F4 2B               [ 6]  495         dec     hl
+      0005F5 22 C6 0D         [16]  496         ld      (MAN_HEAD),hl
+      0005F8 77               [ 7]  497         ld      (hl),a
+      0005F9 11 28 00         [10]  498         ld      de,#SCREEN_WIDTH
+      0005FC 19               [11]  499         add     hl,de
+      0005FD 23               [ 6]  500         inc     hl
+      0005FE 7E               [ 7]  501         ld      a,(hl)
+      0005FF 36 20            [10]  502         ld      (hl),#' '
+      000601 FE 9D            [ 7]  503         cp      #CHR_MAN_WALK
+      000603 28 04            [12]  504         jr      z,transition_left_stay
+      000605 FE A1            [ 7]  505         cp      #CHR_MAN_STAY
+      000607 28 04            [12]  506         jr      z,transition_left_walk
+      000609                        507 transition_left_stay:
+      000609 C6 04            [ 7]  508         add     a,#TRANSITION_MAN_WALK_STAY
+      00060B 18 02            [12]  509         jr      update_left
+      00060D                        510 transition_left_walk:
+      00060D D6 04            [ 7]  511         sub     #TRANSITION_MAN_WALK_STAY
+      00060F                        512 update_left:
+      00060F 2B               [ 6]  513         dec     hl
+      000610 77               [ 7]  514         ld      (hl),a
+      000611 3E 07            [ 7]  515         ld      a,#GAMES_LINES+1
+      000613 01 4F EC         [10]  516         ld      bc,#BWS+(GAME_START_Y)*SCREEN_WIDTH-1
+      000616                        517 loop_left_border_check:
+      000616 C5               [11]  518         push    bc
+      000617 60               [ 4]  519         ld      h,b
+      000618 69               [ 4]  520         ld      l,c
+      000619 ED 5B C6 0D      [20]  521         ld      de,(MAN_HEAD)
+      00061D A7               [ 4]  522         and     a
+      00061E ED 52            [15]  523         sbc     hl,de
+      000620 28 0E            [12]  524         jr      z,correct_left_border
+      000622                        525 left_border_next_adr:
+      000622 C1               [10]  526         pop     bc
+      000623 11 78 00         [10]  527         ld      de,#3*SCREEN_WIDTH
+      000626 60               [ 4]  528         ld      h,b
+      000627 69               [ 4]  529         ld      l,c
+      000628 19               [11]  530         add     hl,de
+      000629 44               [ 4]  531         ld      b,h
+      00062A 4D               [ 4]  532         ld      c,l
+      00062B 3D               [ 4]  533         dec     a
+      00062C 20 E8            [12]  534         jr      nz,loop_left_border_check
+      00062E F1               [10]  535         pop     af
+      00062F C9               [10]  536         ret
+      000630                        537 correct_left_border:
+      000630 2A C6 0D         [16]  538         ld      hl,(MAN_HEAD)
+      000633 11 28 00         [10]  539         ld      de,#SCREEN_WIDTH
+      000636 36 C6            [10]  540         ld      (hl),#CHR_WALL
+      000638 19               [11]  541         add     hl,de
+      000639 36 CC            [10]  542         ld      (hl),#CHR_MAN_HEAD
+      00063B 22 C6 0D         [16]  543         ld      (MAN_HEAD),hl
+      00063E 19               [11]  544         add     hl,de
+      00063F 36 9D            [10]  545         ld      (hl),#CHR_MAN_WALK
+      000641 C3 22 06         [10]  546         jp      left_border_next_adr
+      000644                        547 action_right:
+      000644 F5               [11]  548         push    af
+      000645 2A C6 0D         [16]  549         ld      hl,(MAN_HEAD)
+      000648 7E               [ 7]  550         ld      a,(hl)
+      000649 36 20            [10]  551         ld      (hl),#' '
+      00064B 23               [ 6]  552         inc     hl
+      00064C 22 C6 0D         [16]  553         ld      (MAN_HEAD),hl
+      00064F 77               [ 7]  554         ld      (hl),a
+      000650 11 28 00         [10]  555         ld      de,#SCREEN_WIDTH
+      000653 19               [11]  556         add     hl,de
+      000654 2B               [ 6]  557         dec     hl
+      000655 7E               [ 7]  558         ld      a,(hl)
+      000656 36 20            [10]  559         ld      (hl),#' '
+      000658 FE 9D            [ 7]  560         cp      #CHR_MAN_WALK
+      00065A 28 04            [12]  561         jr      z,transition_stay
+      00065C FE A1            [ 7]  562         cp      #CHR_MAN_STAY
+      00065E 28 04            [12]  563         jr      z,transition_walk
+      000660                        564 transition_stay:
+      000660 C6 04            [ 7]  565         add     a,#TRANSITION_MAN_WALK_STAY
+      000662 18 02            [12]  566         jr      update_right
+      000664                        567 transition_walk:
+      000664 D6 04            [ 7]  568         sub     #TRANSITION_MAN_WALK_STAY
+      000666                        569 update_right:
+      000666 23               [ 6]  570         inc     hl
+      000667 77               [ 7]  571         ld      (hl),a
+      000668 3E 07            [ 7]  572         ld      a,#GAMES_LINES+1
+      00066A 01 78 EC         [10]  573         ld      bc,#BWS+(GAME_START_Y+1)*SCREEN_WIDTH+0
+      00066D                        574 loop_right_border_check:
+      00066D C5               [11]  575         push    bc
+      00066E 60               [ 4]  576         ld      h,b
+      00066F 69               [ 4]  577         ld      l,c
+      000670 ED 5B C6 0D      [20]  578         ld      de,(MAN_HEAD)
+      000674 A7               [ 4]  579         and     a
+      000675 ED 52            [15]  580         sbc     hl,de
+      000677 28 0E            [12]  581         jr      z,correct_right_border
+      000679                        582 right_border_next_adr:
+      000679 C1               [10]  583         pop     bc
+      00067A 11 78 00         [10]  584         ld      de,#3*SCREEN_WIDTH
+      00067D 60               [ 4]  585         ld      h,b
+      00067E 69               [ 4]  586         ld      l,c
+      00067F 19               [11]  587         add     hl,de
+      000680 44               [ 4]  588         ld      b,h
+      000681 4D               [ 4]  589         ld      c,l
+      000682 3D               [ 4]  590         dec     a
+      000683 20 E8            [12]  591         jr      nz,loop_right_border_check
+      000685 F1               [10]  592         pop     af
+      000686 C9               [10]  593         ret
+      000687                        594 correct_right_border:
+      000687 2A C6 0D         [16]  595         ld      hl,(MAN_HEAD)
+      00068A 4E               [ 7]  596         ld      c,(hl)
+      00068B 36 9D            [10]  597         ld      (hl),#CHR_MAN_WALK
+      00068D 11 28 00         [10]  598         ld      de,#SCREEN_WIDTH
+      000690 A7               [ 4]  599         and     a
+      000691 ED 52            [15]  600         sbc     hl,de
+      000693 71               [ 7]  601         ld      (hl),c
+      000694 22 C6 0D         [16]  602         ld      (MAN_HEAD),hl
+      000697 19               [11]  603         add     hl,de
+      000698 19               [11]  604         add     hl,de
+      000699 36 EE            [10]  605         ld      (hl),#CHR_MOVING_LINE
+      00069B 18 DC            [12]  606         jr      right_border_next_adr
+      00069D                        607 action_jump:
+      00069D 2A C6 0D         [16]  608         ld      hl,(MAN_HEAD)
+      0006A0 11 28 00         [10]  609         ld      de,#SCREEN_WIDTH
+      0006A3 A7               [ 4]  610         and     a
+      0006A4 ED 52            [15]  611         sbc     hl,de
+      0006A6 7E               [ 7]  612         ld      a,(hl)
+      0006A7 FE 20            [ 7]  613         cp      #' '
+      0006A9 28 0B            [12]  614         jr      z,jump_ok
+      0006AB FE EE            [ 7]  615         cp      #CHR_MOVING_LINE
+      0006AD 28 2B            [12]  616         jr      z,jump_fail
+      0006AF FE C6            [ 7]  617         cp      #CHR_WALL
+      0006B1 28 27            [12]  618         jr      z,jump_fail
+      0006B3 C3 50 04         [10]  619         jp      handle_fail_delay
+      0006B6                        620 jump_ok:
+      0006B6 D9               [ 4]  621         exx
+      0006B7 CD B8 07         [17]  622         call    add_10_points
+      0006BA D9               [ 4]  623         exx
+      0006BB 19               [11]  624         add     hl,de
+      0006BC 36 20            [10]  625         ld      (hl),#' '
+      0006BE 19               [11]  626         add     hl,de
+      0006BF 36 20            [10]  627         ld      (hl),#' '
+      0006C1 1E 78            [ 7]  628         ld      e,#3*SCREEN_WIDTH
+      0006C3 A7               [ 4]  629         and     a
+      0006C4 ED 52            [15]  630         sbc     hl,de
+      0006C6 36 9D            [10]  631         ld      (hl),#CHR_MAN_WALK
+      0006C8 1E 28            [ 7]  632         ld      e,#SCREEN_WIDTH
+      0006CA A7               [ 4]  633         and     a
+      0006CB ED 52            [15]  634         sbc     hl,de
+      0006CD 36 CC            [10]  635         ld      (hl),#CHR_MAN_HEAD
+      0006CF 22 C6 0D         [16]  636         ld      (MAN_HEAD),hl
+      0006D2 3E 04            [ 7]  637         ld      a,#DELAY_COUNTER_JUMP
+      0006D4 32 C8 0D         [13]  638         ld      (JUMP_DELAY),a
+      0006D7 C3 50 04         [10]  639         jp      handle_fail_delay
+      0006DA                        640 jump_fail:
+      0006DA 19               [11]  641         add     hl,de
+      0006DB 2B               [ 6]  642         dec     hl
+      0006DC 3E CD            [ 7]  643         ld      a,#CHR_SMOKE
+      0006DE 77               [ 7]  644         ld      (hl),a
+      0006DF 23               [ 6]  645         inc     hl
+      0006E0 23               [ 6]  646         inc     hl
+      0006E1 23               [ 6]  647         inc     hl
+      0006E2 77               [ 7]  648         ld      (hl),a
+      0006E3 2B               [ 6]  649         dec     hl
+      0006E4 2B               [ 6]  650         dec     hl
+      0006E5 36 20            [10]  651         ld      (hl),#' '
+      0006E7 19               [11]  652         add     hl,de
+      0006E8 36 97            [10]  653         ld      (hl),#CHR_MAN_SLEEP
+      0006EA 23               [ 6]  654         inc     hl
+      0006EB 36 C9            [10]  655         ld      (hl),#CHR_MAN_SLEEP_HEAD
+      0006ED 3E 0B            [ 7]  656         ld      a,#DELAY_COUNTER
+      0006EF 32 C9 0D         [13]  657         ld      (FAIL_DELAY),a
+      0006F2 3A C5 0D         [13]  658         ld      a,(cnt_fail_jump)
+      0006F5 FE 05            [ 7]  659         cp      #MAX_FAIL_COUNTER
+      0006F7 CA 50 04         [10]  660         jp      z,handle_fail_delay
+      0006FA 3C               [ 4]  661         inc     a
+      0006FB 32 C5 0D         [13]  662         ld      (cnt_fail_jump),a
+      0006FE C3 50 04         [10]  663         jp      handle_fail_delay
+      000701                        664 check_fall_through:
+      000701 3A C8 0D         [13]  665         ld      a,(JUMP_DELAY)
+      000704 FE 01            [ 7]  666         cp      #INITIAL_DELAY_COUNTER
+      000706 C0               [11]  667         ret     nz
+      000707                        668 check_for_trap:
+      000707 2A C6 0D         [16]  669         ld      hl,(MAN_HEAD)
+      00070A 11 28 00         [10]  670         ld      de,#SCREEN_WIDTH
+      00070D 19               [11]  671         add     hl,de
+      00070E 19               [11]  672         add     hl,de
+      00070F 7E               [ 7]  673         ld      a,(hl)
+      000710 FE 20            [ 7]  674         cp      #' '
+      000712 C0               [11]  675         ret     nz
+      000713 3A C9 0D         [13]  676         ld      a,(FAIL_DELAY)
+      000716 FE 01            [ 7]  677         cp      #INITIAL_DELAY_COUNTER
+      000718 28 15            [12]  678         jr      z,erase_player_fell_down
+      00071A 2A C6 0D         [16]  679         ld      hl,(MAN_HEAD)
+      00071D 3E 20            [ 7]  680         ld      a,#' '
+      00071F 2B               [ 6]  681         dec     hl
+      000720 77               [ 7]  682         ld      (hl),a
+      000721 23               [ 6]  683         inc     hl
+      000722 23               [ 6]  684         inc     hl
+      000723 23               [ 6]  685         inc     hl
+      000724 77               [ 7]  686         ld      (hl),a
+      000725 2B               [ 6]  687         dec     hl
+      000726 19               [11]  688         add     hl,de
+      000727 77               [ 7]  689         ld      (hl),a
+      000728 23               [ 6]  690         inc     hl
+      000729 77               [ 7]  691         ld      (hl),a
+      00072A 2B               [ 6]  692         dec     hl
+      00072B 2B               [ 6]  693         dec     hl
+      00072C 77               [ 7]  694         ld      (hl),a
+      00072D 18 08            [12]  695         jr      player_fell_down
+      00072F                        696 erase_player_fell_down:
+      00072F 2A C6 0D         [16]  697         ld      hl,(MAN_HEAD)
+      000732 3E 20            [ 7]  698         ld      a,#' '
+      000734 77               [ 7]  699         ld      (hl),a
+      000735 19               [11]  700         add     hl,de
+      000736 77               [ 7]  701         ld      (hl),a
+      000737                        702 player_fell_down:
+      000737 19               [11]  703         add     hl,de
+      000738 19               [11]  704         add     hl,de
+      000739 22 C6 0D         [16]  705         ld      (MAN_HEAD),hl
+      00073C 19               [11]  706         add     hl,de
+      00073D 36 97            [10]  707         ld      (hl),#CHR_MAN_SLEEP
+      00073F 23               [ 6]  708         inc     hl
+      000740 36 C9            [10]  709         ld      (hl),#CHR_MAN_SLEEP_HEAD
+      000742 3E 08            [ 7]  710         ld      a,#DELAY_COUNTER2
+      000744 32 C9 0D         [13]  711         ld      (FAIL_DELAY),a
+      000747 3A C4 0D         [13]  712         ld      a,(cnt_fail_trap)
+      00074A FE 05            [ 7]  713         cp      #MAX_FAIL_COUNTER
+      00074C C8               [11]  714         ret     z
+      00074D 3C               [ 4]  715         inc     a
+      00074E 32 C4 0D         [13]  716         ld      (cnt_fail_trap),a
+      000751 C9               [10]  717         ret
+      000752                        718 check_level_finished:
+      000752 2A C6 0D         [16]  719         ld      hl,(MAN_HEAD)
+      000755 11 6F EC         [10]  720         ld      de,#BWS+(GAME_START_Y*SCREEN_WIDTH)+(SCREEN_WIDTH-9)
+      000758 A7               [ 4]  721         and     a
+      000759 ED 52            [15]  722         sbc     hl,de
+      00075B 20 39            [12]  723         jr      nz,round_end
+      00075D 3A CD 0D         [13]  724         ld      a,(LEVEL)
+      000760 FE 08            [ 7]  725         cp      #MAX_LEVEL
+      000762 28 01            [12]  726         jr      z,new_level_set
+      000764 3C               [ 4]  727         inc     a
+      000765                        728 new_level_set:
+      000765 32 CD 0D         [13]  729         ld      (LEVEL),a
+      000768 21 33 EF         [10]  730         ld      hl,#BWS+(GAME_START_Y+3*GAMES_LINES)*SCREEN_WIDTH+(15+ALIGN_MIDDLE)
+      00076B 22 C6 0D         [16]  731         ld      (MAN_HEAD),hl
+      00076E 3E 28            [ 7]  732         ld      a,#SCREEN_WIDTH
+      000770 36 CC            [10]  733         ld      (hl),#CHR_MAN_HEAD
+      000772 85               [ 4]  734         add     a,l
+      000773 6F               [ 4]  735         ld      l,a
+      000774 36 A1            [10]  736         ld      (hl),#CHR_MAN_STAY
+      000776 21 C4 0D         [10]  737         ld      hl,#cnt_fail_trap
+      000779 3E 02            [ 7]  738         ld      a,#INITIAL_FAIL_COUNTER
+      00077B 77               [ 7]  739         ld      (hl),a
+      00077C 21 C5 0D         [10]  740         ld      hl,#cnt_fail_jump
+      00077F 77               [ 7]  741         ld      (hl),a
+      000780 21 6D EC         [10]  742         ld      hl,#BWS+GAME_START_Y*SCREEN_WIDTH+(SCREEN_WIDTH-11)
+      000783 36 F8            [10]  743         ld      (hl),#CHR_LINE_TOP
+      000785 23               [ 6]  744         inc     hl
+      000786 36 95            [10]  745         ld      (hl),#CHR_ARROW_RIGHT_TOP
+      000788 23               [ 6]  746         inc     hl
+      000789 36 20            [10]  747         ld      (hl),#' '
+      00078B 21 95 EC         [10]  748         ld      hl,#BWS+(GAME_START_Y+1)*SCREEN_WIDTH++(SCREEN_WIDTH-11)
+      00078E 36 9E            [10]  749         ld      (hl),#CHR_LINE_BOTTOM
+      000790 23               [ 6]  750         inc     hl
+      000791 36 93            [10]  751         ld      (hl),#CHR_ARROW_RIGHT_BOTTOM
+      000793 23               [ 6]  752         inc     hl
+      000794 36 20            [10]  753         ld      (hl),#' '
+      000796                        754 round_end:
+      000796 13               [ 6]  755         inc     de
+      000797 13               [ 6]  756         inc     de
+      000798 2A C6 0D         [16]  757         ld      hl,(MAN_HEAD)
+      00079B A7               [ 4]  758         and     a
+      00079C ED 52            [15]  759         sbc     hl,de
+      00079E 3E 0B            [ 7]  760         ld      a,#DELAY_COUNTER
+      0007A0 C0               [11]  761         ret     nz
+      0007A1 32 C9 0D         [13]  762         ld      (FAIL_DELAY),a
+      0007A4 13               [ 6]  763         inc     de
+      0007A5 ED 53 C6 0D      [20]  764         ld      (MAN_HEAD),de
+      0007A9 3E 20            [ 7]  765         ld      a,#' '
+      0007AB 1B               [ 6]  766         dec     de
+      0007AC 12               [ 7]  767         ld      (de),a
+      0007AD 83               [ 4]  768         add     a,e
+      0007AE 5F               [ 4]  769         ld      e,a
+      0007AF 12               [ 7]  770         ld      (de),a
+      0007B0 6F               [ 4]  771         ld      l,a
+      0007B1 19               [11]  772         add     hl,de
+      0007B2 36 97            [10]  773         ld      (hl),#CHR_MAN_SLEEP
+      0007B4 23               [ 6]  774         inc     hl
+      0007B5 36 C9            [10]  775         ld      (hl),#CHR_MAN_SLEEP_HEAD
+      0007B7 C9               [10]  776         ret
+      0007B8                        777 add_10_points:
+      0004B8                        778         SET_CURSOR_DE 0 23+POSDIFF_POINTS
+      0007B8 C5               [11]    1         push    bc
+      0007B9 11 20 01         [10]    2         ld      de,#(0+1)*256+(23+POSDIFF_POINTS+1)
+      0007BC 0E 12            [ 7]    3         ld      c,#UP_SETCU
+      0007BE CD 05 00         [17]    4         call    BOS
+      0007C1 C1               [10]    5         pop     bc
+      0007C2 2A CB 0D         [16]  779         ld      hl,(POINTS)
+      0007C5 11 0A 00         [10]  780         ld      de,#10
+      0007C8 19               [11]  781         add     hl,de
+      0007C9 22 CB 0D         [16]  782         ld      (POINTS),hl
+      0007CC CD D5 07         [17]  783         call    print_decimal
+      0007CF 3E 20            [ 7]  784         ld      a,#' '
+      0007D1 32 24 EC         [13]  785         ld      (BWS+0*SCREEN_WIDTH+23+POSDIFF_POINTS+5),a
+      0007D4 C9               [10]  786         ret
+      0007D5                        787 print_decimal:
+      0007D5 E5               [11]  788         push    hl
+      0007D6 01 10 27         [10]  789         ld      bc,#10000
+      0007D9 CD 01 08         [17]  790         call    get_decimal_digit
+      0007DC 01 E8 03         [10]  791         ld      bc,#1000
+      0007DF CD 01 08         [17]  792         call    get_decimal_digit
+      0007E2 01 64 00         [10]  793         ld      bc,#100
+      0007E5 CD 01 08         [17]  794         call    get_decimal_digit
+      0007E8 01 0A 00         [10]  795         ld      bc,#10
+      0007EB CD 01 08         [17]  796         call    get_decimal_digit
+      0007EE 01 01 00         [10]  797         ld      bc,#1
+      0007F1 CD 01 08         [17]  798         call    get_decimal_digit
+      0004F4                        799         REMOVE_CURSOR;
+      0007F4 2A 2D 00         [16]    1         ld      hl,(CURS)
+      0007F7 36 20            [10]    2         ld      (hl),#' '
+      0007F9 CB 94            [ 8]    3         res     2,h
+      0007FB CB BE            [15]    4         res     7,(hl)
+      0007FD CB D4            [ 8]    5         set     2,h
+      0007FF E1               [10]  800         pop     hl
+      000800 C9               [10]  801         ret
+      000801                        802 get_decimal_digit:
+      000801 AF               [ 4]  803         xor     a
+      000802                        804 decimal_loop:
+      000802 A7               [ 4]  805         and     a
+      000803 ED 42            [15]  806         sbc     hl,bc
+      000805 3C               [ 4]  807         inc     a
+      000806 D2 02 08         [10]  808         jp      nc,decimal_loop
+      000809 3D               [ 4]  809         dec     a
+      00080A 09               [11]  810         add     hl,bc
+      00080B C6 30            [ 7]  811         add     a,#'0'
+      00050D                        812         OUTCH
+      00080D C5               [11]    1         push    bc
+      00080E D5               [11]    2         push    de
+      00080F 0E 02            [ 7]    3         ld      c,#UP_CONSO
+      000811 5F               [ 4]    4         ld      e,a
+      000812 CD 05 00         [17]    5         call    BOS
+      000815 D1               [10]    6         pop     de
+      000816 C1               [10]    7         pop     bc
+      000817 C9               [10]  813         ret
+      000818                        814 no_lives:
+      000518                        815         PRST7
+      000818 CD A5 0E         [17]    1         call    prst7
+      00081B 0C A0                  816         .db     0x0c,0xa0
+      00081D 21 6F 0E         [10]  817         ld      hl,#TXT_GAME_OVER
+      000820 11 0D EC         [10]  818         ld      de,#POS_GAME_OVER
+      000823 01 0F 00         [10]  819         ld      bc,#TXT_GAME_OVER_size
+      000826 ED B0            [21]  820         ldir
+      000828 0E 40            [ 7]  821         ld      c,#3*SCREEN_WIDTH-TXT_GAME_OVER_size-1+POSDIFF_YOUR_SCORE
+      00082A 7B               [ 4]  822         ld      a,e
+      00082B 81               [ 4]  823         add     a,c
+      00082C 5F               [ 4]  824         ld      e,a
+      00082D 0E 0C            [ 7]  825         ld      c,#TXT_YOUR_SCORE_size
+      00082F ED B0            [21]  826         ldir
+      000831 0E 47            [ 7]  827         ld      c,#2*SCREEN_WIDTH-TXT_YOUR_SCORE_size+3
+      000833 7B               [ 4]  828         ld      a,e
+      000834 81               [ 4]  829         add     a,c
+      000835 5F               [ 4]  830         ld      e,a
+      000836 0E 09            [ 7]  831         ld      c,#TXT_HAZARD_size
+      000838 ED B0            [21]  832         ldir
+      00083A 21 E0 ED         [10]  833         ld      hl,#BWS+15*SCREEN_WIDTH+0+(3*POSDIFF_YOUR_SCORE)
+      00083D 36 A0            [10]  834         ld      (hl),#CHR_MIDDLE_LINE
+      00083F 11 E1 ED         [10]  835         ld      de,#BWS+15*SCREEN_WIDTH+1+(3*POSDIFF_YOUR_SCORE)
+      000842 0E 27            [ 7]  836         ld      c,#SCREEN_WIDTH-1
+      000844 ED B0            [21]  837         ldir
+      000846 2A CB 0D         [16]  838         ld      hl,(POINTS)
+      000549                        839         SET_CURSOR_DE (5-POSDIFF_YOUR_SCORE_DY) (21+ALIGN_MIDDLE)
+      000849 C5               [11]    1         push    bc
+      00084A 11 1A 03         [10]    2         ld      de,#((5-POSDIFF_YOUR_SCORE_DY)+1)*256+((21+ALIGN_MIDDLE)+1)
+      00084D 0E 12            [ 7]    3         ld      c,#UP_SETCU
+      00084F CD 05 00         [17]    4         call    BOS
+      000852 C1               [10]    5         pop     bc
+      000853 CD D5 07         [17]  840         call    print_decimal
+      000856 3A CD 0D         [13]  841         ld      a,(LEVEL)
+      000859 C6 2F            [ 7]  842         add     a,#'0'-1
+      00085B 32 BB EC         [13]  843         ld      (BWS+7*SCREEN_WIDTH+23+ALIGN_MIDDLE+3*POSDIFF_YOUR_SCORE),a
+      00085E ED 5B 51 0E      [20]  844         ld      de,(HIGH_SCORE_TABLE01.points)
+      000862 A7               [ 4]  845         and     a
+      000863 ED 52            [15]  846         sbc     hl,de
+      000865 D4 CD 09         [17]  847         call    nc,draw_new_highscore_box
+      000568                        848         SET_CURSOR_HL (17-POSDIFF_YOUR_SCORE_DY) (3+ALIGN_MIDDLE)
+      000868 D5               [11]    1         push    de
+      000869 C5               [11]    2         push    bc
+      00086A 11 08 0F         [10]    3         ld      de,#((17-POSDIFF_YOUR_SCORE_DY)+1)*256+((3+ALIGN_MIDDLE)+1)
+      00086D 62               [ 4]    4         ld      h,d
+      00086E 6B               [ 4]    5         ld      l,e
+      00086F 0E 12            [ 7]    6         ld      c,#UP_SETCU
+      000871 CD 05 00         [17]    7         call    BOS
+      000874 C1               [10]    8         pop     bc
+      000875 D1               [10]    9         pop     de
+      000576                        849         PRST7
+      000876 CD A5 0E         [17]    1         call    prst7
+      000879 20 49 4E 50 55 54 20   850         .ascis ' INPUT YOUR INITIALS: __ '
              59 4F 55 52 20 49 4E
              49 54 49 41 4C 53 3A
              20 5F 5F A0
-                                    865         ; remove 2xcursor
-      00089E                        866 input::
-      00089E 21 C4 EE         [10]  867         ld      hl,#BWS+17*SCREEN_WIDTH+28
-      0008A1 36 20            [10]  868         ld      (hl),#' '
-      0008A3 21 01 EC         [10]  869         ld      hl,#BWS+0*SCREEN_WIDTH+1
-      0008A6 36 20            [10]  870         ld      (hl),#' '
-      0008A8 21 4D EE         [10]  871         ld      hl,#BWS+(17-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+25+ALIGN_MIDDLE
-      0005AB                        872         CURSOR_DISABLE
-      0008AB C5               [11]    1         push    bc
-      0008AC 0E 1D            [ 7]    2         ld      c,#UP_DCU
-      0008AE CD 05 00         [17]    3         call    BOS
-      0008B1 C1               [10]    4         pop     bc
-      0005B2                        873         INCH
-      0008B2 AF               [ 4]    1         xor     a
-      0008B3 32 25 00         [13]    2         ld      (KEYBU),a
-      0008B6 0E 01            [ 7]    3         ld      c,#UP_CONSI
-      0008B8 CD 05 00         [17]    4         call    BOS
-      0008BB 77               [ 7]  874         ld      (hl),a
-      0008BC 32 79 0E         [13]  875         ld      (INITIALS),a
-      0008BF 23               [ 6]  876         inc     hl
-      0005C0                        877         INCH
-      0008C0 AF               [ 4]    1         xor     a
-      0008C1 32 25 00         [13]    2         ld      (KEYBU),a
-      0008C4 0E 01            [ 7]    3         ld      c,#UP_CONSI
-      0008C6 CD 05 00         [17]    4         call    BOS
-      0008C9 77               [ 7]  878         ld      (hl),a
-      0008CA 32 7A 0E         [13]  879         ld      (INITIALS+1),a
-      0008CD ED 5B D7 0D      [20]  880         ld      de,(POINTS)
-      0008D1 06 05            [ 7]  881         ld      b,#NUMBER_HIGHSCORE_ENTRIES
-      0008D3 2A 5D 0E         [16]  882         ld      hl,(HIGH_SCORE_TABLE01.points)
-      0008D6 A7               [ 4]  883         and     a
-      0008D7 ED 52            [15]  884         sbc     hl,de
-      0008D9 DA A8 09         [10]  885         jp      c,insert_score
-      0008DC 05               [ 4]  886         dec     b
-      0008DD 2A 62 0E         [16]  887         ld      hl,(HIGH_SCORE_TABLE02.points)
-      0008E0 A7               [ 4]  888         and     a
-      0008E1 ED 52            [15]  889         sbc     hl,de
-      0008E3 DA A8 09         [10]  890         jp      c,insert_score
-      0008E6 05               [ 4]  891         dec     b
-      0008E7 2A 67 0E         [16]  892         ld      hl,(HIGH_SCORE_TABLE03.points)
-      0008EA A7               [ 4]  893         and     a
-      0008EB ED 52            [15]  894         sbc     hl,de
-      0008ED DA A8 09         [10]  895         jp      c,insert_score
-      0008F0 05               [ 4]  896         dec     b
-      0008F1 2A 6C 0E         [16]  897         ld      hl,(HIGH_SCORE_TABLE04.points)
-      0008F4 A7               [ 4]  898         and     a
-      0008F5 ED 52            [15]  899         sbc     hl,de
-      0008F7 DA A8 09         [10]  900         jp      c,insert_score
-      0008FA 05               [ 4]  901         dec     b
-      0008FB 2A 71 0E         [16]  902         ld      hl,(HIGH_SCORE_TABLE05.points)
-      0008FE A7               [ 4]  903         and     a
-      0008FF ED 52            [15]  904         sbc     hl,de
-      000901 DA A8 09         [10]  905         jp      c,insert_score
-      000904                        906 print_highscore_table::
-      000904 06 05            [ 7]  907         ld      b,#NUMBER_HIGHSCORE_ENTRIES
-      000906 11 5B 0E         [10]  908         ld      de,#HIGH_SCORE_TABLE01
-      000909 21 8A EE         [10]  909         ld      hl,#BWS+(20-POSDIFF_HIGHSCORE_DY)*SCREEN_WIDTH+6+ALIGN_MIDDLE
-      00090C                        910 print_highscore_entry:
-      00090C 3E 36            [ 7]  911         ld      a,#'6'
-      00090E 90               [ 4]  912         sub     b
-      00090F 77               [ 7]  913         ld      (hl),a
-      000910 1A               [ 7]  914         ld      a,(de)
-      000911 23               [ 6]  915         inc     hl
-      000912 23               [ 6]  916         inc     hl
-      000913 23               [ 6]  917         inc     hl
-      000914 77               [ 7]  918         ld      (hl),a
-      000915 23               [ 6]  919         inc     hl
-      000916 13               [ 6]  920         inc     de
-      000917 1A               [ 7]  921         ld      a,(de)
-      000918 77               [ 7]  922         ld      (hl),a
-      000919 3E 2E            [ 7]  923         ld      a,#'.'
-      00091B 23               [ 6]  924         inc     hl
-      00091C 23               [ 6]  925         inc     hl
-      00091D 77               [ 7]  926         ld      (hl),a
-      00091E 23               [ 6]  927         inc     hl
-      00091F 77               [ 7]  928         ld      (hl),a
-      000920 23               [ 6]  929         inc     hl
-      000921 77               [ 7]  930         ld      (hl),a
-      000922 23               [ 6]  931         inc     hl
-      000923 23               [ 6]  932         inc     hl
-      000624                        933         SET_CURSOR
-      000924 CD C0 0E         [17]    1         call    set_cursor
-      000927 13               [ 6]  934         inc     de
-      000928 1A               [ 7]  935         ld      a,(de)
-      000929 6F               [ 4]  936         ld      l,a
-      00092A 13               [ 6]  937         inc     de
-      00092B 1A               [ 7]  938         ld      a,(de)
-      00092C 67               [ 4]  939         ld      h,a
-      00092D 13               [ 6]  940         inc     de
-      00092E C5               [11]  941         push    bc
-      00092F D5               [11]  942         push    de
-      000930 CD E1 07         [17]  943         call    print_decimal
-      000933 D1               [10]  944         pop     de
-      000934 C1               [10]  945         pop     bc
-      000635                        946         REMOVE_CURSOR
-      000935 2A 2D 00         [16]    1         ld      hl,(CURS)
-      000938 36 20            [10]    2         ld      (hl),#' '
-      00093A CB 94            [ 8]    3         res     2,h
-      00093C CB BE            [15]    4         res     7,(hl)
-      00093E CB D4            [ 8]    5         set     2,h
-      000940 23               [ 6]  947         inc     hl
-      000941 23               [ 6]  948         inc     hl
-      000942 23               [ 6]  949         inc     hl
-      000943 36 30            [10]  950         ld      (hl),#'0'
-      000945 23               [ 6]  951         inc     hl
-      000946 1A               [ 7]  952         ld      a,(de)
-      000947 C6 2F            [ 7]  953         add     a,#'0'-1
-      000949 77               [ 7]  954         ld      (hl),a
-      00094A 13               [ 6]  955         inc     de
-      00094B 3E 15            [ 7]  956         ld      a,#SCREEN_WIDTH-19
-      00094D 85               [ 4]  957         add     a,l
-      00094E 6F               [ 4]  958         ld      l,a
-      00094F 3E 00            [ 7]  959         ld      a,#ZERO
-      000951 8C               [ 4]  960         adc     a,h
-      000952 67               [ 4]  961         ld      h,a
-      000953 10 B7            [13]  962         djnz    print_highscore_entry
-      000655                        963         SET_CURSOR_HL (29-POSDIFF_YOUR_SCORE_DY-POSDIFF_HIGHSCORE_DY) (9+ALIGN_MIDDLE)
-      000955 D5               [11]    1         push    de
-      000956 C5               [11]    2         push    bc
-      000957 11 0E 17         [10]    3         ld      de,#((29-POSDIFF_YOUR_SCORE_DY-POSDIFF_HIGHSCORE_DY)+1)*256+((9+ALIGN_MIDDLE)+1)
-      00095A 62               [ 4]    4         ld      h,d
-      00095B 6B               [ 4]    5         ld      l,e
-      00095C 0E 12            [ 7]    6         ld      c,#UP_SETCU
-      00095E CD 05 00         [17]    7         call    BOS
-      000961 C1               [10]    8         pop     bc
-      000962 D1               [10]    9         pop     de
-      000663                        964         PRST7
-      000963 CD B1 0E         [17]    1         call    prst7
-      000966 4E 45 57 20 47 41 4D   965         .ascii  'NEW GAME ? Y/N'
+                                    851         ; remove 2xcursor
+      000892                        852 input:
+      000892 21 C4 EE         [10]  853         ld      hl,#BWS+17*SCREEN_WIDTH+28
+      000895 36 20            [10]  854         ld      (hl),#' '
+      000897 21 01 EC         [10]  855         ld      hl,#BWS+0*SCREEN_WIDTH+1
+      00089A 36 20            [10]  856         ld      (hl),#' '
+      00089C 21 4D EE         [10]  857         ld      hl,#BWS+(17-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+25+ALIGN_MIDDLE
+      00059F                        858         CURSOR_DISABLE
+      00089F C5               [11]    1         push    bc
+      0008A0 0E 1D            [ 7]    2         ld      c,#UP_DCU
+      0008A2 CD 05 00         [17]    3         call    BOS
+      0008A5 C1               [10]    4         pop     bc
+      0005A6                        859         INCH
+      0008A6 AF               [ 4]    1         xor     a
+      0008A7 32 25 00         [13]    2         ld      (KEYBU),a
+      0008AA 0E 01            [ 7]    3         ld      c,#UP_CONSI
+      0008AC CD 05 00         [17]    4         call    BOS
+      0008AF 77               [ 7]  860         ld      (hl),a
+      0008B0 32 6D 0E         [13]  861         ld      (INITIALS),a
+      0008B3 23               [ 6]  862         inc     hl
+      0005B4                        863         INCH
+      0008B4 AF               [ 4]    1         xor     a
+      0008B5 32 25 00         [13]    2         ld      (KEYBU),a
+      0008B8 0E 01            [ 7]    3         ld      c,#UP_CONSI
+      0008BA CD 05 00         [17]    4         call    BOS
+      0008BD 77               [ 7]  864         ld      (hl),a
+      0008BE 32 6E 0E         [13]  865         ld      (INITIALS+1),a
+      0008C1 ED 5B CB 0D      [20]  866         ld      de,(POINTS)
+      0008C5 06 05            [ 7]  867         ld      b,#NUMBER_HIGHSCORE_ENTRIES
+      0008C7 2A 51 0E         [16]  868         ld      hl,(HIGH_SCORE_TABLE01.points)
+      0008CA A7               [ 4]  869         and     a
+      0008CB ED 52            [15]  870         sbc     hl,de
+      0008CD DA 9C 09         [10]  871         jp      c,insert_score
+      0008D0 05               [ 4]  872         dec     b
+      0008D1 2A 56 0E         [16]  873         ld      hl,(HIGH_SCORE_TABLE02.points)
+      0008D4 A7               [ 4]  874         and     a
+      0008D5 ED 52            [15]  875         sbc     hl,de
+      0008D7 DA 9C 09         [10]  876         jp      c,insert_score
+      0008DA 05               [ 4]  877         dec     b
+      0008DB 2A 5B 0E         [16]  878         ld      hl,(HIGH_SCORE_TABLE03.points)
+      0008DE A7               [ 4]  879         and     a
+      0008DF ED 52            [15]  880         sbc     hl,de
+      0008E1 DA 9C 09         [10]  881         jp      c,insert_score
+      0008E4 05               [ 4]  882         dec     b
+      0008E5 2A 60 0E         [16]  883         ld      hl,(HIGH_SCORE_TABLE04.points)
+      0008E8 A7               [ 4]  884         and     a
+      0008E9 ED 52            [15]  885         sbc     hl,de
+      0008EB DA 9C 09         [10]  886         jp      c,insert_score
+      0008EE 05               [ 4]  887         dec     b
+      0008EF 2A 65 0E         [16]  888         ld      hl,(HIGH_SCORE_TABLE05.points)
+      0008F2 A7               [ 4]  889         and     a
+      0008F3 ED 52            [15]  890         sbc     hl,de
+      0008F5 DA 9C 09         [10]  891         jp      c,insert_score
+      0008F8                        892 print_highscore_table:
+      0008F8 06 05            [ 7]  893         ld      b,#NUMBER_HIGHSCORE_ENTRIES
+      0008FA 11 4F 0E         [10]  894         ld      de,#HIGH_SCORE_TABLE01
+      0008FD 21 8A EE         [10]  895         ld      hl,#BWS+(20-POSDIFF_HIGHSCORE_DY)*SCREEN_WIDTH+6+ALIGN_MIDDLE
+      000900                        896 print_highscore_entry:
+      000900 3E 36            [ 7]  897         ld      a,#'6'
+      000902 90               [ 4]  898         sub     b
+      000903 77               [ 7]  899         ld      (hl),a
+      000904 1A               [ 7]  900         ld      a,(de)
+      000905 23               [ 6]  901         inc     hl
+      000906 23               [ 6]  902         inc     hl
+      000907 23               [ 6]  903         inc     hl
+      000908 77               [ 7]  904         ld      (hl),a
+      000909 23               [ 6]  905         inc     hl
+      00090A 13               [ 6]  906         inc     de
+      00090B 1A               [ 7]  907         ld      a,(de)
+      00090C 77               [ 7]  908         ld      (hl),a
+      00090D 3E 2E            [ 7]  909         ld      a,#'.'
+      00090F 23               [ 6]  910         inc     hl
+      000910 23               [ 6]  911         inc     hl
+      000911 77               [ 7]  912         ld      (hl),a
+      000912 23               [ 6]  913         inc     hl
+      000913 77               [ 7]  914         ld      (hl),a
+      000914 23               [ 6]  915         inc     hl
+      000915 77               [ 7]  916         ld      (hl),a
+      000916 23               [ 6]  917         inc     hl
+      000917 23               [ 6]  918         inc     hl
+      000618                        919         SET_CURSOR
+      000918 CD B4 0E         [17]    1         call    set_cursor
+      00091B 13               [ 6]  920         inc     de
+      00091C 1A               [ 7]  921         ld      a,(de)
+      00091D 6F               [ 4]  922         ld      l,a
+      00091E 13               [ 6]  923         inc     de
+      00091F 1A               [ 7]  924         ld      a,(de)
+      000920 67               [ 4]  925         ld      h,a
+      000921 13               [ 6]  926         inc     de
+      000922 C5               [11]  927         push    bc
+      000923 D5               [11]  928         push    de
+      000924 CD D5 07         [17]  929         call    print_decimal
+      000927 D1               [10]  930         pop     de
+      000928 C1               [10]  931         pop     bc
+      000629                        932         REMOVE_CURSOR
+      000929 2A 2D 00         [16]    1         ld      hl,(CURS)
+      00092C 36 20            [10]    2         ld      (hl),#' '
+      00092E CB 94            [ 8]    3         res     2,h
+      000930 CB BE            [15]    4         res     7,(hl)
+      000932 CB D4            [ 8]    5         set     2,h
+      000934 23               [ 6]  933         inc     hl
+      000935 23               [ 6]  934         inc     hl
+      000936 23               [ 6]  935         inc     hl
+      000937 36 30            [10]  936         ld      (hl),#'0'
+      000939 23               [ 6]  937         inc     hl
+      00093A 1A               [ 7]  938         ld      a,(de)
+      00093B C6 2F            [ 7]  939         add     a,#'0'-1
+      00093D 77               [ 7]  940         ld      (hl),a
+      00093E 13               [ 6]  941         inc     de
+      00093F 3E 15            [ 7]  942         ld      a,#SCREEN_WIDTH-19
+      000941 85               [ 4]  943         add     a,l
+      000942 6F               [ 4]  944         ld      l,a
+      000943 3E 00            [ 7]  945         ld      a,#ZERO
+      000945 8C               [ 4]  946         adc     a,h
+      000946 67               [ 4]  947         ld      h,a
+      000947 10 B7            [13]  948         djnz    print_highscore_entry
+      000649                        949         SET_CURSOR_HL (29-POSDIFF_YOUR_SCORE_DY-POSDIFF_HIGHSCORE_DY) (9+ALIGN_MIDDLE)
+      000949 D5               [11]    1         push    de
+      00094A C5               [11]    2         push    bc
+      00094B 11 0E 17         [10]    3         ld      de,#((29-POSDIFF_YOUR_SCORE_DY-POSDIFF_HIGHSCORE_DY)+1)*256+((9+ALIGN_MIDDLE)+1)
+      00094E 62               [ 4]    4         ld      h,d
+      00094F 6B               [ 4]    5         ld      l,e
+      000950 0E 12            [ 7]    6         ld      c,#UP_SETCU
+      000952 CD 05 00         [17]    7         call    BOS
+      000955 C1               [10]    8         pop     bc
+      000956 D1               [10]    9         pop     de
+      000657                        950         PRST7
+      000957 CD A5 0E         [17]    1         call    prst7
+      00095A 4E 45 57 20 47 41 4D   951         .ascii  'NEW GAME ? Y/N'
              45 20 3F 20 59 2F 4E
-      000974 A0                     966         .db     0xa0
-      000975 21 8C EF         [10]  967         ld      hl,#BWS+(29-POSDIFF_YOUR_SCORE_DY-POSDIFF_HIGHSCORE_DY)*SCREEN_WIDTH+24+ALIGN_MIDDLE
-      000978 36 20            [10]  968         ld      (hl),#' '
-      00067A                        969         CURSOR_DISABLE
-      00097A C5               [11]    1         push    bc
-      00097B 0E 1D            [ 7]    2         ld      c,#UP_DCU
-      00097D CD 05 00         [17]    3         call    BOS
-      000980 C1               [10]    4         pop     bc
-      000981                        970 m_070a:
-      000981                        971 ask_exit_game:
-      000681                        972         INCH
-      000981 AF               [ 4]    1         xor     a
-      000982 32 25 00         [13]    2         ld      (KEYBU),a
-      000985 0E 01            [ 7]    3         ld      c,#UP_CONSI
-      000987 CD 05 00         [17]    4         call    BOS
-      00098A FE 59            [ 7]  973         cp      #'Y'
-      00098C CA 9D 03         [10]  974         jp      z,new_game
-      00098F FE 4E            [ 7]  975         cp      #'N'
-      000991 20 EE            [12]  976         jr      nz,ask_exit_game
-      000993                        977 exit_game:
-      000693                        978         PRST7
-      000993 CD B1 0E         [17]    1         call    prst7
-      000996 0C                     979         .db     0x0c
-      000997 4A 75 6D 70 69 6E 67   980         .ascii  'Jumping Jack'
+      000968 A0                     952         .db     0xa0
+      000969 21 8C EF         [10]  953         ld      hl,#BWS+(29-POSDIFF_YOUR_SCORE_DY-POSDIFF_HIGHSCORE_DY)*SCREEN_WIDTH+24+ALIGN_MIDDLE
+      00096C 36 20            [10]  954         ld      (hl),#' '
+      00066E                        955         CURSOR_DISABLE
+      00096E C5               [11]    1         push    bc
+      00096F 0E 1D            [ 7]    2         ld      c,#UP_DCU
+      000971 CD 05 00         [17]    3         call    BOS
+      000974 C1               [10]    4         pop     bc
+      000975                        956 m_070a:
+      000975                        957 ask_exit_game:
+      000675                        958         INCH
+      000975 AF               [ 4]    1         xor     a
+      000976 32 25 00         [13]    2         ld      (KEYBU),a
+      000979 0E 01            [ 7]    3         ld      c,#UP_CONSI
+      00097B CD 05 00         [17]    4         call    BOS
+      00097E FE 59            [ 7]  959         cp      #'Y'
+      000980 CA 9D 03         [10]  960         jp      z,new_game
+                           000000   961 .if     eq,z9001
+                                    962         cp      #'Z'
+                                    963         jp      z,new_game
+                                    964 .endif
+      000983 FE 4E            [ 7]  965         cp      #'N'
+      000985 20 EE            [12]  966         jr      nz,ask_exit_game
+      000987                        967 exit_game:
+      000687                        968         PRST7
+      000987 CD A5 0E         [17]    1         call    prst7
+      00098A 0C                     969         .db     0x0c
+      00098B 4A 75 6D 70 69 6E 67   970         .ascii  'Jumping Jack'
              20 4A 61 63 6B
-      0009A3 0D 8D                  981         .db     0x0d,0x8d
-      0006A5                        982         END_PROGRAM
-      0009A5 C3 03 F0         [10]    1         jp      WBOOT
-      0009A8                        983 insert_score:
-      0009A8 D5               [11]  984         push    de
-      0009A9 11 74 0E         [10]  985         ld      de,#HIGH_SCORE_TABLE_TMP
-      0009AC 21 6F 0E         [10]  986         ld      hl,#HIGH_SCORE_TABLE05
-      0009AF                        987 move_table_entry:
-      0009AF C5               [11]  988         push    bc
-      0009B0 01 05 00         [10]  989         ld      bc,#HIGH_SCORE_TABLE_TMP-HIGH_SCORE_TABLE05
-      0009B3 ED B0            [21]  990         ldir
-      0009B5 EB               [ 4]  991         ex      de,hl
-      0009B6 0E 0A            [ 7]  992         ld      c,#2*(HIGH_SCORE_TABLE_TMP-HIGH_SCORE_TABLE05)
-      0009B8 A7               [ 4]  993         and     a
-      0009B9 ED 42            [15]  994         sbc     hl,bc
-      0009BB EB               [ 4]  995         ex      de,hl
-      0009BC A7               [ 4]  996         and     a
-      0009BD ED 42            [15]  997         sbc     hl,bc
-      0009BF C1               [10]  998         pop     bc
-      0009C0 10 ED            [13]  999         djnz    move_table_entry
-      0009C2 3A 79 0E         [13] 1000         ld      a,(INITIALS)
-      0009C5 12               [ 7] 1001         ld      (de),a
-      0009C6 13               [ 6] 1002         inc     de
-      0009C7 3A 7A 0E         [13] 1003         ld      a,(INITIALS+1)
-      0009CA 12               [ 7] 1004         ld      (de),a
-      0009CB EB               [ 4] 1005         ex      de,hl
-      0009CC D1               [10] 1006         pop     de
-      0009CD 23               [ 6] 1007         inc     hl
-      0009CE 73               [ 7] 1008         ld      (hl),e
-      0009CF 23               [ 6] 1009         inc     hl
-      0009D0 72               [ 7] 1010         ld      (hl),d
-      0009D1 23               [ 6] 1011         inc     hl
-      0009D2 3A D9 0D         [13] 1012         ld      a,(LEVEL)
-      0009D5 77               [ 7] 1013         ld      (hl),a
-      0009D6 C3 04 09         [10] 1014         jp      print_highscore_table
-      0009D9                       1015 draw_new_highscore_box:
-      0009D9 21 FB EC         [10] 1016         ld      hl,#BWS+(9-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+7+ALIGN_MIDDLE
-      0009DC 36 2A            [10] 1017         ld      (hl),#'*'
-      0009DE 11 FC EC         [10] 1018         ld      de,#BWS+(9-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+8+ALIGN_MIDDLE
-      0009E1 01 11 00         [10] 1019         ld      bc,#TXT_NEW_HIGH_SCORE_size-1
-      0009E4 ED B0            [21] 1020         ldir
-      0009E6 0E 8F            [ 7] 1021         ld      c,#4*SCREEN_WIDTH-TXT_NEW_HIGH_SCORE_size+1
-      0009E8 09               [11] 1022         add     hl,bc
-      0009E9 EB               [ 4] 1023         ex      de,hl
-      0009EA 09               [11] 1024         add     hl,bc
-      0009EB EB               [ 4] 1025         ex      de,hl
-      0009EC 0E 11            [ 7] 1026         ld      c,#TXT_NEW_HIGH_SCORE_size-1
-      0009EE 36 2A            [10] 1027         ld      (hl),#'*'
-      0009F0 ED B0            [21] 1028         ldir
-      0009F2 11 4B ED         [10] 1029         ld      de,#BWS+(11-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+7+ALIGN_MIDDLE
-      0009F5 21 9F 0E         [10] 1030         ld      hl,#TXT_NEW_HIGH_SCORE
-      0009F8 0E 12            [ 7] 1031         ld      c,#TXT_NEW_HIGH_SCORE_size
-      0009FA ED B0            [21] 1032         ldir
-      0009FC 1E 23            [ 7] 1033         ld      e,#BWS+(10-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+7+ALIGN_MIDDLE
-      0009FE 3E 2A            [ 7] 1034         ld      a,#'*'
-      000A00 12               [ 7] 1035         ld      (de),a
-      000A01 1E 34            [ 7] 1036         ld      e,#BWS+(10-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+24+ALIGN_MIDDLE
-      000A03 12               [ 7] 1037         ld      (de),a
-      000A04 1E 73            [ 7] 1038         ld      e,#BWS+(12-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+7+ALIGN_MIDDLE
-      000A06 12               [ 7] 1039         ld      (de),a
-      000A07 1E 84            [ 7] 1040         ld      e,#BWS+(12-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+24+ALIGN_MIDDLE
-      000A09 12               [ 7] 1041         ld      (de),a
-      000A0A C9               [10] 1042         ret
-      000A0B                       1043 TOP_IMAGE:
-                                   1044         ; line 1
-      00070B                       1045         SCREEN_POS
-      000A0B 20 20 20 20              1         .ascii '    '
-      000A0F AE 9E 9E 9E 9E 9E 9E  1046         .db     0xae,0x9e,0x9e,0x9e,0x9e,0x9e,0x9e,0x9e ;........
+      000997 0D 8D                  971         .db     0x0d,0x8d
+      000699                        972         END_PROGRAM
+      000999 C3 03 F0         [10]    1         jp      WBOOT
+      00099C                        973 insert_score:
+      00099C D5               [11]  974         push    de
+      00099D 11 68 0E         [10]  975         ld      de,#HIGH_SCORE_TABLE_TMP
+      0009A0 21 63 0E         [10]  976         ld      hl,#HIGH_SCORE_TABLE05
+      0009A3                        977 move_table_entry:
+      0009A3 C5               [11]  978         push    bc
+      0009A4 01 05 00         [10]  979         ld      bc,#HIGH_SCORE_TABLE_TMP-HIGH_SCORE_TABLE05
+      0009A7 ED B0            [21]  980         ldir
+      0009A9 EB               [ 4]  981         ex      de,hl
+      0009AA 0E 0A            [ 7]  982         ld      c,#2*(HIGH_SCORE_TABLE_TMP-HIGH_SCORE_TABLE05)
+      0009AC A7               [ 4]  983         and     a
+      0009AD ED 42            [15]  984         sbc     hl,bc
+      0009AF EB               [ 4]  985         ex      de,hl
+      0009B0 A7               [ 4]  986         and     a
+      0009B1 ED 42            [15]  987         sbc     hl,bc
+      0009B3 C1               [10]  988         pop     bc
+      0009B4 10 ED            [13]  989         djnz    move_table_entry
+      0009B6 3A 6D 0E         [13]  990         ld      a,(INITIALS)
+      0009B9 12               [ 7]  991         ld      (de),a
+      0009BA 13               [ 6]  992         inc     de
+      0009BB 3A 6E 0E         [13]  993         ld      a,(INITIALS+1)
+      0009BE 12               [ 7]  994         ld      (de),a
+      0009BF EB               [ 4]  995         ex      de,hl
+      0009C0 D1               [10]  996         pop     de
+      0009C1 23               [ 6]  997         inc     hl
+      0009C2 73               [ 7]  998         ld      (hl),e
+      0009C3 23               [ 6]  999         inc     hl
+      0009C4 72               [ 7] 1000         ld      (hl),d
+      0009C5 23               [ 6] 1001         inc     hl
+      0009C6 3A CD 0D         [13] 1002         ld      a,(LEVEL)
+      0009C9 77               [ 7] 1003         ld      (hl),a
+      0009CA C3 F8 08         [10] 1004         jp      print_highscore_table
+      0009CD                       1005 draw_new_highscore_box:
+      0009CD 21 FB EC         [10] 1006         ld      hl,#BWS+(9-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+7+ALIGN_MIDDLE
+      0009D0 36 2A            [10] 1007         ld      (hl),#'*'
+      0009D2 11 FC EC         [10] 1008         ld      de,#BWS+(9-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+8+ALIGN_MIDDLE
+      0009D5 01 11 00         [10] 1009         ld      bc,#TXT_NEW_HIGH_SCORE_size-1
+      0009D8 ED B0            [21] 1010         ldir
+      0009DA 0E 8F            [ 7] 1011         ld      c,#4*SCREEN_WIDTH-TXT_NEW_HIGH_SCORE_size+1
+      0009DC 09               [11] 1012         add     hl,bc
+      0009DD EB               [ 4] 1013         ex      de,hl
+      0009DE 09               [11] 1014         add     hl,bc
+      0009DF EB               [ 4] 1015         ex      de,hl
+      0009E0 0E 11            [ 7] 1016         ld      c,#TXT_NEW_HIGH_SCORE_size-1
+      0009E2 36 2A            [10] 1017         ld      (hl),#'*'
+      0009E4 ED B0            [21] 1018         ldir
+      0009E6 11 4B ED         [10] 1019         ld      de,#BWS+(11-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+7+ALIGN_MIDDLE
+      0009E9 21 93 0E         [10] 1020         ld      hl,#TXT_NEW_HIGH_SCORE
+      0009EC 0E 12            [ 7] 1021         ld      c,#TXT_NEW_HIGH_SCORE_size
+      0009EE ED B0            [21] 1022         ldir
+      0009F0 1E 23            [ 7] 1023         ld      e,#BWS+(10-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+7+ALIGN_MIDDLE
+      0009F2 3E 2A            [ 7] 1024         ld      a,#'*'
+      0009F4 12               [ 7] 1025         ld      (de),a
+      0009F5 1E 34            [ 7] 1026         ld      e,#BWS+(10-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+24+ALIGN_MIDDLE
+      0009F7 12               [ 7] 1027         ld      (de),a
+      0009F8 1E 73            [ 7] 1028         ld      e,#BWS+(12-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+7+ALIGN_MIDDLE
+      0009FA 12               [ 7] 1029         ld      (de),a
+      0009FB 1E 84            [ 7] 1030         ld      e,#BWS+(12-POSDIFF_YOUR_SCORE_DY)*SCREEN_WIDTH+24+ALIGN_MIDDLE
+      0009FD 12               [ 7] 1031         ld      (de),a
+      0009FE C9               [10] 1032         ret
+      0009FF                       1033 TOP_IMAGE:
+      0006FF                       1034         TOP_IMAGE_CONTENT
+                                      1  ; line 1
+      0006FF                          2         SCREEN_POS
+      0009FF 20 20 20 20              1         .ascii '    '
+      000A03 AE 9E 9E 9E 9E 9E 9E     3         .db     0xae,0x9e,0x9e,0x9e,0x9e,0x9e,0x9e,0x9e ;........
              9E
-      000A17 9E 9E AD 20 20 20 20  1047         .db     0x9e,0x9e,0xad,0x20,0x20,0x20,0x20,0x20 ;..-     
+      000A0B 9E 9E AD 20 20 20 20     4         .db     0x9e,0x9e,0xad,0x20,0x20,0x20,0x20,0x20 ;..-     
              20
-      000A1F 20 20 20 20 20 20 20  1048         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000A13 20 20 20 20 20 20 20     5         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000A27 20 20 20 20 20 20 20  1049         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000A1B 20 20 20 20 20 20 20     6         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      00072F                       1050         SCREEN_POS
-      000A2F 20 20 20 20              1         .ascii '    '
-                                   1051         
-                                   1052         ; line 2
-      000733                       1053         SCREEN_POS
-      000A33 20 20 20 20              1         .ascii '    '
-      000A37 9F B9 B6 B3 B2 B6 B8  1054         .db     0x9f,0xb9,0xb6,0xb3,0xb2,0xb6,0xb8,0x20 ;.963268 
+      000723                          7         SCREEN_POS
+      000A23 20 20 20 20              1         .ascii '    '
+                                      8         
+                                      9         ; line 2
+      000727                         10         SCREEN_POS
+      000A27 20 20 20 20              1         .ascii '    '
+      000A2B 9F B9 B6 B3 B2 B6 B8    11         .db     0x9f,0xb9,0xb6,0xb3,0xb2,0xb6,0xb8,0x20 ;.963268 
              20
-      000A3F BD B0 C0 20 20 20 20  1055         .db     0xbd,0xb0,0xc0,0x20,0x20,0x20,0x20,0x20 ;=0@     
+      000A33 BD B0 C0 20 20 20 20    12         .db     0xbd,0xb0,0xc0,0x20,0x20,0x20,0x20,0x20 ;=0@     
              20
-      000A47 20 20 20 20 20 20 20  1056         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xb5 ;       5
+      000A3B 20 20 20 20 20 20 20    13         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xb5 ;       5
              B5
-      000A4F 20 20 20 20 20 20 20  1057         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000A43 20 20 20 20 20 20 20    14         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000757                       1058         SCREEN_POS
-      000A57 20 20 20 20              1         .ascii '    '
-                                   1059 
-                                   1060         ; line 3
-      00075B                       1061         SCREEN_POS
-      000A5B 20 20 20 20              1         .ascii '    '
-      000A5F 9F B8 B7 20 B5 20 20  1062         .db     0x9f,0xb8,0xb7,0x20,0xb5,0x20,0x20,0x20 ;.87 5   
+      00074B                         15         SCREEN_POS
+      000A4B 20 20 20 20              1         .ascii '    '
+                                     16 
+                                     17         ; line 3
+      00074F                         18         SCREEN_POS
+      000A4F 20 20 20 20              1         .ascii '    '
+      000A53 9F B8 B7 20 B5 20 20    19         .db     0x9f,0xb8,0xb7,0x20,0xb5,0x20,0x20,0x20 ;.87 5   
              20
-      000A67 B5 20 C0 20 20 20 20  1063         .db     0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
+      000A5B B5 20 C0 20 20 20 20    20         .db     0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
              20
-      000A6F 20 20 20 20 20 20 20  1064         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xb5 ;       5
+      000A63 20 20 20 20 20 20 20    21         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xb5 ;       5
              B5
-      000A77 20 20 20 20 B7 B7 20  1065         .db     0x20,0x20,0x20,0x20,0xb7,0xb7,0x20,0x20 ;    77  
+      000A6B 20 20 20 20 B7 B7 20    22         .db     0x20,0x20,0x20,0x20,0xb7,0xb7,0x20,0x20 ;    77  
              20
-      00077F                       1066         SCREEN_POS
-      000A7F 20 20 20 20              1         .ascii '    '
-                                   1067 
-                                   1068         ; line 4
-      000783                       1069         SCREEN_POS
-      000A83 20 20 20 20              1         .ascii '    '
-      000A87 9F B3 20 B4 B5 20 B2  1070         .db     0x9f,0xb3,0x20,0xb4,0xb5,0x20,0xb2,0x20 ;.3 45 2 
+      000773                         23         SCREEN_POS
+      000A73 20 20 20 20              1         .ascii '    '
+                                     24 
+                                     25         ; line 4
+      000777                         26         SCREEN_POS
+      000A77 20 20 20 20              1         .ascii '    '
+      000A7B 9F B3 20 B4 B5 20 B2    27         .db     0x9f,0xb3,0x20,0xb4,0xb5,0x20,0xb2,0x20 ;.3 45 2 
              20
-      000A8F B5 20 C0 20 20 20 20  1071         .db     0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
+      000A83 B5 20 C0 20 20 20 20    28         .db     0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
              20
-      000A97 20 20 20 20 20 20 20  1072         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000A8B 20 20 20 20 20 20 20    29         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000A9F B6 B7 20 B9 B2 B2 B8  1073         .db     0xb6,0xb7,0x20,0xb9,0xb2,0xb2,0xb8,0x20 ;67 9228 
+      000A93 B6 B7 20 B9 B2 B2 B8    30         .db     0xb6,0xb7,0x20,0xb9,0xb2,0xb2,0xb8,0x20 ;67 9228 
              20
-      0007A7                       1074         SCREEN_POS
-      000AA7 20 20 20 20              1         .ascii '    '
-                                   1075 
-                                   1076         ; line 5
-      0007AB                       1077         SCREEN_POS
-      000AAB 20 20 20 20              1         .ascii '    '
-      000AAF 9F B1 B6 20 20 B6 B0  1078         .db     0x9f,0xb1,0xb6,0x20,0x20,0xb6,0xb0,0x20 ;.16  60 
+      00079B                         31         SCREEN_POS
+      000A9B 20 20 20 20              1         .ascii '    '
+                                     32 
+                                     33         ; line 5
+      00079F                         34         SCREEN_POS
+      000A9F 20 20 20 20              1         .ascii '    '
+      000AA3 9F B1 B6 20 20 B6 B0    35         .db     0x9f,0xb1,0xb6,0x20,0x20,0xb6,0xb0,0x20 ;.16  60 
              20
-      000AB7 B6 B0 C0 20 20 20 20  1079         .db     0xb6,0xb0,0xc0,0x20,0x20,0x20,0x20,0x20 ;60@     
+      000AAB B6 B0 C0 20 20 20 20    36         .db     0xb6,0xb0,0xc0,0x20,0x20,0x20,0x20,0x20 ;60@     
              20
-      000ABF 20 20 B2 B3 20 20 20  1080         .db     0x20,0x20,0xb2,0xb3,0x20,0x20,0x20,0x20 ;  23    
+      000AB3 20 20 B2 B3 20 20 20    37         .db     0x20,0x20,0xb2,0xb3,0x20,0x20,0x20,0x20 ;  23    
              20
-      000AC7 20 BA A0 B4 B4 A0 B5  1081         .db     0x20,0xba,0xa0,0xb4,0xb4,0xa0,0xb5,0x20 ; : 44 5 
+      000ABB 20 BA A0 B4 B4 A0 B5    38         .db     0x20,0xba,0xa0,0xb4,0xb4,0xa0,0xb5,0x20 ; : 44 5 
              20
-      0007CF                       1082         SCREEN_POS
-      000ACF 20 20 20 20              1         .ascii '    '
-                                   1083 
-                                   1084         ; line 6
-      0007D3                       1085         SCREEN_POS
-      000AD3 20 20 20 20              1         .ascii '    '
-      000AD7 9F 70 72 65 73 65 6E  1086         .db     0x9f,0x70,0x72,0x65,0x73,0x65,0x6e,0x74 ;.present
+      0007C3                         39         SCREEN_POS
+      000AC3 20 20 20 20              1         .ascii '    '
+                                     40 
+                                     41         ; line 6
+      0007C7                         42         SCREEN_POS
+      000AC7 20 20 20 20              1         .ascii '    '
+      000ACB 9F 70 72 65 73 65 6E    43         .db     0x9f,0x70,0x72,0x65,0x73,0x65,0x6e,0x74 ;.present
              74
-      000ADF 73 3A C0 20 20 20 20  1087         .db     0x73,0x3a,0xc0,0x20,0x20,0x20,0x20,0x20 ;s:@     
+      000AD3 73 3A C0 20 20 20 20    44         .db     0x73,0x3a,0xc0,0x20,0x20,0x20,0x20,0x20 ;s:@     
              20
-      000AE7 20 B2 B0 B1 B3 20 20  1088         .db     0x20,0xb2,0xb0,0xb1,0xb3,0x20,0x20,0xb7 ; 2013  7
+      000ADB 20 B2 B0 B1 B3 20 20    45         .db     0x20,0xb2,0xb0,0xb1,0xb3,0x20,0x20,0xb7 ; 2013  7
              B7
-      000AEF B6 B1 B3 B8 B1 B1 B9  1089         .db     0xb6,0xb1,0xb3,0xb8,0xb1,0xb1,0xb9,0x20 ;6138119 
+      000AE3 B6 B1 B3 B8 B1 B1 B9    46         .db     0xb6,0xb1,0xb3,0xb8,0xb1,0xb1,0xb9,0x20 ;6138119 
              20
-      0007F7                       1090         SCREEN_POS
-      000AF7 20 20 20 20              1         .ascii '    '
-                                   1091 
-                                   1092         ; line 7
-      0007FB                       1093         SCREEN_POS
-      000AFB 20 20 20 20              1         .ascii '    '
-      000AFF AB F8 F8 F8 F8 F8 F8  1094         .db     0xab,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8 ;+xxxxxxx
+      0007EB                         47         SCREEN_POS
+      000AEB 20 20 20 20              1         .ascii '    '
+                                     48 
+                                     49         ; line 7
+      0007EF                         50         SCREEN_POS
+      000AEF 20 20 20 20              1         .ascii '    '
+      000AF3 AB F8 F8 F8 F8 F8 F8    51         .db     0xab,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8 ;+xxxxxxx
              F8
-      000B07 F8 F8 AC 20 20 20 20  1095         .db     0xf8,0xf8,0xac,0x20,0x20,0x20,0x20,0x20 ;xx,     
+      000AFB F8 F8 AC 20 20 20 20    52         .db     0xf8,0xf8,0xac,0x20,0x20,0x20,0x20,0x20 ;xx,     
              20
-      000B0F 20 B0 20 20 B5 B7 B6  1096         .db     0x20,0xb0,0x20,0x20,0xb5,0xb7,0xb6,0x20 ; 0  576 
+      000B03 20 B0 20 20 B5 B7 B6    53         .db     0x20,0xb0,0x20,0x20,0xb5,0xb7,0xb6,0x20 ; 0  576 
              20
-      000B17 20 20 B1 B3 B6 BC 20  1097         .db     0x20,0x20,0xb1,0xb3,0xb6,0xbc,0x20,0x20 ;  136<  
+      000B0B 20 20 B1 B3 B6 BC 20    54         .db     0x20,0x20,0xb1,0xb3,0xb6,0xbc,0x20,0x20 ;  136<  
              20
-      00081F                       1098         SCREEN_POS
-      000B1F 20 20 20 20              1         .ascii '    '
-                                   1099 
-                                   1100         ; line 8
-      000823                       1101         SCREEN_POS
-      000B23 20 20 20 20              1         .ascii '    '
-      000B27 20 20 20 20 20 20 20  1102         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000813                         55         SCREEN_POS
+      000B13 20 20 20 20              1         .ascii '    '
+                                     56 
+                                     57         ; line 8
+      000817                         58         SCREEN_POS
+      000B17 20 20 20 20              1         .ascii '    '
+      000B1B 20 20 20 20 20 20 20    59         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000B2F 20 20 20 20 20 20 20  1103         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000B23 20 20 20 20 20 20 20    60         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000B37 B1 B6 B6 B6 B6 20 20  1104         .db     0xb1,0xb6,0xb6,0xb6,0xb6,0x20,0x20,0x20 ;16666   
+      000B2B B1 B6 B6 B6 B6 20 20    61         .db     0xb1,0xb6,0xb6,0xb6,0xb6,0x20,0x20,0x20 ;16666   
              20
-      000B3F 20 20 20 B1 B9 20 20  1105         .db     0x20,0x20,0x20,0xb1,0xb9,0x20,0x20,0x20 ;   19   
+      000B33 20 20 20 B1 B9 20 20    62         .db     0x20,0x20,0x20,0xb1,0xb9,0x20,0x20,0x20 ;   19   
              20
-      000847                       1106          SCREEN_POS
-      000B47 20 20 20 20              1         .ascii '    '
-                                   1107 
-                                   1108         ; line 9
-      00084B                       1109         Z1013_LINE
-                                   1110 
-                                   1111         ; line 10
-      00084B                       1112         Z1013_LINE
-                                   1113 
-                                   1114         ; line 11
-      00084B                       1115         SCREEN_POS
-      000B4B 20 20 20 20              1         .ascii '    '
-      000B4F 20 20 20 20 20 20 20  1116         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      00083B                         63          SCREEN_POS
+      000B3B 20 20 20 20              1         .ascii '    '
+                                     64 
+                                     65         ; line 9
+      00083F                         66         Z1013_LINE
+                                     67 
+                                     68         ; line 10
+      00083F                         69         Z1013_LINE
+                                     70 
+                                     71         ; line 11
+      00083F                         72         SCREEN_POS
+      000B3F 20 20 20 20              1         .ascii '    '
+      000B43 20 20 20 20 20 20 20    73         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000B57 20 20 20 20 20 20 20  1117         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000B4B 20 20 20 20 20 20 20    74         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000B5F 20 20 20 20 20 20 20  1118         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000B53 20 20 20 20 20 20 20    75         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000B67 20 20 20 20 20 20 20  1119         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000B5B 20 20 20 20 20 20 20    76         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      00086F                       1120          SCREEN_POS
-      000B6F 20 20 20 20              1         .ascii '    '
-                                   1121 
-                                   1122         ; line 12
-      000873                       1123         SCREEN_POS
-      000B73 20 20 20 20              1         .ascii '    '
-      000B77 20 20 20 B4 20 20 20  1124         .db     0x20,0x20,0x20,0xb4,0x20,0x20,0x20,0x20 ;   4    
+      000863                         77          SCREEN_POS
+      000B63 20 20 20 20              1         .ascii '    '
+                                     78 
+                                     79         ; line 12
+      000867                         80         SCREEN_POS
+      000B67 20 20 20 20              1         .ascii '    '
+      000B6B 20 20 20 B4 20 20 20    81         .db     0x20,0x20,0x20,0xb4,0x20,0x20,0x20,0x20 ;   4    
              20
-      000B7F 20 20 20 20 B0 20 20  1125         .db     0x20,0x20,0x20,0x20,0xb0,0x20,0x20,0x20 ;    0   
+      000B73 20 20 20 20 B0 20 20    82         .db     0x20,0x20,0x20,0x20,0xb0,0x20,0x20,0x20 ;    0   
              20
-      000B87 20 20 20 20 20 20 B4  1126         .db     0x20,0x20,0x20,0x20,0x20,0x20,0xb4,0x20 ;      4 
+      000B7B 20 20 20 20 20 20 B4    83         .db     0x20,0x20,0x20,0x20,0x20,0x20,0xb4,0x20 ;      4 
              20
-      000B8F 20 20 20 20 B4 B2 20  1127         .db     0x20,0x20,0x20,0x20,0xb4,0xb2,0x20,0x20 ;    42  
+      000B83 20 20 20 20 B4 B2 20    84         .db     0x20,0x20,0x20,0x20,0xb4,0xb2,0x20,0x20 ;    42  
              20
-      000897                       1128          SCREEN_POS
-      000B97 20 20 20 20              1         .ascii '    '
-                                   1129 
-                                   1130         ; line 13
-      00089B                       1131         SCREEN_POS
-      000B9B 20 20 20 20              1         .ascii '    '
-      000B9F 20 20 20 B4 B4 B5 B5  1132         .db     0x20,0x20,0x20,0xb4,0xb4,0xb5,0xb5,0xbd ;   4455=
+      00088B                         85          SCREEN_POS
+      000B8B 20 20 20 20              1         .ascii '    '
+                                     86 
+                                     87         ; line 13
+      00088F                         88         SCREEN_POS
+      000B8F 20 20 20 20              1         .ascii '    '
+      000B93 20 20 20 B4 B4 B5 B5    89         .db     0x20,0x20,0x20,0xb4,0xb4,0xb5,0xb5,0xbd ;   4455=
              BD
-      000BA7 BD B5 B6 B3 B4 BC BD  1133         .db     0xbd,0xb5,0xb6,0xb3,0xb4,0xbc,0xbd,0xb2 ;=5634<=2
+      000B9B BD B5 B6 B3 B4 BC BD    90         .db     0xbd,0xb5,0xb6,0xb3,0xb4,0xbc,0xbd,0xb2 ;=5634<=2
              B2
-      000BAF B6 B3 20 20 20 20 B4  1134         .db     0xb6,0xb3,0x20,0x20,0x20,0x20,0xb4,0xb1 ;63    41
+      000BA3 B6 B3 20 20 20 20 B4    91         .db     0xb6,0xb3,0x20,0x20,0x20,0x20,0xb4,0xb1 ;63    41
              B1
-      000BB7 B8 B2 B6 B3 BB B0 20  1135         .db     0xb8,0xb2,0xb6,0xb3,0xbb,0xb0,0x20,0x20 ;8263;0  
+      000BAB B8 B2 B6 B3 BB B0 20    92         .db     0xb8,0xb2,0xb6,0xb3,0xbb,0xb0,0x20,0x20 ;8263;0  
              20
-      0008BF                       1136          SCREEN_POS
-      000BBF 20 20 20 20              1         .ascii '    '
-                                   1137 
-                                   1138         ; line 14
-      0008C3                       1139         SCREEN_POS
-      000BC3 20 20 20 20              1         .ascii '    '
-      000BC7 20 B3 20 B4 B4 B5 B5  1140         .db     0x20,0xb3,0x20,0xb4,0xb4,0xb5,0xb5,0xb5 ; 3 44555
+      0008B3                         93          SCREEN_POS
+      000BB3 20 20 20 20              1         .ascii '    '
+                                     94 
+                                     95         ; line 14
+      0008B7                         96         SCREEN_POS
+      000BB7 20 20 20 20              1         .ascii '    '
+      000BBB 20 B3 20 B4 B4 B5 B5    97         .db     0x20,0xb3,0x20,0xb4,0xb4,0xb5,0xb5,0xb5 ; 3 44555
              B5
-      000BCF B5 B5 B7 B0 B4 B4 B5  1141         .db     0xb5,0xb5,0xb7,0xb0,0xb4,0xb4,0xb5,0xb1 ;55704451
+      000BC3 B5 B5 B7 B0 B4 B4 B5    98         .db     0xb5,0xb5,0xb7,0xb0,0xb4,0xb4,0xb5,0xb1 ;55704451
              B1
-      000BD7 B7 B4 20 20 B3 20 B4  1142         .db     0xb7,0xb4,0x20,0x20,0xb3,0x20,0xb4,0xb9 ;74  3 49
+      000BCB B7 B4 20 20 B3 20 B4    99         .db     0xb7,0xb4,0x20,0x20,0xb3,0x20,0xb4,0xb9 ;74  3 49
              B9
-      000BDF BD B5 20 B3 B4 B8 20  1143         .db     0xbd,0xb5,0x20,0xb3,0xb4,0xb8,0x20,0x20 ;=5 348  
+      000BD3 BD B5 20 B3 B4 B8 20   100         .db     0xbd,0xb5,0x20,0xb3,0xb4,0xb8,0x20,0x20 ;=5 348  
              20
-      0008E7                       1144          SCREEN_POS
-      000BE7 20 20 20 20              1         .ascii '    '
-                                   1145 
-                                   1146         ; line 15
-      0008EB                       1147         SCREEN_POS
-      000BEB 20 20 20 20              1         .ascii '    '
-      000BEF 20 B8 B7 B0 B1 B0 B1  1148         .db     0x20,0xb8,0xb7,0xb0,0xb1,0xb0,0xb1,0xb1 ; 8701011
+      0008DB                        101          SCREEN_POS
+      000BDB 20 20 20 20              1         .ascii '    '
+                                    102 
+                                    103         ; line 15
+      0008DF                        104         SCREEN_POS
+      000BDF 20 20 20 20              1         .ascii '    '
+      000BE3 20 B8 B7 B0 B1 B0 B1   105         .db     0x20,0xb8,0xb7,0xb0,0xb1,0xb0,0xb1,0xb1 ; 8701011
              B1
-      000BF7 B1 B5 20 20 B0 B0 B1  1149         .db     0xb1,0xb5,0x20,0x20,0xb0,0xb0,0xb1,0xb1 ;15  0011
+      000BEB B1 B5 20 20 B0 B0 B1   106         .db     0xb1,0xb5,0x20,0x20,0xb0,0xb0,0xb1,0xb1 ;15  0011
              B1
-      000BFF B7 B0 20 20 B8 B7 B0  1150         .db     0xb7,0xb0,0x20,0x20,0xb8,0xb7,0xb0,0xb1 ;70  8701
+      000BF3 B7 B0 20 20 B8 B7 B0   107         .db     0xb7,0xb0,0x20,0x20,0xb8,0xb7,0xb0,0xb1 ;70  8701
              B1
-      000C07 B6 20 B6 20 B0 20 B0  1151         .db     0xb6,0x20,0xb6,0x20,0xb0,0x20,0xb0,0x20 ;6 6 0 0 
+      000BFB B6 20 B6 20 B0 20 B0   108         .db     0xb6,0x20,0xb6,0x20,0xb0,0x20,0xb0,0x20 ;6 6 0 0 
              20
-      00090F                       1152          SCREEN_POS
-      000C0F 20 20 20 20              1         .ascii '    '
-                                   1153 
-                                   1154         ; line 16
-      000913                       1155         SCREEN_POS
-      000C13 20 20 20 20              1         .ascii '    '
-      000C17 20 20 20 20 20 20 20  1156         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000903                        109          SCREEN_POS
+      000C03 20 20 20 20              1         .ascii '    '
+                                    110 
+                                    111         ; line 16
+      000907                        112         SCREEN_POS
+      000C07 20 20 20 20              1         .ascii '    '
+      000C0B 20 20 20 20 20 20 20   113         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000C1F 20 20 20 20 20 20 20  1157         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000C13 20 20 20 20 20 20 20   114         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000C27 20 20 20 20 20 20 20  1158         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000C1B 20 20 20 20 20 20 20   115         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000C2F 20 20 20 20 20 20 20  1159         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000C23 20 20 20 20 20 20 20   116         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000937                       1160         SCREEN_POS
-      000C37 20 20 20 20              1         .ascii '    '
-                                   1161 
-      000C3B                       1162 HINT_RIGHT:
-      000C3B 2D 3E 20 2E 2E 2E 20  1163         .db     0x2d,0x3e,0x20,0x2e,0x2e,0x2e,0x20,0x52 ;-> ... R
+      00092B                        117         SCREEN_POS
+      000C2B 20 20 20 20              1         .ascii '    '
+                                   1035         
+      000C2F                       1036 HINT_RIGHT:
+      000C2F 2D 3E 20 2E 2E 2E 20  1037         .db     0x2d,0x3e,0x20,0x2e,0x2e,0x2e,0x20,0x52 ;-> ... R
              52
-      000C43 69 67 68 74           1164         .db     0x69,0x67,0x68,0x74                     ;ight
-      000C47                       1165 HINT_LEFT:
-      000C47 3C 2D 20 2E 2E 2E 2E  1166         .db     0x3c,0x2d,0x20,0x2e,0x2e,0x2e,0x2e,0x20 ;<- .... 
+      000C37 69 67 68 74           1038         .db     0x69,0x67,0x68,0x74                     ;ight
+      000C3B                       1039 HINT_LEFT:
+      000C3B 3C 2D 20 2E 2E 2E 2E  1040         .db     0x3c,0x2d,0x20,0x2e,0x2e,0x2e,0x2e,0x20 ;<- .... 
              20
-      000C4F 4C 65 66 74           1167         .db     0x4c,0x65,0x66,0x74                     ;Left
-      000C53                       1168 HINT_JUMP:
-      000C53 53 50 20 2E 2E 2E 2E  1169         .ascii  'SP .... Jump'
+      000C43 4C 65 66 74           1041         .db     0x4c,0x65,0x66,0x74                     ;Left
+      000C47                       1042 HINT_JUMP:
+      000C47 53 50 20 2E 2E 2E 2E  1043         .ascii  'SP .... Jump'
              20 4A 75 6D 70
-      000C5F                       1170 HINT_PLAY:
-      000C5F 50 20 2E 2E 2E 2E 2E  1171         .ascii  'P ..... Play'
+      000C53                       1044 HINT_PLAY:
+      000C53 50 20 2E 2E 2E 2E 2E  1045         .ascii  'P ..... Play'
              20 50 6C 61 79
-      000C6B                       1172 HINT_EXIT:
-      000C6B 45 20 2E 2E 2E 2E 2E  1173         .ascii  'E ..... Exit'
+      000C5F                       1046 HINT_EXIT:
+      000C5F 45 20 2E 2E 2E 2E 2E  1047         .ascii  'E ..... Exit'
              20 45 78 69 74
-      000C77                       1174 HINT_COPYRIGHT:
-      000C77 43 20 31 39 38 36 20  1175         .ascii  'C 1986 Software Center Ilmenau'
+      000C6B                       1048 HINT_COPYRIGHT:
+      000C6B 43 20 31 39 38 36 20  1049         .ascii  'C 1986 Software Center Ilmenau'
              53 6F 66 74 77 61 72
              65 20 43 65 6E 74 65
              72 20 49 6C 6D 65 6E
              61 75
-      000C95                       1176 HINT_NAME:
-      000C95 47 2E 46 69 73 63 68  1177         .ascii  'G.Fischer & CO'
+      000C89                       1050 HINT_NAME:
+      000C89 47 2E 46 69 73 63 68  1051         .ascii  'G.Fischer & CO'
              65 72 20 26 20 43 4F
-      000CA3                       1178 HINT_YEAR:
-      000CA3 20 20 32 30 32 30 20  1179         .ascii  '  2020 Version'
+      000C97                       1052 HINT_YEAR:
+      000C97 20 20 32 30 32 30 20  1053         .ascii  '  2020 Version'
              56 65 72 73 69 6F 6E
-      000CB1                       1180 VERSION_INFO:
-      000CB1 20 31 2E 31 20        1181         .db     0x20,0x31,0x2e,0x31,0x20                ; 1.1 
-      000CB6                       1182 LINE_BUFFER:
-      000CB6 EE EE EE EE EE EE EE  1183         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000CA5                       1054 VERSION_INFO:
+      000CA5 20 31 2E 31 20        1055         .db     0x20,0x31,0x2e,0x31,0x20                ; 1.1 
+      000CAA                       1056 LINE_BUFFER:
+      000CAA EE EE EE EE EE EE EE  1057         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000CBE EE EE EE EE EE EE EE  1184         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000CB2 EE EE EE EE EE EE EE  1058         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000CC6 EE EE EE EE EE EE EE  1185         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000CBA EE EE EE EE EE EE EE  1059         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000CCE EE EE EE EE EE EE EE  1186         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000CC2 EE EE EE EE EE EE EE  1060         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000CD6 EE EE EE EE EE EE EE  1187         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000CCA EE EE EE EE EE EE EE  1061         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000CDE EE EE EE EE EE EE EE  1188         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000CD2 EE EE EE EE EE EE EE  1062         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000CE6 EE EE EE EE EE EE EE  1189         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000CDA EE EE EE EE EE EE EE  1063         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000CEE EE EE EE EE EE EE EE  1190         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000CE2 EE EE EE EE EE EE EE  1064         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000CF6 20 20 20 EE EE EE EE  1191         .db     0x20,0x20,0x20,0xee,0xee,0xee,0xee,0xee ;   nnnnn
+      000CEA 20 20 20 EE EE EE EE  1065         .db     0x20,0x20,0x20,0xee,0xee,0xee,0xee,0xee ;   nnnnn
              EE
-      000CFE EE EE EE EE EE EE EE  1192         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000CF2 EE EE EE EE EE EE EE  1066         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000D06 EE EE EE EE EE 20 20  1193         .db     0xee,0xee,0xee,0xee,0xee,0x20,0x20,0x20 ;nnnnn   
+      000CFA EE EE EE EE EE 20 20  1067         .db     0xee,0xee,0xee,0xee,0xee,0x20,0x20,0x20 ;nnnnn   
              20
-      000D0E 20 20 EE EE EE EE EE  1194         .db     0x20,0x20,0xee,0xee,0xee,0xee,0xee,0xee ;  nnnnnn
+      000D02 20 20 EE EE EE EE EE  1068         .db     0x20,0x20,0xee,0xee,0xee,0xee,0xee,0xee ;  nnnnnn
              EE
-      000D16 EE EE EE EE EE EE EE  1195         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000D0A EE EE EE EE EE EE EE  1069         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000D1E EE 20 20 20 EE EE EE  1196         .db     0xee,0x20,0x20,0x20,0xee,0xee,0xee,0xee ;n   nnnn
+      000D12 EE 20 20 20 EE EE EE  1070         .db     0xee,0x20,0x20,0x20,0xee,0xee,0xee,0xee ;n   nnnn
              EE
-      000D26 EE EE EE EE EE EE EE  1197         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000D1A EE EE EE EE EE EE EE  1071         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000D2E EE EE EE 20 20 20 EE  1198         .db     0xee,0xee,0xee,0x20,0x20,0x20,0xee,0xee ;nnn   nn
+      000D22 EE EE EE 20 20 20 EE  1072         .db     0xee,0xee,0xee,0x20,0x20,0x20,0xee,0xee ;nnn   nn
              EE
-      000D36 EE EE EE EE EE EE EE  1199         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000D2A EE EE EE EE EE EE EE  1073         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000D3E EE EE EE EE 20 20 20  1200         .db     0xee,0xee,0xee,0xee,0x20,0x20,0x20,0xee ;nnnn   n
+      000D32 EE EE EE EE 20 20 20  1074         .db     0xee,0xee,0xee,0xee,0x20,0x20,0x20,0xee ;nnnn   n
              EE
-      000D46 EE EE EE EE EE EE EE  1201         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0x20 ;nnnnnnn 
+      000D3A EE EE EE EE EE EE EE  1075         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0x20 ;nnnnnnn 
              20
-      000D4E 20 20 EE EE EE EE EE  1202         .db     0x20,0x20,0xee,0xee,0xee,0xee,0xee,0xee ;  nnnnnn
+      000D42 20 20 EE EE EE EE EE  1076         .db     0x20,0x20,0xee,0xee,0xee,0xee,0xee,0xee ;  nnnnnn
              EE
-      000D56 EE EE EE 20 20 20 EE  1203         .db     0xee,0xee,0xee,0x20,0x20,0x20,0xee,0xee ;nnn   nn
+      000D4A EE EE EE 20 20 20 EE  1077         .db     0xee,0xee,0xee,0x20,0x20,0x20,0xee,0xee ;nnn   nn
              EE
-      000D5E EE EE EE EE EE EE EE  1204         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000D52 EE EE EE EE EE EE EE  1078         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000D66 EE EE EE EE EE EE EE  1205         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000D5A EE EE EE EE EE EE EE  1079         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000D6E EE EE EE EE EE EE EE  1206         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000D62 EE EE EE EE EE EE EE  1080         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000D76 EE EE EE 20 20 20 EE  1207         .db     0xee,0xee,0xee,0x20,0x20,0x20,0xee,0xee ;nnn   nn
+      000D6A EE EE EE 20 20 20 EE  1081         .db     0xee,0xee,0xee,0x20,0x20,0x20,0xee,0xee ;nnn   nn
              EE
-      000D7E EE EE EE EE EE EE EE  1208         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000D72 EE EE EE EE EE EE EE  1082         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000D86 EE EE EE EE EE EE EE  1209         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000D7A EE EE EE EE EE EE EE  1083         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000D8E EE EE EE EE EE EE 20  1210         .db     0xee,0xee,0xee,0xee,0xee,0xee,0x20,0x20 ;nnnnnn  
+      000D82 EE EE EE EE EE EE 20  1084         .db     0xee,0xee,0xee,0xee,0xee,0xee,0x20,0x20 ;nnnnnn  
              20
-      000D96 20 EE EE EE EE EE EE  1211         .db     0x20,0xee,0xee,0xee,0xee,0xee,0xee,0xee ; nnnnnnn
+      000D8A 20 EE EE EE EE EE EE  1085         .db     0x20,0xee,0xee,0xee,0xee,0xee,0xee,0xee ; nnnnnnn
              EE
-      000D9E EE EE EE EE EE EE EE  1212         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000D92 EE EE EE EE EE EE EE  1086         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000DA6 EE EE EE EE EE EE EE  1213         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000D9A EE EE EE EE EE EE EE  1087         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000DAE EE EE EE EE EE EE EE  1214         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000DA2 EE EE EE EE EE EE EE  1088         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000DB6 EE EE EE EE EE EE EE  1215         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
+      000DAA EE EE EE EE EE EE EE  1089         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee,0xee ;nnnnnnnn
              EE
-      000DBE EE EE EE EE EE EE EE  1216         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee      ;nnnnnnn
-                                   1217 ; unchecked data source
-      000DC5 EE                    1218         .db     0xee                                    ;n
-      000DC6                       1219 OFFSET_HOLES:
-      000DC6 58 7C 41 98 56        1220         .db     0x58,0x7c,0x41,0x98,0x56                ;X|A.V
-      000DCB                       1221 OFFSET_HOLES_JUMP_PENALTY:
-      000DCB 8B A2 68 C2 DD        1222         .db     0x8b,0xa2,0x68,0xc2,0xdd                ;."hB]
-      000DD0                       1223 cnt_fail_trap:
-      000DD0 05                    1224         .db     5
-      000DD1                       1225 cnt_fail_jump:
-      000DD1 05                    1226         .db     5
-      000DD2                       1227 MAN_HEAD:
-      000DD2 32 EF                 1228         .dw     BWS+(GAME_START_Y+(8-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+14+ALIGN_MIDDLE
-      000DD4                       1229 JUMP_DELAY:
-      000DD4 01                    1230         .db     1
-      000DD5                       1231 FAIL_DELAY:
-      000DD5 01                    1232         .db     1
-      000DD6                       1233 LIVES:
-      000DD6 06                    1234         .db     6
-      000DD7                       1235 POINTS:
-      000DD7 00 00                 1236         .dw     0
-      000DD9                       1237 LEVEL:
-      000DD9 01                    1238         .db     1
-      000DDA                       1239 counter:
-      000DDA 01                    1240         .db     1
-      000DDB                       1241 TXT_JUMP:
-      000DDB 2A 20 4A 55 4D 50 49  1242         .ascii  '* JUMPING JACK *'
+      000DB2 EE EE EE EE EE EE EE  1090         .db     0xee,0xee,0xee,0xee,0xee,0xee,0xee      ;nnnnnnn
+                                   1091 ; unchecked data source
+      000DB9 EE                    1092         .db     0xee                                    ;n
+      000DBA                       1093 OFFSET_HOLES:
+      000DBA 58 7C 41 98 56        1094         .db     0x58,0x7c,0x41,0x98,0x56                ;X|A.V
+      000DBF                       1095 OFFSET_HOLES_JUMP_PENALTY:
+      000DBF 8B A2 68 C2 DD        1096         .db     0x8b,0xa2,0x68,0xc2,0xdd                ;."hB]
+      000DC4                       1097 cnt_fail_trap:
+      000DC4 05                    1098         .db     5
+      000DC5                       1099 cnt_fail_jump:
+      000DC5 05                    1100         .db     5
+      000DC6                       1101 MAN_HEAD:
+      000DC6 32 EF                 1102         .dw     BWS+(GAME_START_Y+(8-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+14+ALIGN_MIDDLE
+      000DC8                       1103 JUMP_DELAY:
+      000DC8 01                    1104         .db     1
+      000DC9                       1105 FAIL_DELAY:
+      000DC9 01                    1106         .db     1
+      000DCA                       1107 LIVES:
+      000DCA 06                    1108         .db     6
+      000DCB                       1109 POINTS:
+      000DCB 00 00                 1110         .dw     0
+      000DCD                       1111 LEVEL:
+      000DCD 01                    1112         .db     1
+      000DCE                       1113 counter:
+      000DCE 01                    1114         .db     1
+      000DCF                       1115 TXT_JUMP:
+      000DCF 2A 20 4A 55 4D 50 49  1116         .ascii  '* JUMPING JACK *'
              4E 47 20 4A 41 43 4B
              20 2A
-      000DEB                       1243 MONSTER_PTR:
-      000DEB DF ED                 1244         .dw     BWS+(GAME_START_Y+3*3+1)*SCREEN_WIDTH-1
-      000DED 30 EE                 1245         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+0
-      000DEF 31 EE                 1246         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+1
-      000DF1 32 EE                 1247         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+2
-                                   1248 
-      000DF3 D5 EC                 1249         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+13
-      000DF5 D6 EC                 1250         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+14
-      000DF7 D7 EC                 1251         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+15
-      000DF9 D8 EC                 1252         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+16
-                                   1253 
-      000DFB 31 EE                 1254         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+1
-      000DFD 32 EE                 1255         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+2
-      000DFF 33 EE                 1256         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+3
-      000E01 34 EE                 1257         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+4
-                                   1258 
-      000E03 C1 EE                 1259         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+25
-      000E05 C2 EE                 1260         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+26
-      000E07 C3 EE                 1261         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+27
-      000E09 C4 EE                 1262         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+28
-                                   1263 
-      000E0B D2 EC                 1264         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+10
-      000E0D D3 EC                 1265         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+11
-      000E0F D4 EC                 1266         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+12
-      000E11 D5 EC                 1267         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+13
-                                   1268 
-      000E13 B3 EE                 1269         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+11
-      000E15 B4 EE                 1270         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+12
-      000E17 B5 EE                 1271         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+13
-      000E19 B6 EE                 1272         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+14
-                                   1273 
-      000E1B BD EE                 1274         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+21
-      000E1D BE EE                 1275         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+22
-      000E1F BF EE                 1276         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+23
-      000E21 C0 EE                 1277         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+24
-      000E23                       1278 MONSTER_IMG:
-      000E23 94 90 8B 90 8B 91 97  1279         .db     0x94,0x90,0x8b,0x90,0x8b,0x91,0x97,0x91 ;........
+      000DDF                       1117 MONSTER_PTR:
+      000DDF DF ED                 1118         .dw     BWS+(GAME_START_Y+3*3+1)*SCREEN_WIDTH-1
+      000DE1 30 EE                 1119         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+0
+      000DE3 31 EE                 1120         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+1
+      000DE5 32 EE                 1121         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+2
+                                   1122 
+      000DE7 D5 EC                 1123         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+13
+      000DE9 D6 EC                 1124         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+14
+      000DEB D7 EC                 1125         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+15
+      000DED D8 EC                 1126         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+16
+                                   1127 
+      000DEF 31 EE                 1128         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+1
+      000DF1 32 EE                 1129         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+2
+      000DF3 33 EE                 1130         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+3
+      000DF5 34 EE                 1131         .dw     BWS+(GAME_START_Y+4*3)*SCREEN_WIDTH+4
+                                   1132 
+      000DF7 C1 EE                 1133         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+25
+      000DF9 C2 EE                 1134         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+26
+      000DFB C3 EE                 1135         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+27
+      000DFD C4 EE                 1136         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+28
+                                   1137 
+      000DFF D2 EC                 1138         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+10
+      000E01 D3 EC                 1139         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+11
+      000E03 D4 EC                 1140         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+12
+      000E05 D5 EC                 1141         .dw     BWS+(GAME_START_Y+1*3)*SCREEN_WIDTH+13
+                                   1142 
+      000E07 B3 EE                 1143         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+11
+      000E09 B4 EE                 1144         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+12
+      000E0B B5 EE                 1145         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+13
+      000E0D B6 EE                 1146         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+14
+                                   1147 
+      000E0F BD EE                 1148         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+21
+      000E11 BE EE                 1149         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+22
+      000E13 BF EE                 1150         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+23
+      000E15 C0 EE                 1151         .dw     BWS+(GAME_START_Y+(7-2*MONSTER_CORRECTION)*3)*SCREEN_WIDTH+24
+                                   1152         
+      000E17                       1153 MONSTER_IMG:
+      000B17                       1154         MONSTER_IMG_CONTENT
+      000E17 94 90 8B 90 8B 91 97     1         .db     0x94,0x90,0x8b,0x90,0x8b,0x91,0x97,0x91 ;........
              91
-      000E2B 19 B5 20 BE 20 BF 20  1280         .db     0x19,0xb5,0x20,0xbe,0x20,0xbf,0x20,0xae ;.5 > ? .
+      000E1F 19 B5 20 BE 20 BF 20     2         .db     0x19,0xb5,0x20,0xbe,0x20,0xbf,0x20,0xae ;.5 > ? .
              AE
-      000E33 92 96 A0 A0 A0 A0 88  1281         .db     0x92,0x96,0xa0,0xa0,0xa0,0xa0,0x88,0xc1 ;..    .A
+      000E27 92 96 A0 A0 A0 A0 88     3         .db     0x92,0x96,0xa0,0xa0,0xa0,0xa0,0x88,0xc1 ;..    .A
              C1
-      000E3B 20 95 20 B7 1E FF 20  1282         .db     0x20,0x95,0x20,0xb7,0x1e,0xff,0x20,0x92 ; . 7.. .
+      000E2F 20 95 20 B7 1E FF 20     4         .db     0x20,0x95,0x20,0xb7,0x1e,0xff,0x20,0x92 ; . 7.. .
              92
-      000E43 17 8C F9 8C 1D 1F FC  1283         .db     0x17,0x8c,0xf9,0x8c,0x1d,0x1f,0xfc,0x8c ;..y...|.
+      000E37 17 8C F9 8C 1D 1F FC     5         .db     0x17,0x8c,0xf9,0x8c,0x1d,0x1f,0xfc,0x8c ;..y...|.
              8C
-      000E4B 92 96 83 82 95 93 20  1284         .db     0x92,0x96,0x83,0x82,0x95,0x93,0x20,0x20 ;......  
+      000E3F 92 96 83 82 95 93 20     6         .db     0x92,0x96,0x83,0x82,0x95,0x93,0x20,0x20 ;......  
              20
-      000E53 20 20 20 20 20 20 20  1285         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
+      000E47 20 20 20 20 20 20 20     7         .db     0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
              20
-      000E5B                       1286 HIGH_SCORE_TABLE01:
-      000E5B 5F 5F                 1287         .ascii '__'
-      000E5D                       1288 HIGH_SCORE_TABLE01.points:
-      000E5D 00 00                 1289         .dw     0
-      000E5F                       1290 HIGH_SCORE_TABLE01.level:
-      000E5F 01                    1291         .db     1
-      000E60                       1292 HIGH_SCORE_TABLE02:
-      000E60 5F 5F                 1293         .ascii '__'
-      000E62                       1294 HIGH_SCORE_TABLE02.points:
-      000E62 00 00                 1295         .dw     0
-      000E64                       1296 HIGH_SCORE_TABLE02.level:
-      000E64 01                    1297         .db     1
-      000E65                       1298 HIGH_SCORE_TABLE03:
-      000E65 5F 5F                 1299         .ascii '__'
-      000E67                       1300 HIGH_SCORE_TABLE03.points:
-      000E67 00 00                 1301         .dw     0
-      000E69                       1302 HIGH_SCORE_TABLE03.level:
-      000E69 01                    1303         .db     1
-      000E6A                       1304 HIGH_SCORE_TABLE04:
-      000E6A 5F 5F                 1305         .ascii '__'
-      000E6C                       1306 HIGH_SCORE_TABLE04.points:
-      000E6C 00 00                 1307         .dw     0
-      000E6E                       1308 HIGH_SCORE_TABLE04.level:
-      000E6E 01                    1309         .db     1
-      000E6F                       1310 HIGH_SCORE_TABLE05:
-      000E6F 5F 5F                 1311         .ascii '__'
-      000E71                       1312 HIGH_SCORE_TABLE05.points:
-      000E71 00 00                 1313         .dw     0
-      000E73                       1314 HIGH_SCORE_TABLE05.level:
-      000E73 01                    1315         .db     1
-      000E74                       1316 HIGH_SCORE_TABLE_TMP:
-      000E74 5F 5F                 1317         .ascii '__'
-      000E76                       1318 HIGH_SCORE_TABLE_TMP.points:
-      000E76 00 00                 1319         .dw     0
-      000E78                       1320 HIGH_SCORE_TABLE_TMP.level:
-      000E78 01                    1321         .db     1
-      000E79                       1322 INITIALS:
-      000E79 5F 5F                 1323         .ascii '__'
-      000E7B                       1324 TXT_GAME_OVER:
-      000E7B 2A 2A 20 47 41 4D 45  1325         .ascii  '** GAME OVER **'
+                                   1155 
+      000E4F                       1156 HIGH_SCORE_TABLE01:
+      000E4F 5F 5F                 1157         .ascii '__'
+      000E51                       1158 HIGH_SCORE_TABLE01.points:
+      000E51 00 00                 1159         .dw     0
+      000E53                       1160 HIGH_SCORE_TABLE01.level:
+      000E53 01                    1161         .db     1
+      000E54                       1162 HIGH_SCORE_TABLE02:
+      000E54 5F 5F                 1163         .ascii '__'
+      000E56                       1164 HIGH_SCORE_TABLE02.points:
+      000E56 00 00                 1165         .dw     0
+      000E58                       1166 HIGH_SCORE_TABLE02.level:
+      000E58 01                    1167         .db     1
+      000E59                       1168 HIGH_SCORE_TABLE03:
+      000E59 5F 5F                 1169         .ascii '__'
+      000E5B                       1170 HIGH_SCORE_TABLE03.points:
+      000E5B 00 00                 1171         .dw     0
+      000E5D                       1172 HIGH_SCORE_TABLE03.level:
+      000E5D 01                    1173         .db     1
+      000E5E                       1174 HIGH_SCORE_TABLE04:
+      000E5E 5F 5F                 1175         .ascii '__'
+      000E60                       1176 HIGH_SCORE_TABLE04.points:
+      000E60 00 00                 1177         .dw     0
+      000E62                       1178 HIGH_SCORE_TABLE04.level:
+      000E62 01                    1179         .db     1
+      000E63                       1180 HIGH_SCORE_TABLE05:
+      000E63 5F 5F                 1181         .ascii '__'
+      000E65                       1182 HIGH_SCORE_TABLE05.points:
+      000E65 00 00                 1183         .dw     0
+      000E67                       1184 HIGH_SCORE_TABLE05.level:
+      000E67 01                    1185         .db     1
+      000E68                       1186 HIGH_SCORE_TABLE_TMP:
+      000E68 5F 5F                 1187         .ascii '__'
+      000E6A                       1188 HIGH_SCORE_TABLE_TMP.points:
+      000E6A 00 00                 1189         .dw     0
+      000E6C                       1190 HIGH_SCORE_TABLE_TMP.level:
+      000E6C 01                    1191         .db     1
+      000E6D                       1192 INITIALS:
+      000E6D 5F 5F                 1193         .ascii '__'
+      000E6F                       1194 TXT_GAME_OVER:
+      000E6F 2A 2A 20 47 41 4D 45  1195         .ascii  '** GAME OVER **'
              20 4F 56 45 52 20 2A
              2A
-      000E8A                       1326 TXT_YOUR_SCORE:
-      000E8A 59 4F 55 52 20 53 43  1327         .ascii  'YOUR SCORE :'
+      000E7E                       1196 TXT_YOUR_SCORE:
+      000E7E 59 4F 55 52 20 53 43  1197         .ascii  'YOUR SCORE :'
              4F 52 45 20 3A
-      000E96                       1328 TXT_HAZARD:
-      000E96 48 41 5A 41 52 44 53  1329         .ascii  'HAZARDS :'
+      000E8A                       1198 TXT_HAZARD:
+      000E8A 48 41 5A 41 52 44 53  1199         .ascii  'HAZARDS :'
              20 3A
-      000E9F                       1330 TXT_NEW_HIGH_SCORE:
-      000E9F 2A 20 4E 45 57 20 48  1331         .ascii  '* NEW HIGH SCORE *'
+      000E93                       1200 TXT_NEW_HIGH_SCORE:
+      000E93 2A 20 4E 45 57 20 48  1201         .ascii  '* NEW HIGH SCORE *'
              49 47 48 20 53 43 4F
              52 45 20 2A
-                                   1332 ; end of source
-                                   1333 ;
-                                   1334 ; mark the end of ROM-image to calculate size for Z80/KCC header
-                                   1335         .area  _DATA
+                                   1202 ; end of source
+                                   1203 ;
+                                   1204 ; mark the end of ROM-image to calculate size for Z80/KCC header
+                                   1205         .area  _DATA
 ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Zilog Z80 / Hitachi HD64180 / ZX-Next / eZ80), page 1.
 Hexadecimal [24-Bits]
 
 Symbol Table
 
-    .__.$$$.                                                    =  002710 GL
+    .__.$$$.                                                    =  002710 L
     .__.ABS.                                                    =  000000 G
-    .__.CPU.                                                    =  000000 GL
-    .__.H$L.                                                    =  000000 GL
-    ALIGN_MIDDLE                                                =  000004 G
-    BOS                                                         =  000005 G
-    BWS                                                         =  00EC00 G
-    CAPITALIZE                                                  =  000020 G
-    CHR_ARROW_RIGHT_BOTTOM                                      =  000093 G
-    CHR_ARROW_RIGHT_TOP                                         =  000095 G
-    CHR_LINE_BOTTOM                                             =  00009E G
-    CHR_LINE_TOP                                                =  0000F8 G
-    CHR_MAN_HEAD                                                =  0000CC G
-    CHR_MAN_SLEEP                                               =  000097 G
-    CHR_MAN_SLEEP_HEAD                                          =  0000C9 G
-    CHR_MAN_STAY                                                =  0000A1 G
-    CHR_MAN_WALK                                                =  00009D G
-    CHR_MIDDLE_LINE                                             =  0000A0 G
-    CHR_MOVING_LINE                                             =  0000EE G
-    CHR_SMOKE                                                   =  0000CD G
-    CHR_WALL                                                    =  0000C6 G
-    CONIN                                                       =  00F009 G
-    CONST                                                       =  00F006 G
-    COOUT                                                       =  00F00C G
-    COUNT                                                       =  000023 G
-    CURS                                                        =  00002D G
-    DELAY_COUNTER                                               =  00000B G
-    DELAY_COUNTER2                                              =  000008 G
-    DELAY_COUNTER_JUMP                                          =  000004 G
-  0 FAIL_DELAY                                                     000AD5 GR
-    GAMES_LINES                                                 =  000006 G
-    GAME_START_Y                                                =  000002 G
-  0 HIGH_SCORE_TABLE01                                             000B5B GR
-  0 HIGH_SCORE_TABLE01.level                                       000B5F GR
-  0 HIGH_SCORE_TABLE01.points                                      000B5D GR
-    HIGH_SCORE_TABLE01_size                                     =  000002 G
-  0 HIGH_SCORE_TABLE02                                             000B60 GR
-  0 HIGH_SCORE_TABLE02.level                                       000B64 GR
-  0 HIGH_SCORE_TABLE02.points                                      000B62 GR
-    HIGH_SCORE_TABLE02_size                                     =  000002 G
-  0 HIGH_SCORE_TABLE03                                             000B65 GR
-  0 HIGH_SCORE_TABLE03.level                                       000B69 GR
-  0 HIGH_SCORE_TABLE03.points                                      000B67 GR
-    HIGH_SCORE_TABLE03_size                                     =  000002 G
-  0 HIGH_SCORE_TABLE04                                             000B6A GR
-  0 HIGH_SCORE_TABLE04.level                                       000B6E GR
-  0 HIGH_SCORE_TABLE04.points                                      000B6C GR
-    HIGH_SCORE_TABLE04_size                                     =  000002 G
-  0 HIGH_SCORE_TABLE05                                             000B6F GR
-  0 HIGH_SCORE_TABLE05.level                                       000B73 GR
-  0 HIGH_SCORE_TABLE05.points                                      000B71 GR
-    HIGH_SCORE_TABLE05_size                                     =  000002 G
-  0 HIGH_SCORE_TABLE_TMP                                           000B74 GR
-  0 HIGH_SCORE_TABLE_TMP.level                                     000B78 GR
-  0 HIGH_SCORE_TABLE_TMP.points                                    000B76 GR
-    HIGH_SCORE_TABLE_TMP_size                                   =  000002 G
-  0 HINT_COPYRIGHT                                                 000977 GR
-    HINT_COPYRIGHT_size                                         =  00001E G
-  0 HINT_EXIT                                                      00096B GR
-    HINT_EXIT_size                                              =  00000C G
-  0 HINT_JUMP                                                      000953 GR
-    HINT_JUMP_size                                              =  00000C G
-  0 HINT_LEFT                                                      000947 GR
-    HINT_LEFT_size                                              =  00000C G
-  0 HINT_NAME                                                      000995 GR
-    HINT_NAME_size                                              =  00000E G
-  0 HINT_PLAY                                                      00095F GR
-    HINT_PLAY_size                                              =  00000C G
-  0 HINT_RIGHT                                                     00093B GR
-    HINT_RIGHT_size                                             =  00000C G
-  0 HINT_YEAR                                                      0009A3 GR
-    HINT_YEAR_size                                              =  00000E G
-    HI_ZERO                                                     =  000000 G
-  0 INITIALS                                                       000B79 GR
-    INITIALS_size                                               =  000002 G
-    INITIAL_DELAY_COUNTER                                       =  000001 G
-    INITIAL_FAIL_COUNTER                                        =  000002 G
-    INITIAL_LEVEL                                               =  000001 G
-    INITIAL_LIVES                                               =  000006 G
-  0 JUMP_DELAY                                                     000AD4 GR
-    KEYBU                                                       =  000025 G
-    LAKEY                                                       =  000024 G
-  0 LEVEL                                                          000AD9 GR
-    LEVEL_1                                                     =  000001 G
-  0 LINE_BUFFER                                                    0009B6 GR
-    LINE_BUFFER_size                                            =  00010F G
-  0 LIVES                                                          000AD6 GR
-  0 MAN_HEAD                                                       000AD2 GR
-    MAX_FAIL_COUNTER                                            =  000005 G
-    MAX_LEVEL                                                   =  000008 G
-    MENU_TOP                                                    =  000010 G
-    MONSTER_CORRECTION                                          =  000001 G
-  0 MONSTER_IMG                                                    000B23 GR
-    MONSTER_IMG_size                                            =  000038 G
-  0 MONSTER_PTR                                                    000AEB GR
-    MONSTER_PTR_size                                            =  000038 G
-    MONSTER_WIDTH                                               =  000004 G
-    MOVE_2X_RIGHT                                               =  000002 G
-    NUMBER_HIGHSCORE_ENTRIES                                    =  000005 G
-    NUMBER_OF_LINES                                             =  000008 G
-  0 OFFSET_HOLES                                                   000AC6 GR
-  0 OFFSET_HOLES_JUMP_PENALTY                                      000ACB GR
-    OFFSET_HOLES_JUMP_PENALTY_size                              =  000005 G
-    OFFSET_HOLES_size                                           =  000005 G
-    P1ROL                                                       =  00003B G
-    P2ROL                                                       =  00003C G
-    P3ROL                                                       =  00003D G
-    P4ROL                                                       =  00003E G
-  0 POINTS                                                         000AD7 GR
-    POSDIFF_HIGHSCORE_DY                                        =  000004 G
-    POSDIFF_NAME                                                =  00000D G
-    POSDIFF_POINTS                                              =  000008 G
-    POSDIFF_YEAR                                                =  000005 G
-    POSDIFF_YOUR_SCORE                                          =  FFFFFFD8 G
-    POSDIFF_YOUR_SCORE_DY                                       =  000003 G
-    POS_COPYRIGHT                                               =  000370 G
-    POS_GAME_OVER                                               =  00EC0D G
-    POS_LIVES                                                   =  00EF98 G
-    POS_TOP_GAME                                                =  00EC0C G
-    POS_TOP_WALL                                                =  00EC28 G
-    SCREEN_HEIGHT                                               =  000018 G
-    SCREEN_WIDTH                                                =  000028 G
-    SLOW_DOWN_13066                                             =  004650 G
-    SMALL_CAPITALS                                              =  00005F G
-  0 START                                                          00000D GR
-    TITLE_TOP_SIZE                                              =  000230 G
-  0 TOP_IMAGE                                                      00070B GR
-    TOP_IMAGE_size                                              =  0001FF G
-    TOP_LINES                                                   =  00000E G
-    TRANSITION_MAN_WALK_STAY                                    =  000004 G
-  0 TXT_GAME_OVER                                                  000B7B GR
-    TXT_GAME_OVER_size                                          =  00000F G
-  0 TXT_HAZARD                                                     000B96 GR
-    TXT_HAZARD_size                                             =  000009 G
-  0 TXT_JUMP                                                       000ADB GR
-    TXT_JUMP_size                                               =  000010 G
-  0 TXT_NEW_HIGH_SCORE                                             000B9F GR
-    TXT_NEW_HIGH_SCORE_size                                     =  000012 G
-  0 TXT_YOUR_SCORE                                                 000B8A GR
-    TXT_YOUR_SCORE_size                                         =  00000C G
-    UP_CONSI                                                    =  000001 G
-    UP_CONSO                                                    =  000002 G
-    UP_CSTS                                                     =  00000B G
-    UP_DCU                                                      =  00001D G
-    UP_PRNST                                                    =  000009 G
-    UP_SETCU                                                    =  000012 G
-  0 VERSION_INFO                                                   0009B1 GR
-    VERSION_INFO_size                                           =  000005 G
-    VK_CLS                                                      =  00000C G
-    VK_HEART                                                    =  0000CB G
-    VK_LEFT                                                     =  000008 G
-    VK_PLAYER                                                   =  0000C4 G
-    VK_RIGHT                                                    =  000009 G
-    WBOOT                                                       =  00F003 G
-    ZERO                                                        =  000000 G
+    .__.CPU.                                                    =  000000 L
+    .__.H$L.                                                    =  000000 L
+    ALIGN_MIDDLE                                                =  000004 
+    BOS                                                         =  000005 
+    BWS                                                         =  00EC00 
+    CAPITALIZE                                                  =  000020 
+    CHR_ARROW_RIGHT_BOTTOM                                      =  000093 
+    CHR_ARROW_RIGHT_TOP                                         =  000095 
+    CHR_LINE_BOTTOM                                             =  00009E 
+    CHR_LINE_TOP                                                =  0000F8 
+    CHR_MAN_HEAD                                                =  0000CC 
+    CHR_MAN_SLEEP                                               =  000097 
+    CHR_MAN_SLEEP_HEAD                                          =  0000C9 
+    CHR_MAN_STAY                                                =  0000A1 
+    CHR_MAN_WALK                                                =  00009D 
+    CHR_MIDDLE_LINE                                             =  0000A0 
+    CHR_MOVING_LINE                                             =  0000EE 
+    CHR_SMOKE                                                   =  0000CD 
+    CHR_WALL                                                    =  0000C6 
+    CONIN                                                       =  00F009 
+    CONST                                                       =  00F006 
+    COOUT                                                       =  00F00C 
+    COUNT                                                       =  000023 
+    CURS                                                        =  00002D 
+    DELAY_COUNTER                                               =  00000B 
+    DELAY_COUNTER2                                              =  000008 
+    DELAY_COUNTER_JUMP                                          =  000004 
+  0 FAIL_DELAY                                                     000AC9 R
+    GAMES_LINES                                                 =  000006 
+    GAME_START_Y                                                =  000002 
+  0 HIGH_SCORE_TABLE01                                             000B4F R
+  0 HIGH_SCORE_TABLE01.level                                       000B53 R
+  0 HIGH_SCORE_TABLE01.points                                      000B51 R
+    HIGH_SCORE_TABLE01_size                                     =  000002 
+  0 HIGH_SCORE_TABLE02                                             000B54 R
+  0 HIGH_SCORE_TABLE02.level                                       000B58 R
+  0 HIGH_SCORE_TABLE02.points                                      000B56 R
+    HIGH_SCORE_TABLE02_size                                     =  000002 
+  0 HIGH_SCORE_TABLE03                                             000B59 R
+  0 HIGH_SCORE_TABLE03.level                                       000B5D R
+  0 HIGH_SCORE_TABLE03.points                                      000B5B R
+    HIGH_SCORE_TABLE03_size                                     =  000002 
+  0 HIGH_SCORE_TABLE04                                             000B5E R
+  0 HIGH_SCORE_TABLE04.level                                       000B62 R
+  0 HIGH_SCORE_TABLE04.points                                      000B60 R
+    HIGH_SCORE_TABLE04_size                                     =  000002 
+  0 HIGH_SCORE_TABLE05                                             000B63 R
+  0 HIGH_SCORE_TABLE05.level                                       000B67 R
+  0 HIGH_SCORE_TABLE05.points                                      000B65 R
+    HIGH_SCORE_TABLE05_size                                     =  000002 
+  0 HIGH_SCORE_TABLE_TMP                                           000B68 R
+  0 HIGH_SCORE_TABLE_TMP.level                                     000B6C R
+  0 HIGH_SCORE_TABLE_TMP.points                                    000B6A R
+    HIGH_SCORE_TABLE_TMP_size                                   =  000002 
+  0 HINT_COPYRIGHT                                                 00096B R
+    HINT_COPYRIGHT_size                                         =  00001E 
+  0 HINT_EXIT                                                      00095F R
+    HINT_EXIT_size                                              =  00000C 
+  0 HINT_JUMP                                                      000947 R
+    HINT_JUMP_size                                              =  00000C 
+  0 HINT_LEFT                                                      00093B R
+    HINT_LEFT_size                                              =  00000C 
+  0 HINT_NAME                                                      000989 R
+    HINT_NAME_size                                              =  00000E 
+  0 HINT_PLAY                                                      000953 R
+    HINT_PLAY_size                                              =  00000C 
+  0 HINT_RIGHT                                                     00092F R
+    HINT_RIGHT_size                                             =  00000C 
+  0 HINT_YEAR                                                      000997 R
+    HINT_YEAR_size                                              =  00000E 
+    HI_ZERO                                                     =  000000 
+  0 INITIALS                                                       000B6D R
+    INITIALS_size                                               =  000002 
+    INITIAL_DELAY_COUNTER                                       =  000001 
+    INITIAL_FAIL_COUNTER                                        =  000002 
+    INITIAL_LEVEL                                               =  000001 
+    INITIAL_LIVES                                               =  000006 
+  0 JUMP_DELAY                                                     000AC8 R
+    KEYBU                                                       =  000025 
+    LAKEY                                                       =  000024 
+  0 LEVEL                                                          000ACD R
+    LEVEL_1                                                     =  000001 
+  0 LINE_BUFFER                                                    0009AA R
+    LINE_BUFFER_size                                            =  00010F 
+  0 LIVES                                                          000ACA R
+  0 MAN_HEAD                                                       000AC6 R
+    MAX_FAIL_COUNTER                                            =  000005 
+    MAX_LEVEL                                                   =  000008 
+    MENU_TOP                                                    =  000010 
+    MONSTER_CORRECTION                                          =  000001 
+  0 MONSTER_IMG                                                    000B17 R
+    MONSTER_IMG_size                                            =  000038 
+  0 MONSTER_PTR                                                    000ADF R
+    MONSTER_PTR_size                                            =  000038 
+    MONSTER_WIDTH                                               =  000004 
+    MOVE_2X_RIGHT                                               =  000002 
+    NUMBER_HIGHSCORE_ENTRIES                                    =  000005 
+    NUMBER_OF_LINES                                             =  000008 
+  0 OFFSET_HOLES                                                   000ABA R
+  0 OFFSET_HOLES_JUMP_PENALTY                                      000ABF R
+    OFFSET_HOLES_JUMP_PENALTY_size                              =  000005 
+    OFFSET_HOLES_size                                           =  000005 
+    P1ROL                                                       =  00003B 
+    P2ROL                                                       =  00003C 
+    P3ROL                                                       =  00003D 
+    P4ROL                                                       =  00003E 
+  0 POINTS                                                         000ACB R
+    POSDIFF_HIGHSCORE_DY                                        =  000004 
+    POSDIFF_NAME                                                =  00000D 
+    POSDIFF_POINTS                                              =  000008 
+    POSDIFF_YEAR                                                =  000005 
+    POSDIFF_YOUR_SCORE                                          =  FFFFFFD8 
+    POSDIFF_YOUR_SCORE_DY                                       =  000003 
+    POS_COPYRIGHT                                               =  000370 
+    POS_GAME_OVER                                               =  00EC0D 
+    POS_LIVES                                                   =  00EF98 
+    POS_TOP_GAME                                                =  00EC0C 
+    POS_TOP_WALL                                                =  00EC28 
+    SCREEN_HEIGHT                                               =  000018 
+    SCREEN_WIDTH                                                =  000028 
+    SLOW_DOWN_13066                                             =  004650 
+    SMALL_CAPITALS                                              =  00005F 
+  0 START                                                          00000D R
+    TITLE_TOP_SIZE                                              =  000230 
+  0 TOP_IMAGE                                                      0006FF R
+    TOP_IMAGE_size                                              =  0001FF 
+    TOP_LINES                                                   =  00000E 
+    TRANSITION_MAN_WALK_STAY                                    =  000004 
+  0 TXT_GAME_OVER                                                  000B6F R
+    TXT_GAME_OVER_size                                          =  00000F 
+  0 TXT_HAZARD                                                     000B8A R
+    TXT_HAZARD_size                                             =  000009 
+  0 TXT_JUMP                                                       000ACF R
+    TXT_JUMP_size                                               =  000010 
+  0 TXT_NEW_HIGH_SCORE                                             000B93 R
+    TXT_NEW_HIGH_SCORE_size                                     =  000012 
+  0 TXT_YOUR_SCORE                                                 000B7E R
+    TXT_YOUR_SCORE_size                                         =  00000C 
+    UP_CONSI                                                    =  000001 
+    UP_CONSO                                                    =  000002 
+    UP_CSTS                                                     =  00000B 
+    UP_DCU                                                      =  00001D 
+    UP_PRNST                                                    =  000009 
+    UP_SETCU                                                    =  000012 
+  0 VERSION_INFO                                                   0009A5 R
+    VERSION_INFO_size                                           =  000005 
+    VK_CLS                                                      =  00000C 
+    VK_HEART                                                    =  0000CB 
+    VK_LEFT                                                     =  000008 
+    VK_PLAYER                                                   =  0000C4 
+    VK_RIGHT                                                    =  000009 
+    WBOOT                                                       =  00F003 
+    ZERO                                                        =  000000 
   0 _main                                                          000000 GR
-  0 action_jump                                                    0003A9 GR
-  0 action_left                                                    0002F9 GR
-  0 action_right                                                   000350 GR
-  0 add_10_points                                                  0004C4 GR
-  0 animation_delay                                                0002EC GR
-  0 animation_lines                                                00027C GR
-  0 animation_loop                                                 000126 GR
-  0 animation_monster                                              0001BD GR
-  0 ask_exit_game                                                  000681 GR
-  0 capitalized                                                    000094 GR
-  0 check_fall_through                                             00040D GR
-  0 check_for_trap                                                 000413 GR
-  0 check_level_finished                                           00045E GR
-  0 choose_menu                                                    000084 GR
-  0 cnt_fail_jump                                                  000AD1 GR
-  0 cnt_fail_trap                                                  000AD0 GR
-  0 correct_left_border                                            00033C GR
-  0 correct_ptr                                                    000207 GR
-  0 correct_right_border                                           000393 GR
-  0 counter                                                        000ADA GR
-  0 decimal_loop                                                   00050E GR
-  0 delay_loop                                                     0002F3 GR
-  0 draw_monster                                                   00023E GR
-  0 draw_monster_segment                                           000243 GR
-  0 draw_new_highscore_box                                         0006D9 GR
-  0 draw_player                                                    0000BB GR
-  0 erase_player_fell_down                                         00043B GR
-  0 exit_game                                                      000693 GR
-  0 get_column                                                     000200 GR
-  0 get_decimal_digit                                              00050D GR
-  0 handle_by_column                                               0001E4 GR
-  0 handle_by_ptr                                                  0001E0 GR
-  0 handle_fail_delay                                              00015C GR
-  0 handle_jump_delay                                              00015F GR
-  0 handle_one_monster                                             0001CC GR
-    inkey                                                       =  00FD33 G
-  0 input                                                          00059E GR
-  0 insert_score                                                   0006A8 GR
-  0 jump_delay_counter_set                                         00016A GR
-  0 jump_fail                                                      0003E6 GR
-  0 jump_ok                                                        0003C2 GR
-  0 left_border_next_adr                                           00032E GR
-  0 loop_failed_penalty_holes                                      000291 GR
-  0 loop_jump_penalty_holes                                        0002B0 GR
-  0 loop_left_border_check                                         000322 GR
-  0 loop_right_border_check                                        000379 GR
-  0 m_070a                                                         000681 GR
-  0 monster_check_crash                                            000260 GR
-  0 move_one_line_up                                               000223 GR
-  0 move_table_entry                                               0006AF GR
-  0 new_game                                                       00009D GR
-  0 new_level_set                                                  000471 GR
-  0 no_lives                                                       000524 GR
-  0 player_activity                                                0001B3 GR
-  0 player_fell_down                                               000443 GR
-  0 player_wake_up                                                 00019A GR
-  0 print_decimal                                                  0004E1 GR
-  0 print_highscore_entry                                          00060C GR
-  0 print_highscore_table                                          000604 GR
-  0 print_line                                                     0002D0 GR
+  0 action_jump                                                    00039D R
+  0 action_left                                                    0002ED R
+  0 action_right                                                   000344 R
+  0 add_10_points                                                  0004B8 R
+  0 animation_delay                                                0002E0 GR
+  0 animation_lines                                                000270 R
+  0 animation_loop                                                 000126 R
+  0 animation_monster                                              0001B1 R
+  0 ask_exit_game                                                  000675 R
+  0 capitalized                                                    000094 R
+  0 check_fall_through                                             000401 R
+  0 check_for_trap                                                 000407 R
+  0 check_level_finished                                           000452 R
+  0 choose_menu                                                    000084 R
+  0 cnt_fail_jump                                                  000AC5 R
+  0 cnt_fail_trap                                                  000AC4 R
+  0 correct_left_border                                            000330 R
+  0 correct_ptr                                                    0001FB R
+  0 correct_right_border                                           000387 R
+  0 counter                                                        000ACE R
+  0 decimal_loop                                                   000502 R
+  0 delay_loop                                                     0002E7 R
+  0 draw_monster                                                   000232 R
+  0 draw_monster_segment                                           000237 R
+  0 draw_new_highscore_box                                         0006CD R
+  0 draw_player                                                    0000BB R
+  0 erase_player_fell_down                                         00042F R
+  0 exit_game                                                      000687 R
+  0 get_column                                                     0001F4 R
+  0 get_decimal_digit                                              000501 R
+  0 handle_by_column                                               0001D8 R
+  0 handle_by_ptr                                                  0001D4 R
+  0 handle_fail_delay                                              000150 R
+  0 handle_jump_delay                                              000153 R
+  0 handle_one_monster                                             0001C0 R
+    inkey                                                       =  00FD33 
+  0 input                                                          000592 R
+  0 insert_score                                                   00069C R
+  0 jump_delay_counter_set                                         00015E R
+  0 jump_fail                                                      0003DA R
+  0 jump_ok                                                        0003B6 R
+  0 left_border_next_adr                                           000322 R
+  0 loop_failed_penalty_holes                                      000285 R
+  0 loop_jump_penalty_holes                                        0002A4 R
+  0 loop_left_border_check                                         000316 R
+  0 loop_right_border_check                                        00036D R
+  0 m_070a                                                         000675 R
+  0 monster_check_crash                                            000254 R
+  0 move_one_line_up                                               000217 R
+  0 move_table_entry                                               0006A3 R
+  0 new_game                                                       00009D R
+  0 new_level_set                                                  000465 R
+  0 no_lives                                                       000518 R
+  0 player_activity                                                0001A7 R
+  0 player_fell_down                                               000437 R
+  0 player_wake_up                                                 00018E R
+  0 print_decimal                                                  0004D5 R
+  0 print_highscore_entry                                          000600 R
+  0 print_highscore_table                                          0005F8 R
+  0 print_line                                                     0002C4 R
     prst7                                                          ****** GX
-  0 right_border_next_adr                                          000385 GR
-  0 round_end                                                      0004A2 GR
+  0 right_border_next_adr                                          000379 R
+  0 round_end                                                      000496 R
   0 sadr                                                           000000 GR
     set_cursor                                                     ****** GX
-  0 start_from_bottom                                              000211 GR
-  0 test_column                                                    000218 GR
-  0 transition_left_stay                                           000315 GR
-  0 transition_left_walk                                           000319 GR
-  0 transition_stay                                                00036C GR
-  0 transition_walk                                                000370 GR
-  0 update_left                                                    00031B GR
-  0 update_pointers                                                00022A GR
-  0 update_right                                                   000372 GR
-    z1013                                                       =  000000 G
-    z9001                                                       =  000001 G
+  0 start_from_bottom                                              000205 R
+    ta_alpha                                                    =  000000 
+  0 test_column                                                    00020C R
+  0 transition_left_stay                                           000309 R
+  0 transition_left_walk                                           00030D R
+  0 transition_stay                                                000360 R
+  0 transition_walk                                                000364 R
+  0 update_left                                                    00030F R
+  0 update_pointers                                                00021E R
+  0 update_right                                                   000366 R
+    z1013                                                       =  000000 
+    z9001                                                       =  000001 
 
 
 ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Zilog Z80 / Hitachi HD64180 / ZX-Next / eZ80), page 2.
@@ -1967,6 +2114,6 @@ Hexadecimal [24-Bits]
 
 Area Table
 
-   0 _CODE                                      size    BB1   flags    0
+   0 _CODE                                      size    BA5   flags    0
    1 _DATA                                      size      0   flags    0
 

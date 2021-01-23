@@ -14,7 +14,7 @@ all: $(TARGETS)
 
 include z9001.mk
 include z1013.mk
-
+include ta_alpha.mk
 
 obj/%:
 	mkdir -p $@

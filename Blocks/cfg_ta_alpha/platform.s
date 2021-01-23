@@ -4,11 +4,11 @@ ta_alpha                        =       1
 ;
 ; ta specific constants
 ;
-BOS                             =       0x0005
 BWS                             =       0xf000
 OFFSET_COLOR                    =       0x0800
 cfg20_settings                  =       0xe469
 crt_cls                         =       0xe9e8
+mon_reboot                      =       0xe023
 
 CFG20                           =       0x20
 CRT_REG                         =       0x50
@@ -22,9 +22,6 @@ VK_RIGHT                        =       0x1c
 VK_UP                           =       0x1e
 VK_DOWN                         =       0x1f
 
-;
-; platform specific constants
-;
 FG_BLACK                        =       0
 FG_BLUE                         =       1
 FG_RED                          =       2
@@ -41,13 +38,18 @@ BG_GREEN                        =       4*8
 BG_CYAN                         =       5*8
 BG_YELLOW                       =       6*8
 BG_WHITE                        =       7*8
+
+SCREEN_WIDTH                    =       40
+SCREEN_HEIGHT                   =       24
+;
+; program specific constants
+;
 FRAME_COLOR                     =       FG_MAGENTA+BG_YELLOW
 STONE_COLOR                     =       FG_GREEN+BG_YELLOW
 RED_STONE_COLOR                 =       FG_MAGENTA+BG_YELLOW
 SELC                            =       0x1c
 SELCR                           =       0x1c
-SCREEN_WIDTH                    =       0x28
-SCREEN_HEIGHT                   =       0x18
+
 POSY_INPUT_LINE                 =       21
 POSX_INPUT_LINE                 =       22
 INPUT_LINE_size                 =       0x0f
