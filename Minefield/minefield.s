@@ -6,28 +6,16 @@
 ;
 ;**********************************
 
-.include 'platform.inc'
-.module  minefield
+        .module  minefield
+        .include 'platform.s'
+        
+        .globl  _main
 
 LOG_BUFFER_INIT        .equ (LOG_BUFFER-1)
 
-.if Z1013
-    CHR_MAN                .equ 0x17
-    END_ROW                .equ 5
-    END_SCREEN_CORRECTION  .equ 9 ; starting line of the text
-.else
-    CHR_MAN                .equ 0xc4
-    END_ROW                .equ 2
-    END_SCREEN_CORRECTION  .equ 5; starting line of the text
-.endif
-BWS                    .equ 0xec00
 BWS_ADR_MINES          .equ BWS+ofs_minen
 BWS_ADR_POINTS         .equ BWS+ofs_points
 BWS_ADR_HINT           .equ BWS+ofs_vorsicht
-
-START_ROW              .equ BWS_HEIGHT-2
-START_COLUMN           .equ (BWS_LINE_WIDTH/2)-1
-END_COLUMN             .equ (BWS_LINE_WIDTH/2)-1
 
 BWS_A_SIE_HABEN        .equ BWS+(END_SCREEN_CORRECTION*BWS_LINE_WIDTH+10)
 BWS_A_TOTAL_POI        .equ BWS+((END_SCREEN_CORRECTION+2)*BWS_LINE_WIDTH+13)
@@ -47,10 +35,6 @@ KEY_DOWN               .equ 'O' ; O
 KEY_START              .equ 'S' ; S
 KEY_QUIT               .equ 0x03 ; vorher ^E
 KEY_NEXT               .equ 0x01 ; vorher ^J
-CHR_VISITED            .equ 0xff
-CHR_FREE               .equ ' '
-CHR_BONUS              .equ 0xca
-CHR_MINE               .equ 0xc9
 RECORD_UP              .equ 0x01
 RECORD_DOWN            .equ 0x02
 RECORD_RIGHT           .equ 0x03
@@ -79,25 +63,10 @@ size_of_sie_haben      .equ 12
 size_of_punkte_erreich .equ 18
 size_of_noch_ein_spiel .equ 16
 
-.macro  FILL_SPACES
-.if Z9001
-        .rept (BWS_LINE_WIDTH-32)
-        .db 0x20
-        .endm
-.endif
-.endm
-
-.area  CODE
-init::
-.if Z9001
-        jp START
-        .ascii 'MINES   '
-        .dw 0
-.endif
-START:
-.if Z1013
-        call joystick_init
-.endif
+        .area  _CODE
+_main:
+        PROGRAM_HEADER
+        JOYSTICK_INIT
         call show_title
 wait_to_start:
         call up_inch
@@ -547,14 +516,7 @@ show_title:
         ld de,#BWS
         ld bc,#BWS_SIZE
         ldir
-.if Z9001
-        ld de,#BWS-0x3ff
-        ld hl,#BWS-0x400
-        ld bc,#BWS_SIZE-1
-        ld a,#0x70 ; whitr
-        ld (hl),a
-        ldir
-.endif
+        FILL_BACKGROUND_COLOR
         ret
 check_for_bonus:
         ld hl,(mines_count)
@@ -645,11 +607,6 @@ animate_left:
         dec hl
         ld (hl),a
         ret
-.if Z1013
-    CUT_OFF .equ (START_ROW-END_ROW-4)*BWS_LINE_WIDTH
-.else
-    CUT_OFF .equ (START_ROW-END_ROW-3)*BWS_LINE_WIDTH
-.endif
 
 distribute_mines:
         ld bc,(mines_count)
@@ -738,84 +695,13 @@ go_next:
         jp kill_all_and_halt
 
 kill_all_and_halt:
-.if Z1013
-        rst 0x20
-        .db UP_PRST7
-        .ascis 'Auf Wiedersehen! Und weg... '
-        rst 0x38
-.else
-        ld c,#UP_PRNST
-        ld de,#str_exit
-        call BOS
-        xor a
-        ret
-str_exit:
-        .asciz 'Auf Wiedersehen! Und weg... '
-.endif
+        END_MESSAGE
 
 quit_sound:
-.if Z1013
-        ld l,#QUIT_SOUND_P1
-        ld d,#QUIT_SOUND_P2
-        ld e,#QUIT_SOUND_P3
-quit$play_effect1:
-        ld c,e
-quit$play_period1:
-        xor #TAPE_OUT
-        out (PIOB_DATA),a
-        ld b,d
-        nop
-        cp #QUIT_SOUND_P4
-        add b
-        out (PIOB_DATA),a
-        ld b,d
-quit$play_half_wave1:
-        djnz quit$play_half_wave1
-        dec c
-        jr nz,quit$play_period1
-        dec d
-        inc e
-        dec l
-        jr nz,quit$play_effect1
-        ld l,#QUIT_SOUND_P1
-quit$play_effect2:
-        ld c,e
-quit$play_period2:
-        xor #TAPE_OUT
-        out (PIOB_DATA),a
-        ld b,d
-        nop
-        cp #QUIT_SOUND_P4
-        add b
-        out (PIOB_DATA),a
-        ld b,d
-quit$play_half_wave2:
-        djnz quit$play_half_wave2
-        dec c
-        jr nz,quit$play_period2
-        inc d
-        dec e
-        dec l
-        jr nz,quit$play_effect2
-.endif
+        QUIT_SOUND
         ret
 click_sound:
-.if Z1013
-        push af
-        ld b,#WAVE_PERIODS
-        xor a
-$click_next_period:
-        ld c,#WAVE_LEN_285Hz; 1-half wave has 3500 clock cycles
-$click_keep_level:
-        out (PIOB_DATA),a
-        nop
-        nop
-        dec c
-        jr nz,$click_keep_level
-        xor #TAPE_OUT
-        djnz $click_next_period
-        pop af
-.endif
+        CLICK_SOUND
         ret
 ;
 ; Galois LFSRs
@@ -842,38 +728,26 @@ seed:
 
 up_inch:
         call rand16
-.if Z9001
-        ld c,#UP_CSTS
-        call BOS
-        or a
-        jr z,up_inch
-        ld c,#UP_CONSI
-        call BOS
-.else
-        rst 0x20
-        .db UP_INKEY
-        or a
-        jr z,up_inch$joystick
-.endif
-        cp #0x0b; CURSOR UP
+        INKEY
+        cp #VK_UP; CURSOR UP
         jr nz,up_inch$test_down
 up_inch$is_up:
         ld a,#'G'
         ret
 up_inch$test_down:
-        cp #0x0a; CURSOR DOWN
+        cp #VK_DOWN; CURSOR DOWN
         jr nz,up_inch$test_left
 up_inch$is_down:
         ld a,#'O'
         ret
 up_inch$test_left:
-        cp #0x08; CURSOR LEFT
+        cp #VK_LEFT; CURSOR LEFT
         jr nz,up_inch$test_right
 up_inch$is_left:
         ld a,#'P'
         ret
 up_inch$test_right:
-        cp #0x09; CURSOR RIGHT
+        cp #VK_RIGHT; CURSOR RIGHT
         jr nz,up_inch$test_enter
 up_inch$is_right:
         ld a,#'Q'
@@ -890,154 +764,16 @@ up_inch$fire:
         jr up_inch$is_start
 up_inch$end:
         ret
-.if Z1013
-up_inch$joystick:
-        in a,(0x00)
-        and #0x1f
-        ld c,a
-        ld b,#0x80
-up_inch$debounce1:
-        djnz up_inch$debounce1
-        in a,(0x00)
-        and #0x1f;
-        cp c
-        jr nz,up_inch$joystick
-joystick:
-        ld a,(last_joystick)
-        cp c
-        jr z,up_inch
-        ld a,c
-        ld (last_joystick),a
-        cp #0x1e; left
-        jr z,up_inch$is_left
-        cp #0x1d; right
-        jr z,up_inch$is_right
-        cp #0x1b; right
-        jr z,up_inch$is_down
-        cp #0x17; up
-        jr z,up_inch$is_up
-        and #0x10
-        ret nz
-        ld a,#'S'
-        ret
-joystick_init:
-        ld a,#0xcf; bitwise input
-        out (0x01),a
-        ld a,#0x1f;
-        out (0x01),a
-        xor a
-        ld (last_joystick),a
-        ld a,#0x60 ; both enabled
-        out (0x00),a
-        ret
-.endif
+	JOYSTICK
 txt_empty_screen:
-.if Z1013
-        .ascii '                                '
-        FILL_SPACES
-        .ascii '   '
-.endif
-        .ascii 'MINEN:'
+        TXT_MINES
 ofs_minen   .equ .-txt_empty_screen
 
-.if Z1013
-        .ascii '    '
-.endif
-        .ascii '     PUNKTE:'
+        TXT_PUNKTE
 ofs_points   .equ .-txt_empty_screen
-.if Z1013
-        .ascii '       '
-.else
-        .ascii '     '
-ofs_vorsicht   .equ .-txt_empty_screen
-        .ascii '                 '
-.endif
 
-.if Z1013
-        .db 0xa8
-        .rept (BWS_LINE_WIDTH-2)
-        .db 0xa0
-        .endm
-        .db 0xa9
+        TXT_EMPTY_SCREEN
 
-        .db 0xa1
-.if Z1013
-ofs_vorsicht   .equ .-txt_empty_screen+5; 5 is intentionally move right
-.endif
-        .rept (BWS_LINE_WIDTH-2)
-        .db ' '
-        .endm
-        .db 0xa1
-        .db 0xa3
-.else
-        .db 0xa8
-.endif
-        .rept (BWS_LINE_WIDTH/2-3)
-        .db 0xa0
-        .endm
-        .db 0xa4,0xa0,0xa4
-        .rept (BWS_LINE_WIDTH/2-2)
-        .db 0xa0
-        .endm
-.if Z1013
-        .db 0xa5
-.else
-        .db 0xa9
-.endif
-        .db 0xa3
-        .rept (BWS_LINE_WIDTH/2-3)
-        .db 0xa0
-        .endm
-        .db 0xaa,0x20,0xa7
-        .rept (BWS_LINE_WIDTH/2-2)
-        .db 0xa0
-        .endm
-        .db 0xa5
-
-        ;;22
-        .rept (BWS_HEIGHT-9)
-                .db 0xa1
-                .rept (BWS_LINE_WIDTH-2)
-                .db 0x20
-                .endm
-                .db 0xa1
-        .endm
-.if Z9001
-        .rept (4)
-        .db 0xa1
-        .rept (BWS_LINE_WIDTH-2)
-        .db 0x20
-        .endm
-        .db 0xa1
-        .endm
-.endif
-
-        .db 0xa3
-        .rept (BWS_LINE_WIDTH/2-3)
-        .db 0xa0
-        .endm
-        .db 0xa9,0x20,0xa8
-        .rept (BWS_LINE_WIDTH/2-2)
-        .db 0xa0
-        .endm
-        .db 0xa5
-
-.if Z1013
-        .db 0xa1
-        .ascii '     SCI     '
-        .db 0xa1,0x20,0xa1
-        .ascii '    GAMES     '
-        .db 0xa1
-.endif
-        .db 0xa7
-        .rept (BWS_LINE_WIDTH/2-3)
-        .db 0xa0
-        .endm
-        .db 0xa2,0xa0,0xa2
-        .rept (BWS_LINE_WIDTH/2-2)
-        .db 0xa0
-        .endm
-        .db 0xaa
 ptr_cursor:
         .db 0xcf,0xef                               ;Oo
 ptr_internal_array:
@@ -1062,129 +798,12 @@ str_punkte_erreicht:
 str_noch_ein_spiel:
         .ascii 'NOCH EIN SPIEL ?'
 txt_title:
-        .ascii '\256\236\236\236\236\236\236\236\236\236\255           \212   \212\212  \212 '
-        FILL_SPACES
-        .ascii '\237\271\266\263\262\266\270 \275\260\300          \212 \212\222\223\236\236\226\225\212\212'
-        FILL_SPACES
-        .db 0x9f,0xb8,0xb7,0x20,0xb5,0x20,0x20,0x20 ;.87 5   
-        .db 0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
-        .db 0x20,0x20,0x20,0x20,0x20,0x8a,0x20,0x99 ;     . .
-        .db 0x20,0x20,0x20,0x20,0x20,0x20,0x9b,0x20 ;      . 
-        FILL_SPACES
-        .db 0x9f,0xb3,0x20,0xb4,0xb5,0x20,0xb2,0x20 ;.3 45 2 
-        .db 0xb5,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;5 @     
-        .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x98 ;       .
-        .db 0x20,0xc9,0x20,0x20,0xc9,0x20,0x9c,0x20 ; I  I . 
-.if Z9001
-        .ascii 'S Start '
-.endif
-        .db 0x9f,0xb1,0xb6,0x20,0x20,0xb6,0xb0,0x20 ;.16  60 
-        .db 0xb6,0xb0,0xc0,0x20,0x92,0x93,0x9e,0x9e ;60@ ....
-        .db 0x96,0x95,0x20,0x20,0x20,0x20,0x20,0x9f ;..     .
-        .db 0x20,0x20,0x86,0x87,0x20,0x20,0xc0,0x20 ;  ..  @ 
-        FILL_SPACES
-        .db 0x9f,0x70,0x72,0x65,0x73,0x65,0x6e,0x74 ;.present
-        .db 0x73,0x3a,0xc0,0x99,0x20,0x20,0x20,0x20 ;s:@.    
-        .db 0x20,0x20,0x9b,0x20,0x20,0x20,0x20,0x9b ;  .    .
-        .db 0x20,0x20,0x85,0x84,0x20,0x20,0x99,0x20 ;  ..  . 
-.if Z9001
-        .ascii '\235 Hoch  '
-.endif
-        .db 0xab,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8,0xf8 ;+xxxxxxx
-        .db 0xf8,0xf8,0xac,0x98,0x20,0xc9,0x20,0x20 ;xx,. I  
-        .db 0xc9,0x20,0x9c,0x20,0x20,0x20,0x20,0x9c ;I .    .
-        .db 0x20,0x86,0x92,0x95,0x87,0x20,0x98,0x20 ; .... . 
-        FILL_SPACES
-        .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
-        .db 0x20,0x20,0x20,0x9f,0x20,0x20,0x86,0x87 ;   .  ..
-        .db 0x20,0x20,0xc0,0x20,0x20,0x20,0x20,0x20 ;  @     
-        .db 0x96,0x95,0xf8,0xf8,0x92,0x93,0x20,0x20 ;..xx..  
-.if Z9001
-        .ascii '\232 Runter'
-.endif
-        .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
-        .db 0x20,0x20,0x20,0x9b,0x20,0x20,0x85,0x84 ;   .  ..
-        .db 0x20,0x20,0x99,0x20,0x20,0x20,0x20,0x20 ;  .     
-        .db 0x20,0x20,0x9f,0xc0,0x20,0x20,0x20,0x20 ;  .@    
-        FILL_SPACES
-        .db 0x20,0x4e,0x6f,0x77,0x20,0x79,0x6f,0x75 ; Now you
-        .db 0x20,0x20,0x20,0x9c,0x20,0x85,0x95,0x92 ;   . ...
-        .db 0x84,0x20,0x98,0x20,0x20,0x20,0x20,0x20 ;. .     
-        .db 0x20,0xdf,0x9f,0xc0,0xdc,0x20,0x20,0x20 ; _.@\   
-.if Z9001
-        .ascii '\224 Links '
-.endif
-        .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
-        .db 0x20,0x20,0x20,0x20,0x96,0x95,0xf8,0xf8 ;    ..xx
-        .db 0x92,0x93,0x20,0x20,0x20,0x20,0x20,0x20 ;..      
-        .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
-        FILL_SPACES
-        .db 0x20,0x61,0x72,0x65,0x20,0x68,0x61,0x70 ; are hap
-        .db 0x70,0x79,0x20,0xdb,0xf8,0x90,0x20,0x20 ;py [x.  
-        .db 0x9e,0x96,0xd8,0x20,0x20,0x20,0x62,0x75 ;..X   bu
-        .db 0x74,0x20,0x62,0x65,0x20,0x20,0x20,0x20 ;t be    
-.if Z9001
-        .ascii '\227 Rechts'
-.endif
-        .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
-        .db 0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;        
-        .db 0x20,0xb7,0xff,0xff,0xb7,0x20,0x20,0x63 ; 7..7  c
-        .db 0x61,0x72,0x65,0x66,0x75,0x6c,0x6c,0x21 ;arefull!
-        FILL_SPACES
-        .ascii '                                '
-        FILL_SPACES
-        .ascii '                                '
-.if Z9001
-        .ascii ' oder   '
-.endif
-        .db 0x20,0x20,0x20,0x20,0xb2,0x20,0xb2,0x20 ;    2 2 
-        .db 0xb3,0x20,0x20,0x20,0x20,0x20,0x20,0x20 ;3       
-        .db 0xb2,0xb3,0xb3,0x20,0x20,0x20,0xb2,0x20 ;233   2 
-        .db 0x20,0x20,0xb3,0x20,0x20,0x20,0x20,0x20 ;  3     
-        FILL_SPACES
-        .db 0x20,0xb8,0x20,0x20,0xb5,0xb8,0xbd,0x20 ; 8  58= 
-        .db 0xb3,0xb2,0xb2,0x20,0x20,0xb7,0xb3,0x20 ;322  73 
-        .db 0xb4,0x20,0xb3,0x20,0xb7,0xb3,0xb5,0x20 ;4 3 735 
-        .db 0xb2,0xb7,0xb4,0x20,0xb2,0xb0,0x20,0x20 ;274 20  
-.if Z9001
-        .ascii 'Joystick'
-.endif
-        .db 0x20,0xb2,0xb0,0x20,0xb5,0x20,0xb5,0x20 ; 20 5 5 
-        .db 0xb4,0xb5,0xb0,0xb4,0xb5,0xb7,0xb9,0xb1 ;45045791
-        .db 0xbc,0x20,0xb4,0xb5,0xb7,0xb9,0xb5,0x20 ;< 45795 
-        .db 0xb4,0x20,0xb4,0x20,0xb8,0x20,0x20,0x20 ;4 4 8   
-        FILL_SPACES
-        .db 0x20,0xb0,0x20,0x20,0xb5,0x20,0xb5,0xb2 ; 0  5 52
-        .db 0xbb,0xb5,0x20,0xbb,0xb1,0xb7,0xb7,0x20 ;;5 ;177 
-        .db 0xb4,0xb2,0xbb,0xb1,0xb7,0xb7,0xb5,0xb3 ;42;17753
-        .db 0xb8,0xb7,0xb4,0x20,0x20,0xb0,0x20,0x20 ;874  0  
-        FILL_SPACES
-        .ascii '                                '
-        FILL_SPACES
-.if Z1013
-        .ascii '  fuer Brosig, A2 und Joystick  '
-        .ascii '                         PA01/88'
-        .ascii '        S   - START             '
-        .ascii '        G \235 - AUFWAERTS         '
-        .ascii '        O \232 - ABWAERTS          '
-        .ascii '        P \224 - LINKS             '
-        .ascii '        Q \227 - RECHTS            '
-        .ascii '                                '
-.endif
-        .ascii '                                '
-        FILL_SPACES
-        .ascii ' C-1987 SOFTWARE CENTER ILMENAU '
-        FILL_SPACES
-        .ascii '      by DIRK STREHLE           '
-        FILL_SPACES
-        .ascii ' 2017 MOD by Andreas Ziermann    '
-        FILL_SPACES
+        TITLE_IMG_CONTENT
 ;
-; kind of .BSS segment data
 ;
-.area BSS 
+;
+	.area _DATA 
 INTERNAL_ARRAY:
         .ds BWS_LINE_WIDTH*MINEFIELD_ARRAY_HEIGHT
 LOG_BUFFER:
         .ds 1
-
