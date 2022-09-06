@@ -13,30 +13,35 @@ Area                                    Addr        Size        Decimal Bytes (A
      00000000  COUNTRY_INTERNATIONAL              
      00000000  CRT_RESET                          
      00000000  HIGH_ZERO                          
+     00000000  NO                                 
      00000000  OFF                                
      00000000  REG_0                              
      00000000  STATUS_SLED                        
+     00000000  _CRT80                             
      00000000  _FDD_PRESENT                       
      00000000  _SIOC                              
+     00000000  _TxRDY                             
      00000000  cold_start                         
      00000001  CEN_RESET                          
      00000001  COUNTRY_DE                         
      00000001  MODIFIER_SHIFT                     
      00000001  ON                                 
      00000001  TOGGLE_SLED                        
-     00000001  _CRT80                             
      00000001  _CRT_VSYNC_PERIOD                  
      00000001  _DISPLAY_INHIBIT                   
      00000001  _GFX_AVAILABLE                     
+     00000001  _RxRDY                             
      00000002  CEN_STROBE                         
      00000002  CMT_RS232_SELECT                   
      00000002  COUNTRY_US                         
      00000002  STATUS_GLED                        
      00000002  _CEN_ACKNOWLEDGE                   
+     00000002  _DRV_CTRL_INTERNAL                 
      00000003  CMT_MOTOR_START                    
      00000003  COUNTRY_FR                         
      00000003  MONINH                             
      00000003  _CEN_BUSY                          
+     00000003  _DRV_CTRL_84                       
      00000004  COUNTRY_UK                         
      00000004  GLED                               
      00000004  TOGGLE_GLED                        
@@ -50,13 +55,8 @@ Area                                    Addr        Size        Decimal Bytes (A
      00000006  ROM_PACK_EN                        
      00000006  UPPER_MONITOR_SEL                  
      00000006  _CRT_NTSC                          
+     00000006  _DRV_FG_BG_SAME_COLOR              
      00000007  COUNTRY_07                         
-     00000007  KBD_BREAK                          
-     00000007  MASK_COUNTRY_BITS                  
-     00000007  ROM_ACCESS_EN                      
-     00000007  RQM_Request_for_master             
-     00000007  _CRT_DISPLAY                       
-     00000008  FDC_CMD_SENSE_INTERRUPT_STATE      
 ASxxxx Linker V03.00 + NoICE + sdld,  page 2.
 Hexadecimal  [32-Bits]
 
@@ -66,8 +66,19 @@ Area                                    Addr        Size        Decimal Bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
+     00000007  KBD_BREAK                          
+     00000007  MASK_COUNTRY_BITS                  
+     00000007  ROM_ACCESS_EN                      
+     00000007  RQM_Request_for_master             
+     00000007  _CRT_DISPLAY                       
+     00000007  _DRV_NO_CLS                        
+     00000007  _DSR                               
+     00000007  _VRAM_ATTR_INVERS                  
+     00000008  COLOR_COUNT                        
+     00000008  FDC_CMD_SENSE_INTERRUPT_STATE      
      00000008  id_basic                           
      00000009  fdc_cmd_read_boot_size             
+     0000000A  VK_NL                              
      0000000C  KBD_COLUMNS                        
      0000000C  kbd_matrix_buffer2_size            
      0000000C  kbd_matrix_buffer_size             
@@ -96,10 +107,28 @@ Area                                    Addr        Size        Decimal Bytes (A
      00000023  str_monitor_size                   
      00000024  crt_table_ntsc_size                
      0000002D  str_reg_size                       
+     00000030  ATTR0_NONE                         
+     00000030  ATTR_WIDTH40                       
      00000030  CEN_DATA                           
+     00000030  COLOR0_BLACK                       
      00000030  STATUS30                           
+     00000031  ATTR_WIDTH80                       
+     00000033  ATTR3_BLINK_INVERSE                
+     00000037  COLOR7_WHITE                       
      00000038  rst_38                             
      0000003B  basic_start                        
+ASxxxx Linker V03.00 + NoICE + sdld,  page 3.
+Hexadecimal  [32-Bits]
+
+Area                                    Addr        Size        Decimal Bytes (Attributes)
+--------------------------------        ----        ----        ------- ----- ------------
+.  .ABS.                            00000000    00000000 =           0. bytes (ABS,CON)
+
+      Value  Global                              Global Defined In Module
+      -----  --------------------------------   ------------------------
+     00000040  UART_DATA                          
+     00000041  UART_CMD                           
+     00000041  UART_STATUS                        
      0000004D  KBD_POSITION_COMMAND               
      0000004E  KBD_POSITION_SHIFT_LOCK            
      0000004F  KBD_POSITION_CTRL                  
@@ -117,16 +146,9 @@ Area                                    Addr        Size        Decimal Bytes (A
      00000071  PIC_OCW1                           
      0000007E  GERMAN_MAX_ASCII_CODE              
      0000007E  ID_IS_BASIC                        
-ASxxxx Linker V03.00 + NoICE + sdld,  page 3.
-Hexadecimal  [32-Bits]
-
-Area                                    Addr        Size        Decimal Bytes (Attributes)
---------------------------------        ----        ----        ------- ----- ------------
-.  .ABS.                            00000000    00000000 =           0. bytes (ABS,CON)
-
-      Value  Global                              Global Defined In Module
-      -----  --------------------------------   ------------------------
      0000007F  VK_DEL                             
+     00000080  VRAM_ATTR_INVERS                   
+     000000C0  VRAM_ATTR_MASK                     
      000000C0  kbd_table_de_size                  
      000000C0  kbd_table_es_size                  
      000000C0  kbd_table_fr_size                  
@@ -139,7 +161,9 @@ Area                                    Addr        Size        Decimal Bytes (A
      000000F0  UPD765_STATE                       
      000000F8  UPD765_DATA                        
      000000F9  UPD765_MAIN_STATUS                 
+     000000FF  YES                                
      00000800  OFFSET_COLOR                       
+     00001000  SIZE4K                             
      00002000  l__CODE                         
      00002710  .__.$$$.                           
      0000A000  ROM_PACK_16K                       
@@ -147,6 +171,7 @@ Area                                    Addr        Size        Decimal Bytes (A
      0000C200  boot_sector                        
      0000E000  s__CODE                         
      0000F000  BWS                                
+     0000F000  bios_rom                           
      0000F000  stack_at_boot                      
      0000FFFF  MAX_ADDRESS                        
 
@@ -159,7 +184,7 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     0000E000  m_e000                             
+     0000E000  init_bios                          
      0000E045  go_basic                           
      0000E060  go_monitor                         
      0000E06D  m_e06d                             
@@ -228,7 +253,7 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000E3BF  m_e3bf                             
      0000E3C3  print_new_line                     
      0000E3CD  print_space                        
-     0000E3D0  m_e3d0                             
+     0000E3D0  put_char_with_pop                  
      0000E3D5  put_char                           
      0000E3E0  m_e3e0                             
      0000E3F2  get_char_echoed                    
@@ -238,14 +263,24 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000E406  dev_serial_read_byte               
      0000E40C  dev_kbd_status                     
      0000E40F  dev_kbd_inkey                      
+     0000E412  CRTOUT                             
      0000E433  dev_serial_tx_ready                
      0000E436  dev_serial_write_byte              
      0000E439  dev_printer_write_byte             
+     0000E43C  unreferenced_09                    
+     0000E43F  unreferenced_10                    
+     0000E442  unreferenced_11                    
      0000E445  m_e445                             
+     0000E460  vertical_display0                  
+     0000E461  vertical_display1                  
      0000E462  column_count                       
+     0000E464  vertical_display2                  
+     0000E465  vertical_display3                  
+     0000E466  printed_char                       
      0000E467  attrib_color                       
      0000E468  cfg10_settings                     
      0000E469  cfg20_settings                     
+     0000E46A  cfg_esc_screen_drv                 
      0000E46D  cursor_row                         
      0000E46E  cursor_column                      
      0000E46F  led_status                         
@@ -258,17 +293,7 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000E48F  kbd_ascii                          
      0000E490  cursor_abs                         
      0000E492  cursor_abs_color                   
-     0000E498  key_code                           
-     0000E49C  param_word                         
-     0000E49E  param_1                            
-     0000E4A0  param_2                            
-     0000E4A2  param_3                            
-     0000E4B6  printer_protocol_flag              
-     0000E4C6  save_stack                         
-     0000E4D0  os_patch                           
-     0000E4D2  beep_delay                         
-     0000E4D4  unreferenced_03                    
-     0000E4D7  unreferenced_04                    
+     0000E494  rows_buffer                        
 ASxxxx Linker V03.00 + NoICE + sdld,  page 6.
 Hexadecimal  [32-Bits]
 
@@ -278,13 +303,26 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
+     0000E498  key_code                           
+     0000E499  color_attribute                    
+     0000E49C  param_word                         
+     0000E49E  param_1                            
+     0000E4A0  param_2                            
+     0000E4A2  param_3                            
+     0000E4A4  max_address                        
+     0000E4B6  printer_protocol_flag              
+     0000E4C6  save_stack                         
+     0000E4D0  os_patch                           
+     0000E4D2  beep_delay                         
+     0000E4D4  unreferenced_03                    
+     0000E4D7  unreferenced_04                    
      0000E4DA  unreferenced_05                    
      0000E4DD  kbd_table_lookup                   
      0000E59D  kbd_buffer_clear_beep              
      0000E5A3  kbd_buffer_clear                   
-     0000E5B1  m_e5b1                             
-     0000E5CA  m_e5ca                             
-     0000E5D5  m_e5d5                             
+     0000E5B1  kbd_status_internal                
+     0000E5CA  loop_find_first_key                
+     0000E5D5  kbd_key_found                      
      0000E5E1  m_e5e1                             
      0000E5E3  m_e5e3                             
      0000E5E7  m_e5e7                             
@@ -298,7 +336,7 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000E65F  set_kbd_debounce_cnt               
      0000E664  m_e664                             
      0000E66A  m_e66a                             
-     0000E66E  kbd_copy_state                     
+     0000E66E  kbd_copy_state_hl                  
      0000E672  kbd_scan_columns                   
      0000E67B  delay                              
      0000E682  m_e682                             
@@ -316,19 +354,6 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000E6F6  m_e6f6                             
      0000E6FF  m_e6ff                             
      0000E70F  m_e70f                             
-     0000E71A  modify_if_graphic_B                
-     0000E729  m_e729                             
-     0000E72C  m_e72c                             
-     0000E739  m_e739                             
-     0000E74F  opcode_compare                     
-     0000E758  unreferenced                       
-     0000E762  m_e762                             
-     0000E765  m_e765                             
-     0000E77A  m_e77a                             
-     0000E794  m_e794                             
-     0000E799  m_e799                             
-     0000E7A2  m_e7a2                             
-     0000E7A8  m_e7a8                             
 ASxxxx Linker V03.00 + NoICE + sdld,  page 7.
 Hexadecimal  [32-Bits]
 
@@ -338,7 +363,20 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     0000E7AC  m_e7ac                             
+     0000E71A  modify_if_graphic_B                
+     0000E729  m_e729                             
+     0000E72C  m_e72c                             
+     0000E739  m_e739                             
+     0000E74F  opcode_compare                     
+     0000E758  unreferenced                       
+     0000E762  get_char                           
+     0000E765  m_e765                             
+     0000E77A  m_e77a                             
+     0000E794  m_e794                             
+     0000E799  m_e799                             
+     0000E7A2  m_e7a2                             
+     0000E7A8  m_e7a8                             
+     0000E7AC  putch_internal                     
      0000E7CC  m_e7cc                             
      0000E7D8  m_e7d8                             
      0000E7DC  m_e7dc                             
@@ -369,26 +407,13 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000E876  asc_7f                             
      0000E879  asc_99                             
      0000E87C  asc_9a                             
+     0000E87F  special_characters_end             
      0000E880  chr_line_feed                      
      0000E891  chr_03                             
+     0000E892  chr_03_fill                        
      0000E894  chr_12                             
+     0000E895  chr_12_fill                        
      0000E897  chr_7f                             
-     0000E89A  chr_inverse_off                    
-     0000E8A0  chr_inverse_on                     
-     0000E8A6  m_e8a6                             
-     0000E8AB  m_e8ab                             
-     0000E8B7  m_e8b7                             
-     0000E8BB  m_e8bb                             
-     0000E8BF  m_e8bf                             
-     0000E8D2  m_e8d2                             
-     0000E8D6  m_e8d6                             
-     0000E8E5  m_e8e5                             
-     0000E8E8  m_e8e8                             
-     0000E8EC  m_e8ec                             
-     0000E8FA  m_e8fa                             
-     0000E909  chr_carrige_return                 
-     0000E922  m_e922                             
-     0000E925  m_e925                             
 ASxxxx Linker V03.00 + NoICE + sdld,  page 8.
 Hexadecimal  [32-Bits]
 
@@ -398,6 +423,23 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
+     0000E898  chr_7f_fill                        
+     0000E89A  chr_inverse_off                    
+     0000E8A0  chr_inverse_on                     
+     0000E8A6  toggle_gled                        
+     0000E8AB  set_gled                           
+     0000E8B7  set_cfg20                          
+     0000E8BB  res_gled                           
+     0000E8BF  m_e8bf                             
+     0000E8D2  res_sled                           
+     0000E8D6  m_e8d6                             
+     0000E8E5  tramp_set_gled                     
+     0000E8E8  m_e8e8                             
+     0000E8EC  m_e8ec                             
+     0000E8FA  m_e8fa                             
+     0000E909  chr_carrige_return                 
+     0000E922  m_e922                             
+     0000E925  m_e925                             
      0000E92E  m_e92e                             
      0000E931  crt_set_cursor                     
      0000E947  m_e947                             
@@ -431,24 +473,7 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000EA6F  m_ea6f                             
      0000EA74  chr_backspace                      
      0000EA7E  chr_beep                           
-     0000EA8F  m_ea8f                             
-     0000EA91  m_ea91                             
-     0000EA96  buzzer_on                          
-     0000EA9E  m_ea9e                             
-     0000EAA4  m_eaa4                             
-     0000EAB5  lpt_busy                           
-     0000EAC2  lpt_write_byte                     
-     0000EAD6  m_ead6                             
-     0000EADD  m_eadd                             
-     0000EAE3  com_tx_ready                       
-     0000EAEC  com_write_byte                     
-     0000EAF2  m_eaf2                             
-     0000EAF6  com_read_byte                      
-     0000EAFF  m_eaff                             
-     0000EB08  m_eb08                             
-     0000EB0D  m_eb0d                             
-     0000EB10  com_rx_ready                       
-     0000EB1D  unreferenced_06                    
+     0000EA8F  res_buzzer                         
 ASxxxx Linker V03.00 + NoICE + sdld,  page 9.
 Hexadecimal  [32-Bits]
 
@@ -458,10 +483,27 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
+     0000EA91  out10_hl                           
+     0000EA96  buzzer_on                          
+     0000EA9E  buzzer_off                         
+     0000EAA4  chk_break                          
+     0000EAB5  lpt_busy                           
+     0000EAC2  lpt_write_byte                     
+     0000EAD6  m_ead6                             
+     0000EADD  m_eadd                             
+     0000EAE3  com_tx_ready                       
+     0000EAEC  com_write_byte                     
+     0000EAF2  uart_send_tx                       
+     0000EAF6  com_read_byte                      
+     0000EAFF  chk_ready                          
+     0000EB08  chk_tx_rdy                         
+     0000EB0D  m_eb0d                             
+     0000EB10  com_rx_ready                       
+     0000EB1D  unreferenced_06                    
      0000EB2C  init_serial                        
      0000EB39  set_cfg10                          
      0000EB3F  unreferenced_07                    
-     0000EB44  m_eb44                             
+     0000EB44  write_cfg10                        
      0000EB4A  unreferenced_08                    
      0000EB51  map_esc_list                       
      0000EB54  map_ch_0c                          
@@ -492,6 +534,15 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000EB9F  map_ch_54                          
      0000EBA2  map_ch_55                          
      0000EBA5  map_ch_56                          
+ASxxxx Linker V03.00 + NoICE + sdld,  page 10.
+Hexadecimal  [32-Bits]
+
+Area                                    Addr        Size        Decimal Bytes (Attributes)
+--------------------------------        ----        ----        ------- ----- ------------
+_CODE                               0000E000    00002000 =        8192. bytes (REL,CON)
+
+      Value  Global                              Global Defined In Module
+      -----  --------------------------------   ------------------------
      0000EBA8  map_ch_59                          
      0000EBAB  map_ch_end                         
      0000EBAC  map_more_codes                     
@@ -509,15 +560,6 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000EBD0  map_ch_more12                      
      0000EBD3  map_ch_more13                      
      0000EBD6  map_ch_more14                      
-ASxxxx Linker V03.00 + NoICE + sdld,  page 10.
-Hexadecimal  [32-Bits]
-
-Area                                    Addr        Size        Decimal Bytes (Attributes)
---------------------------------        ----        ----        ------- ----- ------------
-_CODE                               0000E000    00002000 =        8192. bytes (REL,CON)
-
-      Value  Global                              Global Defined In Module
-      -----  --------------------------------   ------------------------
      0000EBD9  map_ch_more15                      
      0000EBDC  map_ch_more16                      
      0000EBDF  map_ch_more17                      
@@ -531,11 +573,11 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000EC18  graphic_mode_on                    
      0000EC1F  map_C_to_PTR                       
      0000EC2A  key_found                          
-     0000EC34  function_more_0c7                  
+     0000EC34  Esc55_color_attribute_set          
      0000EC3D  function_more_0c15                 
-     0000EC4E  m_ec4e                             
-     0000EC6A  function_more_0c9                  
-     0000EC83  m_ec83                             
+     0000EC4E  set_fgbg_color                     
+     0000EC6A  Esc56_screen_attribute_set         
+     0000EC83  chk_color_range                    
      0000EC8D  set_cursor_on                      
      0000EC91  set_cursor_off                     
      0000EC93  m_ec93                             
@@ -544,7 +586,7 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000ECCB  m_eccb                             
      0000ECD1  alternate_keyboard_table           
      0000ECD6  m_ecd6                             
-     0000ECE1  function_more_0c0                  
+     0000ECE1  Esc0C_initialize_screen_driver     
      0000ECED  function_more_0c13                 
      0000ECF1  m_ecf1                             
      0000ED07  m_ed07                             
@@ -552,6 +594,15 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000ED1B  function_more_0c10                 
      0000ED28  m_ed28                             
      0000ED2E  m_ed2e                             
+ASxxxx Linker V03.00 + NoICE + sdld,  page 11.
+Hexadecimal  [32-Bits]
+
+Area                                    Addr        Size        Decimal Bytes (Attributes)
+--------------------------------        ----        ----        ------- ----- ------------
+_CODE                               0000E000    00002000 =        8192. bytes (REL,CON)
+
+      Value  Global                              Global Defined In Module
+      -----  --------------------------------   ------------------------
      0000ED31  m_ed31                             
      0000ED35  function_more_0c2                  
      0000ED42  function_more_0c17                 
@@ -569,15 +620,6 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000EDA3  m_eda3                             
      0000EDBA  fill_cnt                           
      0000EDC9  m_edc9                             
-ASxxxx Linker V03.00 + NoICE + sdld,  page 11.
-Hexadecimal  [32-Bits]
-
-Area                                    Addr        Size        Decimal Bytes (Attributes)
---------------------------------        ----        ----        ------- ----- ------------
-_CODE                               0000E000    00002000 =        8192. bytes (REL,CON)
-
-      Value  Global                              Global Defined In Module
-      -----  --------------------------------   ------------------------
      0000EDCF  erase_line                         
      0000EDDD  function_4a                        
      0000EDE7  function_more_0c4                  
@@ -585,8 +627,8 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000EDF6  m_edf6                             
      0000EDFC  function_more_0c5                  
      0000EE04  m_ee04                             
-     0000EE11  m_ee11                             
-     0000EE28  m_ee28                             
+     0000EE11  check_cursor_range                 
+     0000EE28  check_cursor_range_fail            
      0000EE2A  function_more_0c1                  
      0000EE32  m_ee32                             
      0000EE3C  m_ee3c                             
@@ -596,15 +638,32 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000EE5B  m_ee5b                             
      0000EE5F  function_more_0c3                  
      0000EE68  function_more_0c12                 
-     0000EE75  function_more_0c6                  
+     0000EE75  Esc53_screen_width_set             
      0000EE78  m_ee78                             
-     0000EE88  m_ee88                             
-     0000EE90  m_ee90                             
+     0000EE88  switch_crt40                       
+     0000EE90  switch_crt80                       
      0000EE96  m_ee96                             
      0000EEB5  crt_write_reg                      
      0000EEC9  m_eec9                             
      0000EECF  crt_table40                        
      0000EEE1  crt_table80                        
+     0000EF00  int0_timer                         
+     0000EF04  int1_rx_rdy                        
+     0000EF08  int2_tx_rdy                        
+     0000EF0C  int3_extint2                       
+     0000EF10  int4_extint1                       
+     0000EF14  int5_unused                        
+     0000EF18  int6_unused                        
+ASxxxx Linker V03.00 + NoICE + sdld,  page 12.
+Hexadecimal  [32-Bits]
+
+Area                                    Addr        Size        Decimal Bytes (Attributes)
+--------------------------------        ----        ----        ------- ----- ------------
+_CODE                               0000E000    00002000 =        8192. bytes (REL,CON)
+
+      Value  Global                              Global Defined In Module
+      -----  --------------------------------   ------------------------
+     0000EF1C  int7_vint                          
      0000EF20  patch_table_1                      
      0000EF2A  patch_table_2                      
      0000EF34  get_hex_digit                      
@@ -623,21 +682,12 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000EFA6  m_efa6                             
      0000EFC1  ENTRY                              
      0000EFF0  boot                               
-     0000F010  m_f010                             
+     0000F010  init_system                        
      0000F020  patch_printer_ptr                  
      0000F02C  init_kbd_table                     
      0000F05E  get_kbd_table_address              
      0000F064  copy_kbd_table                     
      0000F06D  init_crt_param                     
-ASxxxx Linker V03.00 + NoICE + sdld,  page 12.
-Hexadecimal  [32-Bits]
-
-Area                                    Addr        Size        Decimal Bytes (Attributes)
---------------------------------        ----        ----        ------- ----- ------------
-_CODE                               0000E000    00002000 =        8192. bytes (REL,CON)
-
-      Value  Global                              Global Defined In Module
-      -----  --------------------------------   ------------------------
      0000F07E  init_pic                           
      0000F08B  fdc_cmd_init                       
      0000F090  fdc_cmd_read_boot                  
@@ -664,18 +714,26 @@ _CODE                               0000E000    00002000 =        8192. bytes (R
      0000F8C0  kbd_table_de                       
      0000F980  kbd_table_us                       
      0000FA40  kbd_table_fr                       
+ASxxxx Linker V03.00 + NoICE + sdld,  page 13.
+Hexadecimal  [32-Bits]
+
+Area                                    Addr        Size        Decimal Bytes (Attributes)
+--------------------------------        ----        ----        ------- ----- ------------
+_CODE                               0000E000    00002000 =        8192. bytes (REL,CON)
+
+      Value  Global                              Global Defined In Module
+      -----  --------------------------------   ------------------------
      0000FB00  kbd_table_uk                       
      0000FBC0  kbd_table_it                       
      0000FC80  kbd_table_es                       
      0000FD40  crt_table_ntsc                     
-
-ASxxxx Linker V03.00 + NoICE + sdld,  page 13.
+ASxxxx Linker V03.00 + NoICE + sdld,  page 14.
 
 Files Linked                              [ module(s) ]
 
 obj/rom.rel                               [  ]
 
-ASxxxx Linker V03.00 + NoICE + sdld,  page 14.
+ASxxxx Linker V03.00 + NoICE + sdld,  page 15.
 
 User Base Address Definitions
 
